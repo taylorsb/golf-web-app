@@ -1,38 +1,86 @@
+/* General App Styling */
 .App {
   text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+/* Home Page Container */
+.home-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  background-image: url('./theopenimage.jpg');
+  background-size: cover;
+  background-position: center;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+/* App Header */
+.app-header {
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.app-header h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.app-header p {
+  font-size: 1.2rem;
+  max-width: 900px;
+}
+
+/* Leaderboard Container */
+.leaderboard-container {
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  padding: 2rem;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 900px;
+}
+
+/* Main Menu Navigation */
+nav {
+  background-color: #222;
+  padding: 1rem;
+  position: absolute;
+  top: 0;
+  left: 0; /* Changed from right to left */
+  border-bottom-right-radius: 10px; /* Changed from bottom-left to bottom-right */
+  border-bottom-left-radius: 0; /* Removed */
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column; /* Changed to vertical */
+}
+
+nav li {
+  margin-left: 0; /* Removed horizontal margin */
+  margin-bottom: 0.5rem; /* Added vertical margin */
+  text-align: left; /* Left align the text within each list item */
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: #61dafb; /* Highlight color on hover */
 }

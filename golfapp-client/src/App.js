@@ -1,102 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
+import MainMenu from './MainMenu';
+import PlayerManager from './PlayerManager';
 import CourseManager from './CourseManager';
 import TournamentManager from './TournamentManager';
+import Leaderboard from './Leaderboard';
+import backgroundImage from './theopenimage.jpg'; // Import the image
 
-function App() {
-  const [players, setPlayers] = useState([]);
-  const [newPlayerName, setNewPlayerName] = useState('');
-  const [newPlayerHandicap, setNewPlayerHandicap] = useState('');
-  const [editingPlayer, setEditingPlayer] = useState(null);
-
-  useEffect(() => {
-    fetchPlayers();
-  }, []);
-
-  const fetchPlayers = async () => {
-    const response = await fetch('http://127.0.0.1:5000/players');
-    const data = await response.json();
-    setPlayers(data);
-  };
-
-  const handleAddPlayer = async () => {
-    const response = await fetch('http://127.0.0.1:5000/players', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name: newPlayerName, handicap: parseFloat(newPlayerHandicap) }),
-    });
-    const data = await response.json();
-    setPlayers([...players, data]);
-    setNewPlayerName('');
-    setNewPlayerHandicap('');
-  };
-
-  const handleEditClick = (player) => {
-    setEditingPlayer(player);
-    setNewPlayerName(player.name);
-    setNewPlayerHandicap(player.handicap);
-  };
-
-  const handleUpdatePlayer = async () => {
-    await fetch(`http://127.0.0.1:5000/players/${editingPlayer.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name: newPlayerName, handicap: parseFloat(newPlayerHandicap) }),
-    });
-    setEditingPlayer(null);
-    setNewPlayerName('');
-    setNewPlayerHandicap('');
-    fetchPlayers();
-  };
-
-  const handleDeletePlayer = async (id) => {
-    await fetch(`http://127.0.0.1:5000/players/${id}`, {
-      method: 'DELETE',
-    });
-    fetchPlayers();
+function Home() {
+  const homeStyle = {
+    backgroundImage: `url(${backgroundImage})`
   };
 
   return (
-    <div className="App">
-      <h1>Golf Players</h1>
-
-      <div>
-        <input
-          type="text"
-          placeholder="Player Name"
-          value={newPlayerName}
-          onChange={(e) => setNewPlayerName(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Handicap"
-          value={newPlayerHandicap}
-          onChange={(e) => setNewPlayerHandicap(e.target.value)}
-        />
-        {editingPlayer ? (
-          <button onClick={handleUpdatePlayer}>Update Player</button>
-        ) : (
-          <button onClick={handleAddPlayer}>Add Player</button>
-        )}
-      </div>
-
-      <h2>Players List</h2>
-      <ul>
-        {players.map((player) => (
-          <li key={player.id}>
-            {player.name} (Handicap: {player.handicap})
-            <button onClick={() => handleEditClick(player)}>Edit</button>
-            <button onClick={() => handleDeletePlayer(player.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-      <CourseManager />
-      <TournamentManager />
+    <div className="home-container" style={homeStyle}>
+      <header className="app-header">
+        <h1>
+          <span role="img" aria-label="golf-icon">⛳</span> Golf Tournament Manager
+        </h1>
+        <p>
+          <em>“Golf is the closest game to the game we call life. You get bad breaks from good shots;
+          <br />
+          you get good breaks from bad shots – but you have to play the ball where it lies.”</em>
+          <br />
+          <span style={{ textAlign: 'center', display: 'block' }}>by Bobby Jones</span>
+        </p>
+      </header>
+      <main className="leaderboard-container">
+        <Leaderboard />
+      </main>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <div className="App">
+        <MainMenu />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/players" element={<PlayerManager />} />
+          <Route path="/courses" element={<CourseManager />} />
+          <Route path="/tournaments" element={<TournamentManager />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

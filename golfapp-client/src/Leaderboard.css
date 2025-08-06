@@ -1,0 +1,88 @@
+/* Leaderboard Widget Styling */
+.leaderboard-widget {
+  border: 4px solid #000;
+  padding: 1rem;
+  width: fit-content; /* Adjust width to content */
+  margin: 0 auto; /* Center the leaderboard */
+  font-family: 'Arial Black', Arial, sans-serif;
+  background-color: #FFD700; /* Main yellow background */
+  border-radius: 0; /* Ensure square edges for the main widget */
+}
+
+.leaderboard-header {
+  margin-bottom: 1rem;
+}
+
+.leaderboard-header select {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  border: 2px solid #000;
+  background-color: #fff;
+  font-family: Arial, sans-serif;
+  border-radius: 0; /* Square edges */
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard-table th {
+  border: 2px solid #000;
+  padding: 0.2rem;
+  text-align: left; /* Left align column titles */
+  font-size: 0.9rem;
+  border-radius: 0;
+}
+
+.leaderboard-table td {
+  border: 2px solid #000;
+  padding: 0; /* Remove padding from cells to control spacing with spans */
+  text-align: center;
+  font-size: 0.9rem; /* Smaller font size */
+  border-radius: 0; /* Ensure square edges for cells */
+}
+
+.leaderboard-table thead {
+  background-color: #000;
+  color: #fff;
+}
+
+.leaderboard-table tbody td {
+  background-color: #FFD700; /* Yellow background for standard cells */
+  color: #000; /* Black text for position and player name */
+}
+
+.leaderboard-table .gross-score-cell,
+.leaderboard-table .nett-score-cell,
+.leaderboard-table .points-cell {
+  background-color: #fff; /* White background */
+  color: #FF0000; /* Red text */
+}
+
+/* Indented square effect for each character */
+.leaderboard-table td span {
+  display: inline-flex; /* Use inline-flex for centering content */
+  justify-content: center;
+  align-items: center;
+  width: 1.1em; /* Adjusted width for each character square */
+  height: 1.2em; /* Fixed height for each character square */
+  border: 1px solid #000;
+  box-shadow: none; /* Removed shadow effect */
+  margin: 0; /* Remove margin to make them perfectly abut */
+  background-color: inherit; /* Inherit background from parent cell */
+  color: inherit; /* Inherit color from parent cell */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+/* Specific styling for player name cells to ensure fixed width */
+.leaderboard-table .player-name-cell {
+  white-space: nowrap; /* Prevent text wrapping */
+  overflow: hidden; /* Hide overflow if name is too long */
+  text-align: left; /* Align player names to the left within their cell */
+}
+
+.leaderboard-table .player-name-cell span {
+  text-align: center; /* Center each character within its span */
+}
