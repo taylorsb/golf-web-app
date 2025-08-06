@@ -5,7 +5,7 @@ import os
 import json # Import json module
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///golf.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 CORS(app) # Enable CORS for all routes
@@ -46,9 +46,7 @@ class Course(db.Model):
             'hole_stroke_indices': json.loads(self.hole_stroke_indices) if self.hole_stroke_indices else []
         }
 
-# Create database tables
-with app.app_context():
-    db.create_all()
+
 
 # Player API Endpoints (existing)
 @app.route('/players', methods=['GET'])
@@ -89,6 +87,71 @@ def update_player(player_id):
 def delete_player(player_id):
     player = Player.query.get_or_404(player_id)
     db.session.delete(player)
+    db.session.commit()
+    return '', 204
+
+class Tournament(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), unique=True, nullable=False)
+    date = db.Column(db.String(80), nullable=True) # Storing date as string for simplicity
+    location = db.Column(db.String(120), nullable=True)
+
+    def __repr__(self):
+        return '<Tournament %r>' % self.name
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'date': self.date,
+            'location': self.location
+        }
+
+# Tournament API Endpoints
+@app.route('/tournaments', methods=['GET'])
+def get_tournaments():
+    tournaments = Tournament.query.all()
+    return jsonify([tournament.to_dict() for tournament in tournaments])
+
+@app.route('/tournaments/<int:tournament_id>', methods=['GET'])
+def get_tournament(tournament_id):
+    tournament = Tournament.query.get_or_404(tournament_id)
+    return jsonify(tournament.to_dict())
+
+@app.route('/tournaments', methods=['POST'])
+def add_tournament():
+    data = request.get_json()
+    if not data or not 'name' in data:
+        return jsonify({'error': 'Tournament name is required'}), 400
+    
+    new_tournament = Tournament(
+        name=data['name'],
+        date=data.get('date'),
+        location=data.get('location')
+    )
+    db.session.add(new_tournament)
+    db.session.commit()
+    return jsonify(new_tournament.to_dict()), 201
+
+@app.route('/tournaments/<int:tournament_id>', methods=['PUT'])
+def update_tournament(tournament_id):
+    tournament = Tournament.query.get_or_404(tournament_id)
+    data = request.get_json()
+    
+    if 'name' in data:
+        tournament.name = data['name']
+    if 'date' in data:
+        tournament.date = data['date']
+    if 'location' in data:
+        tournament.location = data['location']
+    
+    db.session.commit()
+    return jsonify(tournament.to_dict())
+
+@app.route('/tournaments/<int:tournament_id>', methods=['DELETE'])
+def delete_tournament(tournament_id):
+    tournament = Tournament.query.get_or_404(tournament_id)
+    db.session.delete(tournament)
     db.session.commit()
     return '', 204
 

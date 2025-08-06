@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import CourseManager from './CourseManager';
+import TournamentManager from './TournamentManager';
 
 function App() {
   const [players, setPlayers] = useState([]);
@@ -94,6 +95,7 @@ function App() {
         ))}
       </ul>
       <CourseManager />
+      <TournamentManager />
     </div>
   );
 }
