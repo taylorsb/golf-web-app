@@ -279,8 +279,8 @@ function TournamentManager() {
                   <span>{course.name}</span>
                   <input
                     type="number"
-                    placeholder="Seq"
-                    min="1"
+                      placeholder="Order"
+                      min="1"
                     style={{ width: '50px', marginRight: '5px' }}
                     id={`course-seq-${course.id}`}
                   />
@@ -337,7 +337,7 @@ function TournamentManager() {
                 <thead>
                   <tr>
                     <th>Course Name</th>
-                    <th>Sequence</th>
+                    <th>Order</th>
                     <th>Action</th>
                   </tr>
                 </thead>
