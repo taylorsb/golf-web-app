@@ -83,17 +83,14 @@ const ScorecardEntry = () => {
       {selectedTournament && currentTournament && (
         <div className="tournament-details">
           <h3>Tournament Details</h3>
-          <p><strong>Name:</strong> {currentTournament.name}</p>
-          <p><strong>Date:</strong> {currentTournament.date}</p>
-          <p><strong>Location:</strong> {currentTournament.location}</p>
+          <p><strong>Tournament:</strong> {currentTournament.name} | Date: {currentTournament.date} | Location: {currentTournament.location}</p>
         </div>
       )}
 
       {selectedCourse && currentCourse && (
         <div className="course-details">
           <h3>Course Details</h3>
-          <p><strong>Course Name:</strong> {currentCourse.name}</p>
-          <p><strong>Slope Rating:</strong> {currentCourse.slope_rating}</p>
+          <p><strong>Course:</strong> {currentCourse.name} | Slope Rating: {currentCourse.slope_rating}</p>
         </div>
       )}
     </div>
