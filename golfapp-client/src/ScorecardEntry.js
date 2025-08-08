@@ -84,24 +84,26 @@ const ScorecardEntry = () => {
     <div className="scorecard-container">
       <h2>Scorecard Entry</h2>
 
-      <div className="controls-container">
-        <label htmlFor="tournament-select">Select Tournament:</label>
-        <select id="tournament-select" value={selectedTournament} onChange={handleTournamentChange}>
-          <option value="">--Select a Tournament--</option>
-          {tournaments.map(tournament => (
-            <option key={tournament.id} value={tournament.id}>{tournament.name}</option>
-          ))}
-        </select>
-      </div>
+      <div className="dropdown-grid">
+        <div className="controls-container">
+          <label htmlFor="tournament-select">Select Tournament:</label>
+          <select id="tournament-select" value={selectedTournament} onChange={handleTournamentChange}>
+            <option value="">--Select a Tournament--</option>
+            {tournaments.map(tournament => (
+              <option key={tournament.id} value={tournament.id}>{tournament.name}</option>
+            ))}
+          </select>
+        </div>
 
-      <div>
-        <label htmlFor="course-select">Filter by Course:</label>
-        <select id="course-select" value={selectedCourse} onChange={handleCourseChange}>
-          <option value="">--Select a Course--</option>
-          {courses.map(course => (
-            <option key={course.id} value={course.id}>{course.name}</option>
-          ))}
-        </select>
+        <div className="controls-container">
+          <label htmlFor="course-select">Select Course:</label>
+          <select id="course-select" value={selectedCourse} onChange={handleCourseChange}>
+            <option value="">--Select a Course--</option>
+            {courses.map(course => (
+              <option key={course.id} value={course.id}>{course.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="details-grid">

@@ -5,7 +5,7 @@
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -moz-osx-smoothing: grayscale;
 }
 
 /* Home Page Container */
@@ -83,4 +83,15 @@ nav a {
 
 nav a:hover {
   color: #61dafb; /* Highlight color on hover */
+}
+
+/* Nested menu for Scorecard Entry */
+nav ul ul {
+  margin-left: 15px; /* Indent */
+  margin-top: 5px;
+}
+
+nav ul ul li a {
+  font-size: 0.9rem; /* Smaller font size */
+  font-weight: normal;
 }
