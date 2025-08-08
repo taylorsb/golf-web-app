@@ -6,10 +6,33 @@ function TournamentManager() {
   const [newTournamentDate, setNewTournamentDate] = useState('');
   const [newTournamentLocation, setNewTournamentLocation] = useState('');
   const [editingTournament, setEditingTournament] = useState(null);
+  const [players, setPlayers] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [assignedPlayers, setAssignedPlayers] = useState([]); // Players currently assigned to the editing tournament
+  const [assignedCourses, setAssignedCourses] = useState([]); // Courses currently assigned to the editing tournament
+  const [playersToAdd, setPlayersToAdd] = useState([]); // Players to be added on submit
+  const [playersToRemove, setPlayersToRemove] = useState([]); // Players to be removed on submit
+  const [coursesToAdd, setCoursesToAdd] = useState([]); // Courses to be added on submit
+  const [coursesToRemove, setCoursesToRemove] = useState([]); // Courses to be removed on submit
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     fetchTournaments();
+    fetchPlayers();
+    fetchCourses();
   }, []);
+
+  const fetchPlayers = async () => {
+    const response = await fetch('http://127.0.0.1:5000/players');
+    const data = await response.json();
+    setPlayers(data);
+  };
+
+  const fetchCourses = async () => {
+    const response = await fetch('http://127.0.0.1:5000/courses');
+    const data = await response.json();
+    setCourses(data);
+  };
 
   const fetchTournaments = async () => {
     const response = await fetch('http://127.0.0.1:5000/tournaments');
@@ -41,6 +64,125 @@ function TournamentManager() {
     setNewTournamentName(tournament.name);
     setNewTournamentDate(tournament.date);
     setNewTournamentLocation(tournament.location);
+    setAssignedPlayers(tournament.players);
+    setAssignedCourses(tournament.courses);
+    setPlayersToAdd([]);
+    setPlayersToRemove([]);
+    setCoursesToAdd([]);
+    setCoursesToRemove([]);
+  };
+
+  const handleAddPlayerToPending = (player) => {
+    if (!assignedPlayers.some(p => p.id === player.id) && !playersToAdd.some(p => p.id === player.id)) {
+      setPlayersToAdd([...playersToAdd, player]);
+      setPlayersToRemove(playersToRemove.filter(p => p.id !== player.id)); // Remove from remove list if it was there
+    }
+  };
+
+  const handleRemovePlayerFromPending = (player) => {
+    if (playersToAdd.some(p => p.id === player.id)) {
+      setPlayersToAdd(playersToAdd.filter(p => p.id !== player.id));
+    } else if (assignedPlayers.some(p => p.id === player.id)) {
+      setPlayersToRemove([...playersToRemove, player]);
+      setAssignedPlayers(assignedPlayers.filter(p => p.id !== player.id)); // Optimistically remove from assigned list
+    }
+  };
+
+  const handleAddCourseToPending = (course, sequenceNumber) => {
+    const parsedSequence = parseInt(sequenceNumber, 10);
+    if (isNaN(parsedSequence) || parsedSequence <= 0) {
+      alert('Sequence number must be a positive integer.');
+      return;
+    }
+
+    // Check for uniqueness and sequential order (frontend validation)
+    const allCourses = [...assignedCourses, ...coursesToAdd];
+    const existingSequenceNumbers = allCourses.map(c => c.sequence_number);
+
+    if (existingSequenceNumbers.includes(parsedSequence)) {
+      alert('Sequence number must be unique.');
+      return;
+    }
+
+    // Check if the new sequence number breaks the sequential order
+    const sortedSequenceNumbers = [...existingSequenceNumbers, parsedSequence].sort((a, b) => a - b);
+    for (let i = 0; i < sortedSequenceNumbers.length; i++) {
+      if (sortedSequenceNumbers[i] !== i + 1) {
+        alert('Sequence numbers must be sequential (e.g., 1, 2, 3).');
+        return;
+      }
+    }
+
+    if (!assignedCourses.some(c => c.id === course.id) && !coursesToAdd.some(c => c.id === course.id)) {
+      setCoursesToAdd([...coursesToAdd, { ...course, sequence_number: parsedSequence }]);
+      setCoursesToRemove(coursesToRemove.filter(c => c.id !== course.id)); // Remove from remove list if it was there
+    }
+  };
+
+  const handleRemoveCourseFromPending = (course) => {
+    if (coursesToAdd.some(c => c.id === course.id)) {
+      setCoursesToAdd(coursesToAdd.filter(c => c.id !== course.id));
+    } else if (assignedCourses.some(c => c.id === course.id)) {
+      setCoursesToRemove([...coursesToRemove, course]);
+      setAssignedCourses(assignedCourses.filter(c => c.id !== course.id)); // Optimistically remove from assigned list
+    }
+  };
+
+  const handleSubmitChanges = async () => {
+    const tournamentId = editingTournament.id;
+
+    // Add players
+    if (playersToAdd.length > 0) {
+      await fetch(`http://127.0.0.1:5000/tournaments/${tournamentId}/players`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ player_ids: playersToAdd.map(p => p.id) }),
+      });
+    }
+
+    // Remove players
+    if (playersToRemove.length > 0) {
+      await fetch(`http://127.0.0.1:5000/tournaments/${tournamentId}/players`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ player_ids: playersToRemove.map(p => p.id) }),
+      });
+    }
+
+    // Add courses
+    if (coursesToAdd.length > 0) {
+      await fetch(`http://127.0.0.1:5000/tournaments/${tournamentId}/courses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courses: coursesToAdd.map(c => ({ id: c.id, sequence_number: c.sequence_number })) }),
+      });
+    }
+
+    // Remove courses
+    if (coursesToRemove.length > 0) {
+      await fetch(`http://127.0.0.1:5000/tournaments/${tournamentId}/courses`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ course_ids: coursesToRemove.map(c => c.id) }),
+      });
+    }
+
+    // Refresh the tournament data after all changes are submitted
+    const updatedTournamentResponse = await fetch(`http://127.0.0.1:5000/tournaments/${tournamentId}`);
+    const updatedTournamentData = await updatedTournamentResponse.json();
+    setEditingTournament(updatedTournamentData);
+    setAssignedPlayers(updatedTournamentData.players);
+    setAssignedCourses(updatedTournamentData.courses);
+    setPlayersToAdd([]);
+    setPlayersToRemove([]);
+    setCoursesToAdd([]);
+    setCoursesToRemove([]);
+    fetchTournaments(); // Also refresh the main list of tournaments
+
+    setSuccessMessage('All changes submitted successfully!');
+    setTimeout(() => {
+      setSuccessMessage('');
+    }, 3000); // Message fades after 3 seconds
   };
 
   const handleUpdateTournament = async () => {
@@ -109,6 +251,123 @@ function TournamentManager() {
           </li>
         ))}
       </ul>
+
+      {editingTournament && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+          <div style={{ flex: 1, textAlign: 'center' }}>
+            <h2>Assign Players to {editingTournament.name}</h2>
+            <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
+              {players.map((player) => (
+                <div key={player.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                  <span>{player.name}</span>
+                  <button
+                    onClick={() => handleAddPlayerToPending(player)}
+                    disabled={assignedPlayers.some(p => p.id === player.id) || playersToAdd.some(p => p.id === player.id)}
+                  >
+                    +
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ flex: 1, textAlign: 'center' }}>
+            <h2>Assign Courses to {editingTournament.name}</h2>
+            <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
+              {courses.map((course) => (
+                <div key={course.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                  <span>{course.name}</span>
+                  <input
+                    type="number"
+                    placeholder="Seq"
+                    min="1"
+                    style={{ width: '50px', marginRight: '5px' }}
+                    id={`course-seq-${course.id}`}
+                  />
+                  <button
+                    onClick={() => handleAddCourseToPending(course, document.getElementById(`course-seq-${course.id}`).value)}
+                    disabled={assignedCourses.some(c => c.id === course.id) || coursesToAdd.some(c => c.id === course.id)}
+                  >
+                    +
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingTournament && (
+        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+          <h2>Current Assignments for {editingTournament.name}</h2>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+            <div style={{ flex: 1, textAlign: 'center' }}>
+              <h3>Assigned Players:</h3>
+              <table border="1" style={{ width: '100%', margin: '0 auto' }}>
+                <thead>
+                  <tr>
+                    <th>Player Name</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {assignedPlayers.map(player => (
+                    <tr key={player.id}>
+                      <td>{player.name}</td>
+                      <td>
+                        <button onClick={() => handleRemovePlayerFromPending(player)}>🗑️</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {playersToAdd.map(player => (
+                    <tr key={player.id} style={{ backgroundColor: '#e0ffe0' }}>
+                      <td>{player.name} (Pending Add)</td>
+                      <td>
+                        <button onClick={() => handleRemovePlayerFromPending(player)}>🗑️</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div style={{ flex: 1, textAlign: 'center' }}>
+              <h3>Assigned Courses:</h3>
+              <table border="1" style={{ width: '100%', margin: '0 auto' }}>
+                <thead>
+                  <tr>
+                    <th>Course Name</th>
+                    <th>Sequence</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {assignedCourses.map(course => (
+                    <tr key={course.id}>
+                      <td>{course.name}</td>
+                      <td>{course.sequence_number}</td>
+                      <td>
+                        <button onClick={() => handleRemoveCourseFromPending(course)}>🗑️</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {coursesToAdd.map(course => (
+                    <tr key={course.id} style={{ backgroundColor: '#e0ffe0' }}>
+                      <td>{course.name} (Pending Add)</td>
+                      <td>{course.sequence_number}</td>
+                      <td>
+                        <button onClick={() => handleRemoveCourseFromPending(course)}>🗑️</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <button onClick={handleSubmitChanges} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '1.2em' }}>Submit All Changes</button>
+          {successMessage && <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>}
+        </div>
+      )}
     </div>
   );
 }

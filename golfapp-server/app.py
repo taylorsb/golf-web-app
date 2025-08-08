@@ -10,6 +10,19 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 CORS(app) # Enable CORS for all routes
 
+# Association table for Tournament and Player
+tournament_players = db.Table('tournament_players',
+    db.Column('tournament_id', db.Integer, db.ForeignKey('tournament.id'), primary_key=True),
+    db.Column('player_id', db.Integer, db.ForeignKey('player.id'), primary_key=True)
+)
+
+# Association table for Tournament and Course
+tournament_courses = db.Table('tournament_courses',
+    db.Column('tournament_id', db.Integer, db.ForeignKey('tournament.id'), primary_key=True),
+    db.Column('course_id', db.Integer, db.ForeignKey('course.id'), primary_key=True),
+    db.Column('sequence_number', db.Integer, nullable=False, default=0)
+)
+
 class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
@@ -95,6 +108,8 @@ class Tournament(db.Model):
     name = db.Column(db.String(120), unique=True, nullable=False)
     date = db.Column(db.String(80), nullable=True) # Storing date as string for simplicity
     location = db.Column(db.String(120), nullable=True)
+    players = db.relationship('Player', secondary=tournament_players, backref=db.backref('tournaments', lazy='dynamic'))
+    courses = db.relationship('Course', secondary=tournament_courses, backref=db.backref('tournaments', lazy='dynamic'))
 
     def __repr__(self):
         return '<Tournament %r>' % self.name
@@ -104,7 +119,9 @@ class Tournament(db.Model):
             'id': self.id,
             'name': self.name,
             'date': self.date,
-            'location': self.location
+            'location': self.location,
+            'players': [player.to_dict() for player in self.players],
+            'courses': [{'id': c.id, 'name': c.name, 'country': c.country, 'slope_rating': c.slope_rating, 'hole_pars': c.hole_pars, 'hole_stroke_indices': c.hole_stroke_indices, 'sequence_number': db.session.query(tournament_courses.c.sequence_number).filter_by(tournament_id=self.id, course_id=c.id).scalar()} for c in self.courses]
         }
 
 # Tournament API Endpoints
@@ -154,6 +171,73 @@ def delete_tournament(tournament_id):
     db.session.delete(tournament)
     db.session.commit()
     return '', 204
+
+@app.route('/tournaments/<int:tournament_id>/players', methods=['POST'])
+def add_players_to_tournament(tournament_id):
+    tournament = Tournament.query.get_or_404(tournament_id)
+    data = request.get_json()
+    player_ids = data.get('player_ids', [])
+
+    for player_id in player_ids:
+        player = Player.query.get(player_id)
+        if player and player not in tournament.players:
+            tournament.players.append(player)
+    db.session.commit()
+    return jsonify(tournament.to_dict()), 200
+
+@app.route('/tournaments/<int:tournament_id>/players', methods=['DELETE'])
+def remove_players_from_tournament(tournament_id):
+    tournament = Tournament.query.get_or_404(tournament_id)
+    data = request.get_json()
+    player_ids = data.get('player_ids', [])
+
+    for player_id in player_ids:
+        player = Player.query.get(player_id)
+        if player and player in tournament.players:
+            tournament.players.remove(player)
+    db.session.commit()
+    return jsonify(tournament.to_dict()), 200
+
+    db.session.commit()
+    return jsonify(tournament.to_dict()), 200
+
+# Tournament Course Management Endpoints
+@app.route('/tournaments/<int:tournament_id>/courses', methods=['POST'])
+def add_courses_to_tournament(tournament_id):
+    tournament = Tournament.query.get_or_404(tournament_id)
+    data = request.get_json()
+    courses_data = data.get('courses', [])
+
+    for course_item in courses_data:
+        course_id = course_item.get('id')
+        sequence_number = course_item.get('sequence_number')
+        course = Course.query.get(course_id)
+        if course and course not in tournament.courses:
+            # Create a new entry in the association table with sequence_number
+            stmt = tournament_courses.insert().values(
+                tournament_id=tournament.id,
+                course_id=course.id,
+                sequence_number=sequence_number
+            )
+            db.session.execute(stmt)
+    db.session.commit()
+    return jsonify(tournament.to_dict()), 200
+
+@app.route('/tournaments/<int:tournament_id>/courses', methods=['DELETE'])
+def remove_courses_from_tournament(tournament_id):
+    tournament = Tournament.query.get_or_404(tournament_id)
+    data = request.get_json()
+    course_ids = data.get('course_ids', [])
+
+    for course_id in course_ids:
+        # Delete directly from the association table
+        stmt = tournament_courses.delete().where(
+            (tournament_courses.c.tournament_id == tournament.id) &
+            (tournament_courses.c.course_id == course_id)
+        )
+        db.session.execute(stmt)
+    db.session.commit()
+    return jsonify(tournament.to_dict()), 200
 
 # Course API Endpoints (new)
 @app.route('/courses', methods=['GET'])
