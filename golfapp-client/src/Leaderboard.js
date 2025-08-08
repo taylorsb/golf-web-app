@@ -13,11 +13,25 @@ const Leaderboard = () => {
       { position: 3, playerName: 'Player Three', grossScore: 73, nettScore: 71, points: 33 },
       { position: 4, playerName: 'Another Player', grossScore: 71, nettScore: 69, points: 35 },
       { position: 5, playerName: 'Long Player Name Here', grossScore: 75, nettScore: 73, points: 30 },
+      { position: 6, playerName: 'Sixth Player', grossScore: 76, nettScore: 74, points: 29 },
+      { position: 7, playerName: 'Seventh Player', grossScore: 77, nettScore: 75, points: 28 },
+      { position: 8, playerName: 'Eighth Player', grossScore: 78, nettScore: 76, points: 27 },
+      { position: 9, playerName: 'Ninth Player', grossScore: 79, nettScore: 77, points: 26 },
+      { position: 10, playerName: 'Tenth Player', grossScore: 80, nettScore: 78, points: 25 },
+      { position: 11, playerName: 'Eleventh Player', grossScore: 81, nettScore: 79, points: 24 },
     ],
     '2': [
       { position: 1, playerName: 'Player Alpha', grossScore: 68, nettScore: 65, points: 38 },
       { position: 2, playerName: 'Player Beta', grossScore: 71, nettScore: 69, points: 35 },
       { position: 3, playerName: 'Player Gamma', grossScore: 74, nettScore: 72, points: 32 },
+      { position: 4, playerName: 'Player Delta', grossScore: 75, nettScore: 73, points: 31 },
+      { position: 5, playerName: 'Player Epsilon', grossScore: 76, nettScore: 74, points: 30 },
+      { position: 6, playerName: 'Player Zeta', grossScore: 77, nettScore: 75, points: 29 },
+      { position: 7, playerName: 'Player Eta', grossScore: 78, nettScore: 76, points: 28 },
+      { position: 8, playerName: 'Player Theta', grossScore: 79, nettScore: 77, points: 27 },
+      { position: 9, playerName: 'Player Iota', grossScore: 80, nettScore: 78, points: 26 },
+      { position: 10, playerName: 'Player Kappa', grossScore: 81, nettScore: 79, points: 25 },
+      { position: 11, playerName: 'Player Lambda', grossScore: 82, nettScore: 80, points: 24 },
     ],
   };
 
@@ -63,7 +77,7 @@ const Leaderboard = () => {
     ));
   };
 
-  const leaderboardData = mockLeaderboardData[selectedTournament] || [];
+  const leaderboardData = (mockLeaderboardData[selectedTournament] || []).slice(0, 10);
 
   return (
     <div className="leaderboard-widget">
