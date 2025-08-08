@@ -29,3 +29,6 @@ Desktop.ini
 
 # Gemini CLI
 .gemini/
+
+# Database files
+instance/*.db
