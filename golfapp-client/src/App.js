@@ -5,6 +5,7 @@ import MainMenu from './MainMenu';
 import PlayerManager from './PlayerManager';
 import CourseManager from './CourseManager';
 import TournamentManager from './TournamentManager';
+import ScorecardEntry from './ScorecardEntry';
 import Leaderboard from './Leaderboard';
 import backgroundImage from './theopenimage.jpg'; // Import the image
 
@@ -44,6 +45,7 @@ function App() {
           <Route path="/players" element={<PlayerManager />} />
           <Route path="/courses" element={<CourseManager />} />
           <Route path="/tournaments" element={<TournamentManager />} />
+          <Route path="/tournaments/scorecard-entry" element={<ScorecardEntry />} />
         </Routes>
       </div>
     </Router>

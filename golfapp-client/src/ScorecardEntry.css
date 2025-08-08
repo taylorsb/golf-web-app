@@ -1,0 +1,73 @@
+.scorecard-container {
+  padding: 10px;
+  font-family: Arial, sans-serif;
+  font-size: 0.8em; /* Overall smaller font size for the container */
+  margin-top: 150px; /* Move content down to avoid navigation */
+}
+
+.scorecard-container h2 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 1.2em; /* Smaller heading */
+}
+
+.controls-container {
+  margin-bottom: 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap; /* Allow wrapping for smaller screens */
+  justify-content: center; /* Center align dropdowns */
+}
+
+.controls-container label {
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.controls-container select {
+  padding: 4px;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+  font-size: 0.8em; /* Smaller select font */
+}
+
+.scorecard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.scorecard-table th,
+.scorecard-table td {
+  border: 1px solid #ddd;
+  padding: 2px; /* Reduced padding */
+  text-align: center;
+  font-size: 0.7em; /* Smaller font size for table cells */
+  white-space: normal; /* Allow text wrapping in headers/cells */
+}
+
+.scorecard-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.scorecard-table th:nth-child(n+21) { /* Target calculated fields headers (adjust number if needed) */
+  width: 60px; /* Smaller width for calculated fields */
+}
+
+.scorecard-table input[type="number"] {
+  width: 30px; /* Even smaller width */
+  padding: 4px; /* Increased padding for larger height */
+  font-size: 0.7em; /* Smaller font size for inputs */
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  text-align: center;
+  -moz-appearance: textfield; /* Firefox */
+}
+
+/* Hide spin buttons for Chrome, Safari, Edge */
+.scorecard-table input[type="number"]::-webkit-outer-spin-button,
+.scorecard-table input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

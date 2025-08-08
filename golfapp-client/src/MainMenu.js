@@ -17,6 +17,11 @@ const MainMenu = () => {
         </li>
         <li>
           <Link to="/tournaments">Tournaments</Link>
+          <ul>
+            <li>
+              <Link to="/tournaments/scorecard-entry">Scorecard Entry</Link>
+            </li>
+          </ul>
         </li>
       </ul>
     </nav>

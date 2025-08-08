@@ -1,6 +1,9 @@
 import os
 from app import app, db
 
+# Ensure the database URI is correctly set for create_db.py
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db'
+
 instance_path = os.path.join(app.root_path, 'instance')
 if not os.path.exists(instance_path):
     os.makedirs(instance_path)
