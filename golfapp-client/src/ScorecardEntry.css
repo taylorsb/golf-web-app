@@ -71,3 +71,37 @@
   -webkit-appearance: none;
   margin: 0;
 }
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.tournament-details,
+.course-details,
+.player-handicaps {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.player-handicaps table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.player-handicaps th,
+.player-handicaps td {
+  border: 1px solid #eee;
+  padding: 8px;
+  text-align: left;
+  font-size: 0.9em;
+}
+
+.player-handicaps th {
+  background-color: #e0e0e0;
+}

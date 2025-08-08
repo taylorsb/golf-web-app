@@ -6,6 +6,7 @@ const ScorecardEntry = () => {
   const [selectedTournament, setSelectedTournament] = useState('');
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState('');
+  const [players, setPlayers] = useState([]);
 
   useEffect(() => {
     const fetchTournaments = async () => {
@@ -38,6 +39,26 @@ const ScorecardEntry = () => {
     fetchCourses();
   }, []);
 
+  useEffect(() => {
+    if (selectedTournament) {
+      const fetchPlayers = async () => {
+        try {
+          const response = await fetch(`http://localhost:5000/tournaments/${selectedTournament}/players`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          setPlayers(data);
+        } catch (error) {
+          console.error("Error fetching players for tournament:", error);
+        }
+      };
+      fetchPlayers();
+    } else {
+      setPlayers([]);
+    }
+  }, [selectedTournament]);
+
   const currentTournament = useMemo(() => {
     return tournaments.find(tournament => tournament.id === selectedTournament);
   }, [tournaments, selectedTournament]);
@@ -54,7 +75,10 @@ const ScorecardEntry = () => {
     setSelectedCourse(parseInt(e.target.value));
   };
 
-  
+  const calculatePlayingHandicap = (handicapIndex, slopeRating) => {
+    if (handicapIndex === null || handicapIndex === undefined || slopeRating === null || slopeRating === undefined) return 'N/A';
+    return Math.round(handicapIndex * (slopeRating / 113));
+  };
 
   return (
     <div className="scorecard-container">
@@ -80,19 +104,45 @@ const ScorecardEntry = () => {
         </select>
       </div>
 
-      {selectedTournament && currentTournament && (
-        <div className="tournament-details">
-          <h3>Tournament Details</h3>
-          <p><strong>Tournament:</strong> {currentTournament.name} | Date: {currentTournament.date} | Location: {currentTournament.location}</p>
-        </div>
-      )}
+      <div className="details-grid">
+        {selectedTournament && currentTournament && (
+          <div className="tournament-details">
+            <h3>Tournament Details</h3>
+            <p><strong>Tournament:</strong> {currentTournament.name} | Date: {currentTournament.date} | Location: {currentTournament.location}</p>
+          </div>
+        )}
 
-      {selectedCourse && currentCourse && (
-        <div className="course-details">
-          <h3>Course Details</h3>
-          <p><strong>Course:</strong> {currentCourse.name} | Slope Rating: {currentCourse.slope_rating}</p>
-        </div>
-      )}
+        {selectedCourse && currentCourse && (
+          <div className="course-details">
+            <h3>Course Details</h3>
+            <p><strong>Course:</strong> {currentCourse.name} | Slope Rating: {currentCourse.slope_rating}</p>
+          </div>
+        )}
+
+        {selectedTournament && selectedCourse && players.length > 0 && (
+          <div className="player-handicaps">
+            <h3>Player Course Handicaps</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Player Name</th>
+                  <th>Handicap Index</th>
+                  <th>Playing Handicap</th>
+                </tr>
+              </thead>
+              <tbody>
+                {players.map(player => (
+                  <tr key={player.id}>
+                    <td>{player.name}</td>
+                    <td>{player.handicap}</td>
+                    <td>{calculatePlayingHandicap(player.handicap, currentCourse.slope_rating)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
