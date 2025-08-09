@@ -95,36 +95,30 @@ function TournamentManager() {
       return;
     }
 
-    // Check for uniqueness and sequential order (frontend validation)
+    // Check for uniqueness of course_id and sequence_number combination
     const allCourses = [...assignedCourses, ...coursesToAdd];
-    const existingSequenceNumbers = allCourses.map(c => c.sequence_number);
+    const isDuplicate = allCourses.some(c => c.id === course.id && c.sequence_number === parsedSequence);
 
-    if (existingSequenceNumbers.includes(parsedSequence)) {
-      alert('Sequence number must be unique.');
+    if (isDuplicate) {
+      alert('This course with this sequence number is already assigned.');
       return;
     }
 
-    // Check if the new sequence number breaks the sequential order
-    const sortedSequenceNumbers = [...existingSequenceNumbers, parsedSequence].sort((a, b) => a - b);
-    for (let i = 0; i < sortedSequenceNumbers.length; i++) {
-      if (sortedSequenceNumbers[i] !== i + 1) {
-        alert('Sequence numbers must be sequential (e.g., 1, 2, 3).');
-        return;
-      }
-    }
-
-    if (!assignedCourses.some(c => c.id === course.id) && !coursesToAdd.some(c => c.id === course.id)) {
-      setCoursesToAdd([...coursesToAdd, { ...course, sequence_number: parsedSequence }]);
-      setCoursesToRemove(coursesToRemove.filter(c => c.id !== course.id)); // Remove from remove list if it was there
-    }
+    setCoursesToAdd([...coursesToAdd, { ...course, sequence_number: parsedSequence }]);
+    // When adding, ensure it's not in the coursesToRemove list
+    setCoursesToRemove(coursesToRemove.filter(c => !(c.id === course.id && c.sequence_number === parsedSequence)));
   };
 
-  const handleRemoveCourseFromPending = (course) => {
-    if (coursesToAdd.some(c => c.id === course.id)) {
-      setCoursesToAdd(coursesToAdd.filter(c => c.id !== course.id));
-    } else if (assignedCourses.some(c => c.id === course.id)) {
-      setCoursesToRemove([...coursesToRemove, course]);
-      setAssignedCourses(assignedCourses.filter(c => c.id !== course.id)); // Optimistically remove from assigned list
+  const handleRemoveCourseFromPending = (courseToRemove) => {
+    // Check if it's in the coursesToAdd list (pending additions)
+    if (coursesToAdd.some(c => c.id === courseToRemove.id && c.sequence_number === courseToRemove.sequence_number)) {
+      setCoursesToAdd(coursesToAdd.filter(c => !(c.id === courseToRemove.id && c.sequence_number === courseToRemove.sequence_number)));
+    } 
+    // Check if it's in the assignedCourses list (already assigned)
+    else if (assignedCourses.some(c => c.id === courseToRemove.id && c.sequence_number === courseToRemove.sequence_number)) {
+      setCoursesToRemove([...coursesToRemove, courseToRemove]);
+      // Optimistically remove from assigned list for immediate UI update
+      setAssignedCourses(assignedCourses.filter(c => !(c.id === courseToRemove.id && c.sequence_number === courseToRemove.sequence_number)));
     }
   };
 
@@ -163,7 +157,7 @@ function TournamentManager() {
       await fetch(`http://127.0.0.1:5000/tournaments/${tournamentId}/courses`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ course_ids: coursesToRemove.map(c => c.id) }),
+        body: JSON.stringify({ courses: coursesToRemove.map(c => ({ id: c.id, sequence_number: c.sequence_number })) }),
       });
     }
 
@@ -286,7 +280,6 @@ function TournamentManager() {
                   />
                   <button
                     onClick={() => handleAddCourseToPending(course, document.getElementById(`course-seq-${course.id}`).value)}
-                    disabled={assignedCourses.some(c => c.id === course.id) || coursesToAdd.some(c => c.id === course.id)}
                   >
                     +
                   </button>
@@ -343,7 +336,7 @@ function TournamentManager() {
                 </thead>
                 <tbody>
                   {assignedCourses.map(course => (
-                    <tr key={course.id}>
+                    <tr key={`${course.id}-${course.sequence_number}`}>
                       <td>{course.name}</td>
                       <td>{course.sequence_number}</td>
                       <td>
@@ -352,7 +345,7 @@ function TournamentManager() {
                     </tr>
                   ))}
                   {coursesToAdd.map(course => (
-                    <tr key={course.id} style={{ backgroundColor: '#e0ffe0' }}>
+                    <tr key={`${course.id}-${course.sequence_number}`} style={{ backgroundColor: '#e0ffe0' }}>
                       <td>{course.name} (Pending Add)</td>
                       <td>{course.sequence_number}</td>
                       <td>

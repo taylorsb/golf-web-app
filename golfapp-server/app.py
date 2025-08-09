@@ -25,7 +25,7 @@ tournament_players = db.Table('tournament_players',
 tournament_courses = db.Table('tournament_courses',
     db.Column('tournament_id', db.Integer, db.ForeignKey('tournament.id'), primary_key=True),
     db.Column('course_id', db.Integer, db.ForeignKey('course.id'), primary_key=True),
-    db.Column('sequence_number', db.Integer, nullable=False, default=0)
+    db.Column('sequence_number', db.Integer, nullable=False, default=0, primary_key=True)
 )
 
 class Player(db.Model):
@@ -120,13 +120,23 @@ class Tournament(db.Model):
         return '<Tournament %r>' % self.name
 
     def to_dict(self):
+        courses_data = []
+        # Query the association table directly to get courses with their sequence numbers
+        course_associations = db.session.query(tournament_courses).filter_by(tournament_id=self.id).all()
+        for assoc in course_associations:
+            course = Course.query.get(assoc.course_id)
+            if course:
+                course_dict = course.to_dict()
+                course_dict['sequence_number'] = assoc.sequence_number
+                courses_data.append(course_dict)
+
         return {
             'id': self.id,
             'name': self.name,
             'date': self.date,
             'location': self.location,
             'players': [player.to_dict() for player in self.players],
-            'courses': [{'id': c.id, 'name': c.name, 'country': c.country, 'slope_rating': c.slope_rating, 'hole_pars': c.hole_pars, 'hole_stroke_indices': c.hole_stroke_indices, 'sequence_number': db.session.query(tournament_courses.c.sequence_number).filter_by(tournament_id=self.id, course_id=c.id).scalar()} for c in self.courses]
+            'courses': courses_data
         }
 
 class Round(db.Model):
@@ -360,14 +370,20 @@ def add_courses_to_tournament(tournament_id):
         course_id = course_item.get('id')
         sequence_number = course_item.get('sequence_number')
         course = Course.query.get(course_id)
-        if course and course not in tournament.courses:
+        if course:
             # Create a new entry in the association table with sequence_number
             stmt = tournament_courses.insert().values(
                 tournament_id=tournament.id,
                 course_id=course.id,
                 sequence_number=sequence_number
             )
-            db.session.execute(stmt)
+            try:
+                db.session.execute(stmt)
+            except Exception as e:
+                db.session.rollback()
+                print(f"Error adding course {course_id} with sequence {sequence_number}: {e}")
+                # Optionally, return an error to the frontend here if needed
+                continue # Skip to the next course_item
     db.session.commit()
     return jsonify(tournament.to_dict()), 200
 
@@ -375,13 +391,16 @@ def add_courses_to_tournament(tournament_id):
 def remove_courses_from_tournament(tournament_id):
     tournament = Tournament.query.get_or_404(tournament_id)
     data = request.get_json()
-    course_ids = data.get('course_ids', [])
+    courses_to_remove = data.get('courses', [])
 
-    for course_id in course_ids:
+    for course_item in courses_to_remove:
+        course_id = course_item.get('id')
+        sequence_number = course_item.get('sequence_number')
         # Delete directly from the association table
         stmt = tournament_courses.delete().where(
             (tournament_courses.c.tournament_id == tournament.id) &
-            (tournament_courses.c.course_id == course_id)
+            (tournament_courses.c.course_id == course_id) &
+            (tournament_courses.c.sequence_number == sequence_number)
         )
         db.session.execute(stmt)
     db.session.commit()

@@ -218,11 +218,7 @@ const Leaderboard = () => {
                 </tr>
               ))}
             </tbody>
-            <tfoot> {/* New footer row */}
-              <tr>
-                <td colSpan="6"></td> {/* Empty cells for styling */}
-              </tr>
-            </tfoot>
+            <tfoot><tr><td colSpan="6"></td></tr></tfoot>
           </table>
         </div>
       </div>
