@@ -423,14 +423,26 @@ def calculate_stableford_points(hole_par, player_handicap, hole_stroke_index, gr
     # Real Stableford calculation is more complex and depends on course rating, slope, etc.
     # For now, let's assume a basic calculation based on par and handicap strokes.
 
-    # Calculate handicap strokes for this hole
-    # Assuming handicap strokes are distributed based on stroke index
-    # A more accurate calculation would involve player's playing handicap and course stroke indices
     handicap_strokes = 0
     if player_handicap is not None and hole_stroke_index is not None:
-        # Simple distribution: 1 stroke for each point of handicap up to 18, then 2 strokes, etc.
-        if player_handicap > 0 and hole_stroke_index <= player_handicap:
-            handicap_strokes = 1
+        if player_handicap > 0:
+            # Positive handicap: strokes are added to holes based on stroke index
+            full_rounds = player_handicap // 18
+            remaining_strokes = player_handicap % 18
+            
+            handicap_strokes += full_rounds
+            if hole_stroke_index <= remaining_strokes:
+                handicap_strokes += 1
+        elif player_handicap < 0:
+            # Negative handicap: strokes are subtracted from holes based on stroke index (in reverse)
+            abs_handicap = abs(player_handicap)
+            full_rounds = abs_handicap // 18
+            remaining_strokes = abs_handicap % 18
+
+            handicap_strokes -= full_rounds
+            # For negative handicaps, strokes are taken from the hardest holes first (highest stroke index)
+            if hole_stroke_index > (18 - remaining_strokes):
+                handicap_strokes -= 1
 
     adjusted_par = hole_par + handicap_strokes
 
@@ -491,10 +503,10 @@ def record_hole_scores(round_id):
         hole_stroke_index = hole_stroke_indices[hole_number - 1]
 
         # Calculate nett score for the hole
-        nett_score = gross_score - (player.handicap / 18 if player.handicap else 0)
+        nett_score = gross_score - (round_data.player_playing_handicap / 18 if round_data.player_playing_handicap else 0)
 
         # Calculate Stableford points for the hole
-        stableford_points = calculate_stableford_points(hole_par, player.handicap, hole_stroke_index, gross_score)
+        stableford_points = calculate_stableford_points(hole_par, round_data.player_playing_handicap, hole_stroke_index, gross_score)
 
         new_hole_score = HoleScore(
             round_id=round_id,
