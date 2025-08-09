@@ -211,27 +211,100 @@ const ScorecardEntry = () => {
     }
   }, [selectedTournament]);
 
+  const [isLoadingRounds, setIsLoadingRounds] = useState(true); // New state for loading indicator
+
   useEffect(() => {
-    if (selectedCourse) {
-      const fetchHoleData = async () => {
+    if (selectedCourse && selectedTournament && players.length > 0) {
+      const fetchHoleDataAndExistingScores = async () => {
         try {
-          const response = await fetch(`http://localhost:5000/courses/${selectedCourse}/holes`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+          setIsLoadingRounds(true); // Set loading to true at the start
+          console.log('useEffect: selectedCourse changed', { selectedCourse, selectedTournament, players });
+
+          // Fetch hole data (par, stroke index)
+          const holeDataResponse = await fetch(`http://localhost:5000/courses/${selectedCourse}/holes`);
+          if (!holeDataResponse.ok) {
+            throw new Error(`HTTP error! status: ${holeDataResponse.status}`);
           }
-          const data = await response.json();
-          // Sort hole data by sequence number if available, otherwise by hole number
+          const data = await holeDataResponse.json();
           const sortedHoleData = data.sort((a, b) => (a.sequence || a.hole_number) - (b.sequence || b.hole_number));
           setHoleData(sortedHoleData);
+
+          // Clear previous scores and summaries
+          setScores({});
+          setSubmittedSummaryScores({});
+          setRoundInitiated(false); // Assume not initiated until confirmed
+
+          const newRoundIds = {};
+          const fetchedScores = {};
+          const fetchedSummaries = {};
+          let allRoundsInitiated = true;
+
+          // Collect all player IDs for a single API call
+          const playerIds = players.map(p => p.id);
+          const playerIdsString = playerIds.join(',');
+
+          // Fetch all existing rounds for all players in a single API call
+          console.log(`Fetching existing rounds for players: ${playerIdsString}, course ${selectedCourse}, tournament ${selectedTournament}`);
+          const allExistingRoundsResponse = await fetch(`http://localhost:5000/rounds?tournament_id=${selectedTournament}&player_ids=${playerIdsString}&course_id=${selectedCourse}`);
+          if (!allExistingRoundsResponse.ok) {
+            console.error("Error fetching all existing rounds.");
+            allRoundsInitiated = false;
+            // Continue to process players, but assume no rounds found for any of them
+          }
+          const allExistingRounds = allExistingRoundsResponse.ok ? await allExistingRoundsResponse.json() : [];
+          console.log('All existing rounds fetched:', allExistingRounds);
+
+          // Process existing rounds for each player
+          for (const player of players) {
+            // Initialize for each player
+            fetchedScores[player.id] = {};
+            fetchedSummaries[player.id] = {};
+
+            const existingRound = allExistingRounds.find(r => r.player_id === player.id);
+
+            if (existingRound) {
+              newRoundIds[player.id] = existingRound.id;
+              console.log(`Found existing round ${existingRound.id} for player ${player.id}. Using embedded hole scores.`);
+              const playerHoleScores = {};
+              existingRound.hole_scores.forEach(hs => {
+                playerHoleScores[hs.hole_number] = hs.gross_score;
+              });
+              fetchedScores[player.id] = playerHoleScores;
+              fetchedSummaries[player.id] = existingRound; // Store the whole round object for summaries
+            } else {
+              console.warn(`No existing round object found for player ${player.id} after fetching.`);
+              allRoundsInitiated = false;
+            }
+          }
+          console.log('Final fetchedScores:', fetchedScores);
+          console.log('Final fetchedSummaries:', fetchedSummaries);
+          console.log('Final newRoundIds:', newRoundIds);
+          console.log('Final allRoundsInitiated:', allRoundsInitiated);
+
+          setRoundIds(newRoundIds);
+          setScores(fetchedScores);
+          setSubmittedSummaryScores(fetchedSummaries);
+          setRoundInitiated(allRoundsInitiated);
+
         } catch (error) {
-          console.error("Error fetching hole data:", error);
+          console.error("Error fetching hole data or existing scores:", error);
+          setHoleData([]);
+          setScores({});
+          setSubmittedSummaryScores({});
+          setRoundInitiated(false);
+        } finally {
+          setIsLoadingRounds(false); // Set loading to false after fetch completes (success or error)
         }
       };
-      fetchHoleData();
+      fetchHoleDataAndExistingScores();
     } else {
       setHoleData([]);
+      setScores({});
+      setSubmittedSummaryScores({});
+      setRoundInitiated(false);
+      setIsLoadingRounds(false); // Also set to false if no course/tournament/players selected
     }
-  }, [selectedCourse]);
+  }, [selectedCourse, selectedTournament, players]);
 
   const currentTournament = useMemo(() => {
     return tournaments.find(tournament => tournament.id === selectedTournament);
@@ -339,7 +412,7 @@ const ScorecardEntry = () => {
 
       {selectedTournament && selectedCourse && players.length > 0 && (
         <div className="scorecard-grid-container">
-          {!roundInitiated && (
+          {!isLoadingRounds && !roundInitiated && (
             <button className="initiate-scoring-button" onClick={handleInitiateScoring}>Initiate Scoring</button>
           )}
           <h3>Input Scores</h3>

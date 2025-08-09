@@ -150,7 +150,7 @@ class Round(db.Model):
     tournament = db.relationship('Tournament', backref=db.backref('rounds', lazy=True))
     player = db.relationship('Player', backref=db.backref('rounds', lazy=True))
     course = db.relationship('Course', backref=db.backref('rounds', lazy=True))
-    hole_scores = db.relationship('HoleScore', backref='round', lazy=True, cascade="all, delete-orphan")
+    hole_scores = db.relationship('HoleScore', backref='round', lazy=False, cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
@@ -365,6 +365,27 @@ def create_round():
     db.session.commit()
     return jsonify(new_round.to_dict()), 201
 
+@app.route('/rounds', methods=['GET'])
+def get_rounds():
+    tournament_id = request.args.get('tournament_id', type=int)
+    player_id = request.args.get('player_id', type=int)
+    course_id = request.args.get('course_id', type=int)
+
+    from sqlalchemy.orm import joinedload
+    query = Round.query.options(joinedload(Round.hole_scores))
+
+    if tournament_id:
+        query = query.filter_by(tournament_id=tournament_id)
+    player_id_str = request.args.get('player_ids')
+    if player_id_str:
+        player_ids = [int(pid) for pid in player_id_str.split(',')]
+        query = query.filter(Round.player_id.in_(player_ids))
+    if course_id:
+        query = query.filter_by(course_id=course_id)
+
+    rounds = query.all()
+    return jsonify([r.to_dict() for r in rounds])
+
 @app.route('/rounds/<int:round_id>', methods=['GET'])
 def get_round(round_id):
     round_data = Round.query.get_or_404(round_id)
@@ -478,10 +499,7 @@ def record_hole_scores(round_id):
     if len(hole_pars) != 18 or len(hole_stroke_indices) != 18:
         return jsonify({'error': 'Course hole pars or stroke indices are incomplete.'}), 400
 
-    # Clear existing hole scores for this round before adding new ones
-    HoleScore.query.filter_by(round_id=round_id).delete()
-    db.session.commit()
-
+    # Initialize summary variables
     total_gross = 0
     total_nett = 0
     total_stableford = 0
@@ -508,14 +526,25 @@ def record_hole_scores(round_id):
         # Calculate Stableford points for the hole
         stableford_points = calculate_stableford_points(hole_par, round_data.player_playing_handicap, hole_stroke_index, gross_score)
 
-        new_hole_score = HoleScore(
-            round_id=round_id,
-            hole_number=hole_number,
-            gross_score=gross_score,
-            nett_score=nett_score,
-            stableford_points=stableford_points
-        )
-        db.session.add(new_hole_score)
+        # Check if HoleScore already exists for this round and hole number
+        existing_hole_score = HoleScore.query.filter_by(round_id=round_id, hole_number=hole_number).first()
+
+        if existing_hole_score:
+            # Update existing score
+            existing_hole_score.gross_score = gross_score
+            existing_hole_score.nett_score = nett_score
+            existing_hole_score.stableford_points = stableford_points
+            db.session.add(existing_hole_score) # Re-add to session for update
+        else:
+            # Create new score
+            new_hole_score = HoleScore(
+                round_id=round_id,
+                hole_number=hole_number,
+                gross_score=gross_score,
+                nett_score=nett_score,
+                stableford_points=stableford_points
+            )
+            db.session.add(new_hole_score)
 
         # Accumulate summary scores
         total_gross += gross_score
@@ -544,4 +573,9 @@ def record_hole_scores(round_id):
 
     db.session.commit()
     return jsonify(round_data.to_dict()), 200
+
+@app.route('/rounds/<int:round_id>/scores', methods=['GET'])
+def get_hole_scores_for_round(round_id):
+    hole_scores = HoleScore.query.filter_by(round_id=round_id).all()
+    return jsonify([score.to_dict() for score in hole_scores])
 
