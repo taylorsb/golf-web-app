@@ -4,39 +4,15 @@ import './Leaderboard.css';
 const Leaderboard = () => {
   const [tournaments, setTournaments] = useState([]);
   const [selectedTournament, setSelectedTournament] = useState('');
+  const [courses, setCourses] = useState([]);
+  const [selectedCourse, setSelectedCourse] = useState('');
+  const [allRoundsData, setAllRoundsData] = useState([]); // Raw data from backend
+  const [displayedLeaderboard, setDisplayedLeaderboard] = useState([]); // Processed and sorted data
+  const [sortColumn, setSortColumn] = useState('roundStablefordPoints'); // Default sort
+  const [sortDirection, setSortDirection] = useState('desc'); // Default sort direction
 
-  // Mock data for the leaderboard
-  const mockLeaderboardData = {
-    '1': [
-      { position: 1, playerName: 'Player One', grossScore: 70, nettScore: 68, points: 36 },
-      { position: 2, playerName: 'Player Two', grossScore: 72, nettScore: 70, points: 34 },
-      { position: 3, playerName: 'Player Three', grossScore: 73, nettScore: 71, points: 33 },
-      { position: 4, playerName: 'Another Player', grossScore: 71, nettScore: 69, points: 35 },
-      { position: 5, playerName: 'Long Player Name Here', grossScore: 75, nettScore: 73, points: 30 },
-      { position: 6, playerName: 'Sixth Player', grossScore: 76, nettScore: 74, points: 29 },
-      { position: 7, playerName: 'Seventh Player', grossScore: 77, nettScore: 75, points: 28 },
-      { position: 8, playerName: 'Eighth Player', grossScore: 78, nettScore: 76, points: 27 },
-      { position: 9, playerName: 'Ninth Player', grossScore: 79, nettScore: 77, points: 26 },
-      { position: 10, playerName: 'Tenth Player', grossScore: 80, nettScore: 78, points: 25 },
-      { position: 11, playerName: 'Eleventh Player', grossScore: 81, nettScore: 79, points: 24 },
-    ],
-    '2': [
-      { position: 1, playerName: 'Player Alpha', grossScore: 68, nettScore: 65, points: 38 },
-      { position: 2, playerName: 'Player Beta', grossScore: 71, nettScore: 69, points: 35 },
-      { position: 3, playerName: 'Player Gamma', grossScore: 74, nettScore: 72, points: 32 },
-      { position: 4, playerName: 'Player Delta', grossScore: 75, nettScore: 73, points: 31 },
-      { position: 5, playerName: 'Player Epsilon', grossScore: 76, nettScore: 74, points: 30 },
-      { position: 6, playerName: 'Player Zeta', grossScore: 77, nettScore: 75, points: 29 },
-      { position: 7, playerName: 'Player Eta', grossScore: 78, nettScore: 76, points: 28 },
-      { position: 8, playerName: 'Player Theta', grossScore: 79, nettScore: 77, points: 27 },
-      { position: 9, playerName: 'Player Iota', grossScore: 80, nettScore: 78, points: 26 },
-      { position: 10, playerName: 'Player Kappa', grossScore: 81, nettScore: 79, points: 25 },
-      { position: 11, playerName: 'Player Lambda', grossScore: 82, nettScore: 80, points: 24 },
-    ],
-  };
-
+  // Fetch tournaments
   useEffect(() => {
-    // Fetch tournaments to populate the dropdown
     const fetchTournaments = async () => {
       try {
         const response = await fetch('http://127.0.0.1:5000/tournaments');
@@ -47,74 +23,210 @@ const Leaderboard = () => {
         }
       } catch (error) {
         console.error('Error fetching tournaments:', error);
-        // Set up mock tournaments if the fetch fails
-        const mockTournaments = [
-          { id: '1', name: 'Mock Tournament 1' },
-          { id: '2', name: 'Mock Tournament 2' },
-        ];
-        setTournaments(mockTournaments);
-        if (mockTournaments.length > 0) {
-          setSelectedTournament(mockTournaments[0].id);
-        }
+        // Fallback for development if backend is not running
+        setTournaments([{ id: 1, name: 'Development Tournament' }]);
+        setSelectedTournament(1);
       }
     };
     fetchTournaments();
   }, []);
 
+  // Fetch courses for selected tournament
+  useEffect(() => {
+    const fetchCourses = async () => {
+      if (selectedTournament) {
+        try {
+          const response = await fetch(`http://127.0.0.1:5000/tournaments/${selectedTournament}/courses`);
+          const data = await response.json();
+          setCourses(data);
+          if (data.length > 0) {
+            setSelectedCourse(data[0].id);
+          } else {
+            setSelectedCourse(''); // No courses for this tournament
+          }
+        } catch (error) {
+          console.error('Error fetching courses:', error);
+          setCourses([]);
+          setSelectedCourse('');
+        }
+      }
+    };
+    fetchCourses();
+  }, [selectedTournament]);
+
+  // Fetch all rounds data for the selected tournament (and optionally course)
+  useEffect(() => {
+    const fetchRoundsData = async () => {
+      if (selectedTournament) {
+        try {
+          const response = await fetch(`http://127.0.0.1:5000/tournaments/${selectedTournament}/rounds_summary`);
+          const data = await response.json();
+          setAllRoundsData(data);
+        } catch (error) {
+          console.error('Error fetching rounds summary:', error);
+          setAllRoundsData([]);
+        }
+      }
+    };
+    fetchRoundsData();
+  }, [selectedTournament]);
+
+  // Process and sort leaderboard data
+  useEffect(() => {
+    const processLeaderboardData = () => {
+      console.log('Processing leaderboard data. Sort Column:', sortColumn, 'Sort Direction:', sortDirection);
+      // First, calculate tournament-wide aggregates for each player
+      const playerTournamentAggregates = {};
+      allRoundsData.forEach(round => {
+        if (!playerTournamentAggregates[round.player_id]) {
+          playerTournamentAggregates[round.player_id] = {
+            playerName: round.player_name,
+            tournamentStablefordPoints: 0,
+            tournamentGross: 0,
+          };
+        }
+        playerTournamentAggregates[round.player_id].tournamentStablefordPoints += round.stableford_total || 0;
+        playerTournamentAggregates[round.player_id].tournamentGross += round.gross_score_total || 0;
+      });
+
+      // Then, filter rounds based on selected course for display
+      let roundsToDisplay = allRoundsData;
+      if (selectedCourse) {
+        roundsToDisplay = allRoundsData.filter(round => round.course_id === selectedCourse);
+      }
+
+      // Now, combine the filtered rounds with the tournament aggregates
+      let processedData = roundsToDisplay.map(round => ({
+        playerName: round.player_name,
+        tournamentStablefordPoints: playerTournamentAggregates[round.player_id]?.tournamentStablefordPoints || 0,
+        tournamentGross: playerTournamentAggregates[round.player_id]?.tournamentGross || 0,
+        roundStablefordPoints: round.stableford_total || 0,
+        roundGross: round.gross_score_total || 0,
+        roundId: round.id, // Unique key for the row
+      }));
+
+      // Apply sorting
+      processedData.sort((a, b) => {
+        let comparison = 0;
+        if (sortColumn === 'roundStablefordPoints' || sortColumn === 'tournamentStablefordPoints') {
+          comparison = b[sortColumn] - a[sortColumn]; // High to low
+        } else if (sortColumn === 'roundGross' || sortColumn === 'tournamentGross') {
+          comparison = a[sortColumn] - b[sortColumn]; // Low to high
+        }
+
+        if (sortDirection === 'asc') {
+          comparison *= -1; // Reverse for ascending
+        }
+        return comparison;
+      });
+
+      // Add position after sorting
+      processedData = processedData.map((item, index) => ({
+        ...item,
+        position: index + 1,
+      }));
+
+      setDisplayedLeaderboard(processedData);
+    };
+
+    processLeaderboardData();
+  }, [allRoundsData, selectedCourse, sortColumn, sortDirection]);
+
   const handleTournamentChange = (event) => {
     setSelectedTournament(event.target.value);
+    setSelectedCourse(''); // Reset selected course when tournament changes
   };
 
-  const renderCharacters = (value, totalCells) => {
-    let strValue = String(value);
-    // Pad with spaces to the totalCells length
-    strValue = strValue.padEnd(totalCells, ' ');
-    // Truncate if longer than totalCells
-    strValue = strValue.substring(0, totalCells);
-
-    return strValue.split('').map((char, index) => (
-      <span key={index}>{char === ' ' ? '\u00A0' : char}</span> // Use non-breaking space for empty cells
-    ));
+  const handleCourseChange = (event) => {
+    setSelectedCourse(parseInt(event.target.value));
   };
 
-  const leaderboardData = (mockLeaderboardData[selectedTournament] || []).slice(0, 10);
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      // Set default direction based on column type
+      if (column === 'roundStablefordPoints' || column === 'tournamentStablefordPoints') {
+        setSortDirection('desc');
+      } else {
+        setSortDirection('asc');
+      }
+    }
+  };
 
   return (
-    <div className="leaderboard-widget">
-      <div className="leaderboard-header">
-        <select onChange={handleTournamentChange} value={selectedTournament}>
+    <> {/* Use a React Fragment to wrap multiple top-level elements */}
+      <div className="leaderboard-controls"> {/* New container for controls */}
+        <label htmlFor="tournament-select">Tournament:</label>
+        <select id="tournament-select" onChange={handleTournamentChange} value={selectedTournament}>
           {tournaments.map((tournament) => (
             <option key={tournament.id} value={tournament.id}>
               {tournament.name}
             </option>
           ))}
         </select>
+        {selectedTournament && (
+          <>
+            <label htmlFor="course-select">Golf Course:</label>
+            <select id="course-select" onChange={handleCourseChange} value={selectedCourse} disabled={courses.length === 0}>
+              <option value="">All Courses</option>
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.name}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
       </div>
-      <div className="leaderboard-body">
-        <table className="leaderboard-table">
-          <thead>
-            <tr>
-              <th>Pos</th>
-              <th>Player</th>
-              <th>Gross</th>
-              <th>Nett</th>
-              <th>Points</th>
-            </tr>
-          </thead>
-          <tbody>
-            {leaderboardData.map((player) => (
-              <tr key={player.playerName}>
-                <td>{renderCharacters(player.position, 3)}</td>
-                <td className="player-name-cell">{renderCharacters(player.playerName, 20)}</td>
-                <td className="gross-score-cell">{renderCharacters(player.grossScore, 3)}</td>
-                <td className="nett-score-cell">{renderCharacters(player.nettScore, 3)}</td>
-                <td className="points-cell">{renderCharacters(player.points, 3)}</td>
+      <div className="leaderboard-widget">
+        <h2>Leaderboard</h2> {/* Renamed title */}
+        <div className="leaderboard-body">
+          <table className="leaderboard-table">
+            <thead>
+              <tr>
+                <th onClick={() => handleSort('position')}>
+                  Pos {sortColumn === 'position' && (sortDirection === 'asc' ? '▲' : '▼')}
+                </th>
+                <th onClick={() => handleSort('playerName')}>
+                  Player {sortColumn === 'playerName' && (sortDirection === 'asc' ? '▲' : '▼')}
+                </th>
+                <th onClick={() => handleSort('tournamentStablefordPoints')}>
+                  Tourn. Stableford {sortColumn === 'tournamentStablefordPoints' && (sortDirection === 'asc' ? '▲' : '▼')}
+                </th>
+                <th onClick={() => handleSort('roundStablefordPoints')}>
+                  Round Stableford {sortColumn === 'roundStablefordPoints' && (sortDirection === 'asc' ? '▲' : '▼')}
+                </th>
+                <th onClick={() => handleSort('tournamentGross')}>
+                  Tourn. Gross {sortColumn === 'tournamentGross' && (sortDirection === 'asc' ? '▲' : '▼')}
+                </th>
+                <th onClick={() => handleSort('roundGross')}>
+                  Round Gross {sortColumn === 'roundGross' && (sortDirection === 'asc' ? '▲' : '▼')}
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {displayedLeaderboard.map((player) => (
+                <tr key={player.roundId}> {/* Use roundId as key for unique rows */}
+                  <td>{player.position}</td>
+                  <td className="player-name-cell">{player.playerName}</td>
+                  <td className="points-cell">{player.tournamentStablefordPoints}</td>
+                  <td className="points-cell">{player.roundStablefordPoints}</td>
+                  <td className="gross-score-cell">{player.tournamentGross}</td>
+                  <td className="gross-score-cell">{player.roundGross}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot> {/* New footer row */}
+              <tr>
+                <td colSpan="6"></td> {/* Empty cells for styling */}
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

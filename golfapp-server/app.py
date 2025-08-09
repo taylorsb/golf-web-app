@@ -4,6 +4,9 @@ from flask_cors import CORS
 from flask_migrate import Migrate # Import Migrate
 import os
 import json # Import json module
+from datetime import date
+from sqlalchemy.orm import joinedload
+from sqlalchemy import func
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db'
@@ -192,6 +195,60 @@ class HoleScore(db.Model):
             'stableford_points': self.stableford_points
         }
 
+# Course API Endpoints
+@app.route('/courses', methods=['GET'])
+def get_courses():
+    courses = Course.query.all()
+    return jsonify([course.to_dict() for course in courses])
+
+@app.route('/courses/<int:course_id>', methods=['GET'])
+def get_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    return jsonify(course.to_dict())
+
+@app.route('/courses', methods=['POST'])
+def add_course():
+    data = request.get_json()
+    if not data or not 'name' in data:
+        return jsonify({'error': 'Course name is required'}), 400
+    
+    new_course = Course(
+        name=data['name'],
+        country=data.get('country'),
+        slope_rating=data.get('slope_rating'),
+        hole_pars=json.dumps(data.get('hole_pars', [])),
+        hole_stroke_indices=json.dumps(data.get('hole_stroke_indices', []))
+    )
+    db.session.add(new_course)
+    db.session.commit()
+    return jsonify(new_course.to_dict()), 201
+
+@app.route('/courses/<int:course_id>', methods=['PUT'])
+def update_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    data = request.get_json()
+    
+    if 'name' in data:
+        course.name = data['name']
+    if 'country' in data:
+        course.country = data['country']
+    if 'slope_rating' in data:
+        course.slope_rating = data['slope_rating']
+    if 'hole_pars' in data:
+        course.hole_pars = json.dumps(data['hole_pars'])
+    if 'hole_stroke_indices' in data:
+        course.hole_stroke_indices = json.dumps(data['hole_stroke_indices'])
+    
+    db.session.commit()
+    return jsonify(course.to_dict())
+
+@app.route('/courses/<int:course_id>', methods=['DELETE'])
+def delete_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    db.session.delete(course)
+    db.session.commit()
+    return '', 204
+
 # Tournament API Endpoints
 @app.route('/tournaments', methods=['GET'])
 def get_tournaments():
@@ -370,113 +427,23 @@ def get_rounds():
     tournament_id = request.args.get('tournament_id', type=int)
     player_id = request.args.get('player_id', type=int)
     course_id = request.args.get('course_id', type=int)
+    player_id_str = request.args.get('player_ids')
 
     from sqlalchemy.orm import joinedload
     query = Round.query.options(joinedload(Round.hole_scores))
 
     if tournament_id:
         query = query.filter_by(tournament_id=tournament_id)
-    player_id_str = request.args.get('player_ids')
+    if player_id:
+        query = query.filter_by(player_id=player_id)
+    if course_id:
+        query = query.filter_by(course_id=course_id)
     if player_id_str:
         player_ids = [int(pid) for pid in player_id_str.split(',')]
         query = query.filter(Round.player_id.in_(player_ids))
-    if course_id:
-        query = query.filter_by(course_id=course_id)
 
     rounds = query.all()
     return jsonify([r.to_dict() for r in rounds])
-
-@app.route('/rounds/<int:round_id>', methods=['GET'])
-def get_round(round_id):
-    round_data = Round.query.get_or_404(round_id)
-    return jsonify(round_data.to_dict())
-
-@app.route('/initiate_round', methods=['POST'])
-def initiate_round():
-    data = request.get_json()
-    tournament_id = data.get('tournament_id')
-    course_id = data.get('course_id')
-    players_data = data.get('players_data', [])
-
-    if not tournament_id or not course_id or not players_data:
-        return jsonify({'error': 'Missing tournament_id, course_id, or players_data'}), 400
-
-    from datetime import date
-    today = date.today().isoformat()
-
-    rounds_created = []
-    for player_data in players_data:
-        player_id = player_data.get('player_id')
-        handicap_index = player_data.get('handicap_index')
-        playing_handicap = player_data.get('playing_handicap')
-
-        if not player_id:
-            continue
-
-        # Determine the next round number for this player in this tournament/course
-        # Determine the next round number for this player in this tournament/course
-        # This is now the sequence number of the course in the tournament
-        course_sequence = db.session.query(tournament_courses.c.sequence_number).filter_by(
-            tournament_id=tournament_id,
-            course_id=course_id
-        ).scalar()
-        round_number = course_sequence if course_sequence is not None else 1 # Default to 1 if not found or not set
-        
-
-        new_round = Round(
-            tournament_id=tournament_id,
-            player_id=player_id,
-            course_id=course_id,
-            round_number=round_number,
-            date_played=today,
-            player_handicap_index=handicap_index,
-            player_playing_handicap=playing_handicap
-        )
-        db.session.add(new_round)
-        db.session.flush() # To get the ID of the new_round before commit
-        rounds_created.append(new_round.to_dict())
-
-    db.session.commit()
-    return jsonify({'message': 'Rounds initiated successfully!', 'rounds': rounds_created}), 200
-
-def calculate_stableford_points(hole_par, player_handicap, hole_stroke_index, gross_score):
-    # This is a simplified Stableford calculation. 
-    # Real Stableford calculation is more complex and depends on course rating, slope, etc.
-    # For now, let's assume a basic calculation based on par and handicap strokes.
-
-    handicap_strokes = 0
-    if player_handicap is not None and hole_stroke_index is not None:
-        if player_handicap > 0:
-            # Positive handicap: strokes are added to holes based on stroke index
-            full_rounds = player_handicap // 18
-            remaining_strokes = player_handicap % 18
-            
-            handicap_strokes += full_rounds
-            if hole_stroke_index <= remaining_strokes:
-                handicap_strokes += 1
-        elif player_handicap < 0:
-            # Negative handicap: strokes are subtracted from holes based on stroke index (in reverse)
-            abs_handicap = abs(player_handicap)
-            full_rounds = abs_handicap // 18
-            remaining_strokes = abs_handicap % 18
-
-            handicap_strokes -= full_rounds
-            # For negative handicaps, strokes are taken from the hardest holes first (highest stroke index)
-            if hole_stroke_index > (18 - remaining_strokes):
-                handicap_strokes -= 1
-
-    adjusted_par = hole_par + handicap_strokes
-
-    if gross_score <= adjusted_par - 2:
-        return 4  # Eagle or better
-    elif gross_score == adjusted_par - 1:
-        return 3  # Birdie
-    elif gross_score == adjusted_par:
-        return 2  # Par
-    elif gross_score == adjusted_par + 1:
-        return 1  # Bogey
-    else:
-        return 0  # Double Bogey or worse
 
 @app.route('/rounds/<int:round_id>/scores', methods=['POST'])
 def record_hole_scores(round_id):
@@ -579,3 +546,105 @@ def get_hole_scores_for_round(round_id):
     hole_scores = HoleScore.query.filter_by(round_id=round_id).all()
     return jsonify([score.to_dict() for score in hole_scores])
 
+@app.route('/initiate_round', methods=['POST'])
+def initiate_round():
+    data = request.get_json()
+    tournament_id = data.get('tournament_id')
+    course_id = data.get('course_id')
+    players_data = data.get('players_data', [])
+
+    if not tournament_id or not course_id or not players_data:
+        return jsonify({'error': 'Missing tournament_id, course_id, or players_data'}), 400
+
+    today = date.today().isoformat()
+
+    rounds_created = []
+    for player_data in players_data:
+        player_id = player_data.get('player_id')
+        handicap_index = player_data.get('handicap_index')
+        playing_handicap = player_data.get('playing_handicap')
+
+        if not player_id:
+            continue
+
+        # Determine the next round number for this player in this tournament/course
+        # This is now the sequence number of the course in the tournament
+        course_sequence = db.session.query(tournament_courses.c.sequence_number).filter_by(
+            tournament_id=tournament_id,
+            course_id=course_id
+        ).scalar()
+        round_number = course_sequence if course_sequence is not None else 1 # Default to 1 if not found or not set
+        
+
+        new_round = Round(
+            tournament_id=tournament_id,
+            player_id=player_id,
+            course_id=course_id,
+            round_number=round_number,
+            date_played=today,
+            player_handicap_index=handicap_index,
+            player_playing_handicap=playing_handicap
+        )
+        db.session.add(new_round)
+        db.session.flush() # To get the ID of the new_round before commit
+        rounds_created.append(new_round.to_dict())
+
+    db.session.commit()
+    return jsonify({'message': 'Rounds initiated successfully!', 'rounds': rounds_created}), 200
+
+@app.route('/tournaments/<int:tournament_id>/rounds_summary', methods=['GET'])
+def get_rounds_summary_for_tournament(tournament_id):
+    # Fetch all rounds for the given tournament, eagerly loading player and course details
+    rounds = Round.query.filter_by(tournament_id=tournament_id).options(
+        joinedload(Round.player),
+        joinedload(Round.course)
+    ).all()
+
+    rounds_data = []
+    for r in rounds:
+        round_dict = r.to_dict()
+        # Add player and course names directly to the round dictionary for easier consumption
+        round_dict['player_name'] = r.player.name if r.player else 'Unknown Player'
+        round_dict['course_name'] = r.course.name if r.course else 'Unknown Course'
+        rounds_data.append(round_dict)
+    
+    return jsonify(rounds_data)
+
+def calculate_stableford_points(hole_par, player_handicap, hole_stroke_index, gross_score):
+    # This is a simplified Stableford calculation. 
+    # Real Stableford calculation is more complex and depends on course rating, slope, etc.
+    # For now, let's assume a basic calculation based on par and handicap strokes.
+
+    handicap_strokes = 0
+    if player_handicap is not None and hole_stroke_index is not None:
+        if player_handicap > 0:
+            # Positive handicap: strokes are added to holes based on stroke index
+            full_rounds = player_handicap // 18
+            remaining_strokes = player_handicap % 18
+            
+            handicap_strokes += full_rounds
+            if hole_stroke_index <= remaining_strokes:
+                handicap_strokes += 1
+        elif player_handicap < 0:
+            # Negative handicap: strokes are subtracted from holes based on stroke index (in reverse)
+            abs_handicap = abs(player_handicap)
+            full_rounds = abs_handicap // 18
+            remaining_strokes = abs_handicap % 18
+
+            handicap_strokes -= full_rounds
+            # For negative handicaps, strokes are taken from the hardest holes first (highest stroke index)
+            if hole_stroke_index > (18 - remaining_strokes):
+                handicap_strokes -= 1
+
+    adjusted_par = hole_par + handicap_strokes
+
+    if gross_score <= adjusted_par - 2:
+        return 4  # Eagle or better
+    elif gross_score == adjusted_par - 1:
+        return 3  # Birdie
+    elif gross_score == adjusted_par:
+        return 2  # Par
+    elif gross_score == adjusted_par + 1:
+        return 1  # Bogey
+    else:
+        return 0  # Double Bogey or worse
