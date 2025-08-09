@@ -133,21 +133,7 @@ const ScorecardEntry = () => {
       }
     };
 
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/courses');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setCourses(data);
-      } catch (error) {
-        console.error("Error fetching courses:", error);
-      }
-    };
-
     fetchTournaments();
-    fetchCourses();
   }, []);
 
   useEffect(() => {
@@ -164,9 +150,25 @@ const ScorecardEntry = () => {
           console.error("Error fetching players for tournament:", error);
         }
       };
+
+      const fetchCoursesForTournament = async () => {
+        try {
+          const response = await fetch(`http://localhost:5000/tournaments/${selectedTournament}/courses`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          setCourses(data);
+        } catch (error) {
+          console.error("Error fetching courses for tournament:", error);
+        }
+      };
+
       fetchPlayers();
+      fetchCoursesForTournament();
     } else {
       setPlayers([]);
+      setCourses([]); // Clear courses when no tournament is selected
     }
   }, [selectedTournament]);
 
