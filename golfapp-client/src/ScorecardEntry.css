@@ -2,7 +2,7 @@
   padding: 10px;
   font-family: Arial, sans-serif;
   font-size: 0.8em; /* Overall smaller font size for the container */
-  margin-top: 150px; /* Move content down to avoid navigation */
+  margin-top: 80px; /* Reduced margin-top to move content higher */
 }
 
 .scorecard-container h2 {
@@ -41,10 +41,16 @@
   box-sizing: border-box;
 }
 
+.scorecard-grid-container {
+  margin-top: 20px;
+  width: 100%; /* Ensure it takes full width */
+}
+
 .scorecard-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+  /* Removed min-width */
 }
 
 .scorecard-table th,
@@ -56,8 +62,13 @@
   white-space: normal; /* Allow text wrapping in headers/cells */
 }
 
-.scorecard-table th {
-  background-color: #f2f2f2;
+.scorecard-table thead {
+  border: 2px solid #A9A9A9; /* Mid-grey border around the header */
+}
+
+.scorecard-table thead th {
+  background-color: #A9A9A9; /* Mid-grey background */
+  color: white; /* White text */
   font-weight: bold;
 }
 
@@ -65,14 +76,19 @@
   width: 60px; /* Smaller width for calculated fields */
 }
 
-.scorecard-table input[type="number"] {
+.scorecard-table input[type="number"],
+.stableford-value,
+.summary-value {
   width: 30px; /* Even smaller width */
-  padding: 4px; /* Increased padding for larger height */
-  font-size: 0.7em; /* Smaller font size for inputs */
+  padding: 4px;
+  font-size: 0.7em;
   border: 1px solid #ccc;
   border-radius: 2px;
   text-align: center;
-  -moz-appearance: textfield; /* Firefox */
+  display: inline-block; /* Ensure span behaves like a block for width/padding */
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  height: 24px; /* Explicit height */
+  line-height: 16px; /* Adjust line-height to vertically center text */
 }
 
 /* Hide spin buttons for Chrome, Safari, Edge */
@@ -84,16 +100,16 @@
 
 .details-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-top: 20px;
+  grid-template-columns: repeat(3, minmax(150px, 1fr)); /* Adjusted for narrower columns */
+  gap: 10px; /* Reduced gap */
+  margin-top: 10px; /* Already reduced */
 }
 
 .tournament-details,
 .course-details,
 .player-handicaps {
   border: 1px solid #ddd;
-  padding: 15px;
+  padding: 5px; /* Already reduced */
   border-radius: 5px;
   background-color: #f9f9f9;
 }
@@ -101,17 +117,43 @@
 .player-handicaps table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  margin-top: 5px; /* Already reduced */
 }
 
 .player-handicaps th,
 .player-handicaps td {
   border: 1px solid #eee;
-  padding: 8px;
+  padding: 4px; /* Already reduced */
   text-align: left;
-  font-size: 0.9em;
+  font-size: 0.8em; /* Already reduced */
 }
 
 .player-handicaps th {
   background-color: #e0e0e0;
+}
+
+.player-handicaps td:nth-child(1) {
+  width: 40%; /* Adjust width for player name column */
+}
+
+.player-handicaps td:nth-child(2) {
+  width: 60%; /* Adjust width for handicap details column */
+}
+
+.initiate-scoring-button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin-top: 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.initiate-scoring-button:hover {
+  background-color: #45a049;
 }
