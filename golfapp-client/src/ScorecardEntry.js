@@ -366,7 +366,7 @@ const ScorecardEntry = () => {
           <select id="course-select" value={selectedCourse} onChange={handleCourseChange}>
             <option value="">--Select a Course--</option>
             {courses.map(course => (
-              <option key={course.id} value={course.id}>{course.name}</option>
+              <option key={course.id} value={course.id}>{course.name} - {course.sequence_number}</option>
             ))}
           </select>
         </div>

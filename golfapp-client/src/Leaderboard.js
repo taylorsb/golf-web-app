@@ -173,7 +173,7 @@ const Leaderboard = () => {
               <option value="">All Courses</option>
               {courses.map((course) => (
                 <option key={course.id} value={course.id}>
-                  {course.name}
+                  {course.name} - {course.sequence_number}
                 </option>
               ))}
             </select>
