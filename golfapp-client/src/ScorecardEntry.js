@@ -10,6 +10,115 @@ const ScorecardEntry = () => {
   const [holeData, setHoleData] = useState([]); // To store par and stroke index for each hole
   const [scores, setScores] = useState({}); // To store player scores
 
+  const [roundInitiated, setRoundInitiated] = useState(false);
+  const [roundIds, setRoundIds] = useState({}); // To store round_id for each player
+
+  const handleInitiateScoring = async () => {
+    if (!selectedTournament || !selectedCourse || players.length === 0) {
+      alert("Please select a tournament and course, and ensure players are loaded.");
+      return;
+    }
+
+    const playersDataForInitiation = players.map(player => ({
+      player_id: player.id,
+      handicap_index: player.handicap,
+      playing_handicap: calculatePlayingHandicap(player.handicap, currentCourse.slope_rating),
+    }));
+
+    try {
+      const response = await fetch('http://localhost:5000/initiate_round', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tournament_id: selectedTournament,
+          course_id: selectedCourse,
+          players_data: playersDataForInitiation,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      alert(result.message);
+      setRoundInitiated(true);
+      // Store round IDs for each player
+      const newRoundIds = {};
+      result.rounds.forEach(round => {
+        newRoundIds[round.player_id] = round.id;
+      });
+      setRoundIds(newRoundIds);
+
+    } catch (error) {
+      console.error("Error initiating scoring:", error);
+      alert(`Failed to initiate scoring: ${error.message}`);
+    }
+  };
+
+  const handleSubmitFinalScores = async () => {
+    if (!selectedTournament || !selectedCourse || players.length === 0) {
+      alert("Please select a tournament and course, and ensure players are loaded.");
+      return;
+    }
+
+    const playersDataForSubmission = players.map(player => {
+      const playerHoleScores = {};
+      for (let i = 1; i <= 18; i++) {
+        playerHoleScores[i] = scores[player.id]?.[i] ? parseInt(scores[player.id][i]) : 0; // Default to 0 if no score entered
+      }
+
+      const summaryScores = {
+        front9Gross: calculateFront9Gross(player.id),
+        back9Gross: calculateBack9Gross(player.id),
+        overallGross: calculateGrossScore(player.id),
+        front9Nett: calculateFront9Net(player.id),
+        back9Nett: calculateBack9Net(player.id),
+        overallNett: calculateNetScore(player.id),
+        stablefordPoints: calculateTotalStablefordPoints(player.id),
+      };
+
+      return {
+        player_id: player.id,
+        hole_scores: playerHoleScores,
+        summary_scores: summaryScores,
+      };
+    });
+
+    try {
+      const response = await fetch('http://localhost:5000/submit_round', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tournament_id: selectedTournament,
+          course_id: selectedCourse,
+          players_data: playersDataForSubmission,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      alert(result.message);
+      // Optionally, clear scores or navigate away after successful submission
+      setScores({});
+
+    } catch (error) {
+      console.error("Error submitting scores:", error);
+      alert(`Failed to submit scores: ${error.message}`);
+    }
+  };
+
+
+
   useEffect(() => {
     const fetchTournaments = async () => {
       try {
@@ -114,30 +223,106 @@ const ScorecardEntry = () => {
     return Math.round(handicapIndex * (slopeRating / 113));
   };
 
-  const calculateBack9Net = (playerId) => {
-    const grossBack9 = calculateBack9Gross(playerId);
+  const getStrokeIndexForHole = (holeNumber) => {
+    const hole = holeData.find(h => h.hole_number === holeNumber);
+    return hole ? hole.stroke_index : 0; // Return 0 or appropriate default if not found
+  };
+
+  const calculateGrossScore = (playerId) => {
+    let totalGross = 0;
+    for (let i = 1; i <= 18; i++) {
+      const score = parseInt(scores[playerId]?.[i]);
+      if (!isNaN(score)) {
+        totalGross += score;
+      }
+    }
+    return totalGross;
+  };
+
+  const calculateFront9Gross = (playerId) => {
+    let front9Gross = 0;
+    for (let i = 1; i <= 9; i++) {
+      const score = parseInt(scores[playerId]?.[i]);
+      if (!isNaN(score)) {
+        front9Gross += score;
+      }
+    }
+    return front9Gross;
+  };
+
+  const calculateBack9Gross = (playerId) => {
+    let back9Gross = 0;
+    for (let i = 10; i <= 18; i++) {
+      const score = parseInt(scores[playerId]?.[i]);
+      if (!isNaN(score)) {
+        back9Gross += score;
+      }
+    }
+    return back9Gross;
+  };
+
+  const calculateNetScore = (playerId) => {
+    const grossScore = calculateGrossScore(playerId);
+    const player = players.find(p => p.id === playerId);
+    if (!player || !currentCourse) return 'N/A';
+    const playingHandicap = calculatePlayingHandicap(player.handicap, currentCourse.slope_rating);
+    return grossScore - playingHandicap;
+  };
+
+  const calculateFront9Net = (playerId) => {
+    const grossFront9 = calculateFront9Gross(playerId);
     const player = players.find(p => p.id === playerId);
     if (!player || !currentCourse) return 'N/A';
     const playingHandicap = calculatePlayingHandicap(player.handicap, currentCourse.slope_rating);
 
-    // Distribute handicap strokes over 18 holes based on stroke index
-    let back9Strokes = 0;
+    let front9Strokes = 0;
     const holesWithStrokes = [];
     for (let i = 1; i <= 18; i++) {
       const strokeIndex = getStrokeIndexForHole(i);
-      if (strokeIndex > 0) { // Ensure stroke index is valid
+      if (strokeIndex > 0) {
         holesWithStrokes.push({ holeIndex: i, strokeIndex: strokeIndex });
       }
     }
 
-    // Sort holes by stroke index to apply handicap strokes to the hardest holes first
     holesWithStrokes.sort((a, b) => a.strokeIndex - b.strokeIndex);
 
     let remainingHandicap = playingHandicap;
     for (let i = 0; i < 18; i++) {
       if (remainingHandicap > 0) {
         const hole = holesWithStrokes[i];
-        if (hole && hole.holeIndex > 9) { // Only consider back 9 holes
+        if (hole && hole.holeIndex <= 9) {
+          front9Strokes++;
+        }
+        remainingHandicap--;
+      } else {
+        break;
+      }
+    }
+    return grossFront9 - front9Strokes;
+  };
+
+  const calculateBack9Net = (playerId) => {
+    const grossBack9 = calculateBack9Gross(playerId);
+    const player = players.find(p => p.id === playerId);
+    if (!player || !currentCourse) return 'N/A';
+    const playingHandicap = calculatePlayingHandicap(player.handicap, currentCourse.slope_rating);
+
+    let back9Strokes = 0;
+    const holesWithStrokes = [];
+    for (let i = 1; i <= 18; i++) {
+      const strokeIndex = getStrokeIndexForHole(i);
+      if (strokeIndex > 0) {
+        holesWithStrokes.push({ holeIndex: i, strokeIndex: strokeIndex });
+      }
+    }
+
+    holesWithStrokes.sort((a, b) => a.strokeIndex - b.strokeIndex);
+
+    let remainingHandicap = playingHandicap;
+    for (let i = 0; i < 18; i++) {
+      if (remainingHandicap > 0) {
+        const hole = holesWithStrokes[i];
+        if (hole && hole.holeIndex > 9) {
           back9Strokes++;
         }
         remainingHandicap--;
@@ -148,63 +333,13 @@ const ScorecardEntry = () => {
     return grossBack9 - back9Strokes;
   };
 
-  const handleSubmitScores = async () => {
-    if (!selectedTournament || !selectedCourse || players.length === 0) {
-      alert("Please select a tournament and course, and ensure players are loaded.");
-      return;
-    }
-
-    const playersDataForSubmission = players.map(player => {
-      const playerHoleScores = {};
-      for (let i = 1; i <= 18; i++) {
-        playerHoleScores[i] = scores[player.id]?.[i] ? parseInt(scores[player.id][i]) : 0; // Default to 0 if no score entered
-      }
-
-      const summaryScores = {
-        front9Gross: calculateFront9Gross(player.id),
-        back9Gross: calculateBack9Gross(player.id),
-        overallGross: calculateGrossScore(player.id),
-        front9Nett: calculateFront9Net(player.id),
-        back9Nett: calculateBack9Net(player.id),
-        overallNett: calculateNetScore(player.id),
-        stablefordPoints: calculateTotalStablefordPoints(player.id),
-      };
-
-      return {
-        player_id: player.id,
-        hole_scores: playerHoleScores,
-        summary_scores: summaryScores,
-      };
-    });
-
-    try {
-      const response = await fetch('http://localhost:5000/submit_round', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tournament_id: selectedTournament,
-          course_id: selectedCourse,
-          players_data: playersDataForSubmission,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      alert(result.message);
-      // Optionally, clear scores or navigate away after successful submission
-      setScores({});
-
-    } catch (error) {
-      console.error("Error submitting scores:", error);
-      alert(`Failed to submit scores: ${error.message}`);
-    }
+  const calculateTotalStablefordPoints = (playerId) => {
+    // This is a placeholder. Actual Stableford calculation is complex and depends on net score per hole.
+    // For now, return a placeholder or 0.
+    return 'N/A';
   };
+
+
 
   return (
     <div className="scorecard-container">
@@ -272,6 +407,9 @@ const ScorecardEntry = () => {
 
       {selectedTournament && selectedCourse && players.length > 0 && (
         <div className="scorecard-grid-container">
+          {!roundInitiated && (
+            <button className="initiate-scoring-button" onClick={handleInitiateScoring}>Initiate Scoring</button>
+          )}
           <h3>Input Scores</h3>
           <table className="scorecard-table">
             <thead>
@@ -327,6 +465,7 @@ const ScorecardEntry = () => {
                         type="number"
                         value={scores[player.id]?.[i + 1] || ''}
                         onChange={(e) => handleScoreChange(player.id, i + 1, e.target.value)}
+                        disabled={!roundInitiated} // Re-add disabled attribute
                       />
                     </td>
                   ))}
@@ -341,7 +480,9 @@ const ScorecardEntry = () => {
               ))}
             </tbody>
           </table>
-          <button className="initiate-scoring-button" onClick={handleSubmitScores}>Initiate Scoring</button>
+          {roundInitiated && (
+            <button className="initiate-scoring-button" onClick={handleSubmitFinalScores}>Submit Scores</button>
+          )}
         </div>
       )}
     </div>
