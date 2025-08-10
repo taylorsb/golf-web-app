@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './TournamentManager.css';
 
 function TournamentManager() {
   const [tournaments, setTournaments] = useState([]);
@@ -206,7 +207,7 @@ function TournamentManager() {
   };
 
   return (
-    <div>
+    <div className="tournament-manager">
       <h1>Tournament Management</h1>
 
       <div>
@@ -247,8 +248,8 @@ function TournamentManager() {
       </ul>
 
       {editingTournament && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-          <div style={{ flex: 1, textAlign: 'center' }}>
+        <div className="assignment-section">
+          <div className="assignment-box">
             <h2>Assign Players to {editingTournament.name}</h2>
             <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
               {players.map((player) => (
@@ -265,24 +266,25 @@ function TournamentManager() {
             </div>
           </div>
 
-          <div style={{ flex: 1, textAlign: 'center' }}>
+          <div className="assignment-box">
             <h2>Assign Courses to {editingTournament.name}</h2>
             <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
               {courses.map((course) => (
-                <div key={course.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
+                <div key={course.id} className="course-assignment-row">
                   <span>{course.name}</span>
-                  <input
-                    type="number"
+                  <div>
+                    <input
+                      type="number"
                       placeholder="Order"
                       min="1"
-                    style={{ width: '50px', marginRight: '5px' }}
-                    id={`course-seq-${course.id}`}
-                  />
-                  <button
-                    onClick={() => handleAddCourseToPending(course, document.getElementById(`course-seq-${course.id}`).value)}
-                  >
-                    +
-                  </button>
+                      id={`course-seq-${course.id}`}
+                    />
+                    <button
+                      onClick={() => handleAddCourseToPending(course, document.getElementById(`course-seq-${course.id}`).value)}
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -291,10 +293,10 @@ function TournamentManager() {
       )}
 
       {editingTournament && (
-        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+        <div className="current-assignments-section">
           <h2>Current Assignments for {editingTournament.name}</h2>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
-            <div style={{ flex: 1, textAlign: 'center' }}>
+          <div className="current-assignments">
+            <div className="assignment-list">
               <h3>Assigned Players:</h3>
               <table border="1" style={{ width: '100%', margin: '0 auto' }}>
                 <thead>
@@ -324,7 +326,7 @@ function TournamentManager() {
               </table>
             </div>
 
-            <div style={{ flex: 1, textAlign: 'center' }}>
+            <div className="assignment-list">
               <h3>Assigned Courses:</h3>
               <table border="1" style={{ width: '100%', margin: '0 auto' }}>
                 <thead>
@@ -335,7 +337,7 @@ function TournamentManager() {
                   </tr>
                 </thead>
                 <tbody>
-                  {assignedCourses.map(course => (
+                  {[...assignedCourses].sort((a, b) => a.sequence_number - b.sequence_number).map(course => (
                     <tr key={`${course.id}-${course.sequence_number}`}>
                       <td>{course.name}</td>
                       <td>{course.sequence_number}</td>
@@ -344,7 +346,7 @@ function TournamentManager() {
                       </td>
                     </tr>
                   ))}
-                  {coursesToAdd.map(course => (
+                  {[...coursesToAdd].sort((a, b) => a.sequence_number - b.sequence_number).map(course => (
                     <tr key={`${course.id}-${course.sequence_number}`} style={{ backgroundColor: '#e0ffe0' }}>
                       <td>{course.name} (Pending Add)</td>
                       <td>{course.sequence_number}</td>
@@ -357,7 +359,7 @@ function TournamentManager() {
               </table>
             </div>
           </div>
-          <button onClick={handleSubmitChanges} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '1.2em' }}>Submit All Changes</button>
+          <button onClick={handleSubmitChanges} className="initiate-scoring-button" style={{ marginTop: '20px', padding: '10px 20px', fontSize: '1.2em' }}>Update Assignments</button>
           {successMessage && <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>}
         </div>
       )}

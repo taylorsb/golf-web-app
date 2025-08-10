@@ -1,0 +1,94 @@
+/* TournamentManager.css */
+
+.tournament-manager {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.assignment-section {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 800px;
+    margin-bottom: 20px;
+}
+
+.assignment-box {
+    width: 45%;
+    max-width: 350px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.assignment-box > div > div {
+    align-items: start;
+}
+
+.current-assignments-section {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+}
+
+.current-assignments {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
+}
+
+.assignment-list {
+    width: 45%;
+    max-width: 350px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.assignment-list table td {
+  vertical-align: top;
+}
+
+.course-assignment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.course-assignment-row span {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.course-assignment-row input {
+  width: 50px;
+  margin-right: 5px;
+}
+
+.course-assignment-row button {
+  width: 30px;
+}
+
+.initiate-scoring-button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin-top: 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.initiate-scoring-button:hover {
+  background-color: #45a049;
+}

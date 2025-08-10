@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './PlayerManager.css';
 
 const PlayerManager = () => {
   const [players, setPlayers] = useState([]);
@@ -58,7 +59,7 @@ const PlayerManager = () => {
   };
 
   return (
-    <div>
+    <div className="player-manager">
       <h1>Golf Players</h1>
 
       <div>
@@ -75,9 +76,9 @@ const PlayerManager = () => {
           onChange={(e) => setNewPlayerHandicap(e.target.value)}
         />
         {editingPlayer ? (
-          <button onClick={handleUpdatePlayer}>Update Player</button>
+          <button onClick={handleUpdatePlayer} className="initiate-scoring-button">Update Player</button>
         ) : (
-          <button onClick={handleAddPlayer}>Add Player</button>
+          <button onClick={handleAddPlayer} className="initiate-scoring-button">Add Player</button>
         )}
       </div>
 
@@ -86,8 +87,8 @@ const PlayerManager = () => {
         {players.map((player) => (
           <li key={player.id}>
             {player.name} (Handicap: {player.handicap})
-            <button onClick={() => handleEditClick(player)}>Edit</button>
-            <button onClick={() => handleDeletePlayer(player.id)}>Delete</button>
+            <button onClick={() => handleEditClick(player)} className="initiate-scoring-button">Edit</button>
+            <button onClick={() => handleDeletePlayer(player.id)} className="initiate-scoring-button">Delete</button>
           </li>
         ))}
       </ul>

@@ -1,0 +1,7 @@
+fix: Resolve scorecard display and submission issues
+
+Addresses several bugs related to scorecard display and score submission:
+- Corrected frontend logic to properly load and display existing hole scores when switching courses.
+- Optimized frontend data fetching for existing rounds by making a single API call.
+- Fixed backend `record_hole_scores` function to correctly initialize and accumulate summary scores, resolving `UnboundLocalError` and `NameError`.
+- Ensured `HoleScore` entries are updated (upserted) rather than always inserted.

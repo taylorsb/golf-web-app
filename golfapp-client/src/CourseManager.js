@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './CourseManager.css';
 
 function CourseManager() {
   const [courses, setCourses] = useState([]);
@@ -97,11 +98,11 @@ function CourseManager() {
   };
 
   return (
-    <div>
+    <div className="course-manager">
       <h2>Golf Courses</h2>
 
       {!showCourseForm && !editingCourse && (
-        <button onClick={() => setShowCourseForm(true)}>Add New Course</button>
+        <button onClick={() => setShowCourseForm(true)} className="initiate-scoring-button">Add New Course</button>
       )}
 
       {(showCourseForm || editingCourse) && (
@@ -148,11 +149,11 @@ function CourseManager() {
           </div>
 
           {editingCourse ? (
-            <button onClick={handleUpdateCourse}>Update Course</button>
+            <button onClick={handleUpdateCourse} className="initiate-scoring-button">Update Course</button>
           ) : (
-            <button onClick={handleAddCourse}>Add Course</button>
+            <button onClick={handleAddCourse} className="initiate-scoring-button">Add Course</button>
           )}
-          <button onClick={resetForm}>Cancel</button>
+          <button onClick={resetForm} className="initiate-scoring-button">Cancel</button>
         </div>
       )}
 
@@ -161,8 +162,8 @@ function CourseManager() {
         {courses.map((course) => (
           <li key={course.id}>
             {course.name} ({course.country}) - Slope: {course.slope_rating}
-            <button onClick={() => handleEditClick(course)}>Edit</button>
-            <button onClick={() => handleDeleteCourse(course.id)}>Delete</button>
+            <button onClick={() => handleEditClick(course)} className="initiate-scoring-button" style={{ marginLeft: '10px' }}>Edit</button>
+            <button onClick={() => handleDeleteCourse(course.id)} className="initiate-scoring-button">Delete</button>
           </li>
         ))}
       </ul>
