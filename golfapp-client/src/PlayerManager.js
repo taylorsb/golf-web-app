@@ -83,15 +83,17 @@ const PlayerManager = () => {
       </div>
 
       <h2>Players List</h2>
-      <ul>
-        {players.map((player) => (
-          <li key={player.id}>
-            {player.name} (Handicap: {player.handicap})
-            <button onClick={() => handleEditClick(player)} className="initiate-scoring-button">Edit</button>
-            <button onClick={() => handleDeletePlayer(player.id)} className="initiate-scoring-button">Delete</button>
-          </li>
-        ))}
-      </ul>
+      <table className="player-table">
+        <tbody>
+          {players.map((player) => (
+            <tr key={player.id}>
+              <td>{player.name} (Handicap: {player.handicap})</td>
+              <td><button onClick={() => handleEditClick(player)} className="initiate-scoring-button">Edit</button></td>
+              <td><button onClick={() => handleDeletePlayer(player.id)} className="initiate-scoring-button">Delete</button></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

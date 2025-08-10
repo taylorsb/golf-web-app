@@ -1,3 +1,51 @@
+.player-manager {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.player-manager h1,
+.player-manager h2 {
+  color: #333;
+}
+
+.player-manager div {
+  margin-bottom: 20px;
+}
+
+.player-manager input[type="text"],
+.player-manager input[type="number"] {
+  padding: 8px;
+  margin-right: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+/* Table styles */
+.player-table {
+  width: 600px; /* Fixed width for the table */
+  margin: 0 auto; /* Center the table */
+  border-collapse: collapse;
+  table-layout: fixed; /* Ensure column widths are respected */
+}
+
+.player-table td {
+  border: none; /* Make borders invisible */
+  padding: 8px; /* Adjust padding as needed */
+  text-align: center; /* Center content horizontally */
+  vertical-align: middle; /* Center content vertically */
+}
+
+.player-table td:nth-child(1) {
+  width: 70%; /* Increased width for name and handicap column */
+}
+
+.player-table td:nth-child(2),
+.player-table td:nth-child(3) {
+  width: 15%; /* Reduced width for edit and delete button columns */
+}
+
+/* Button styles (retained from previous) */
 .initiate-scoring-button {
   background-color: #4CAF50; /* Green */
   border: none;

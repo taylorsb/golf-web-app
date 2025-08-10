@@ -148,6 +148,7 @@ class Round(db.Model):
     date_played = db.Column(db.String(80), nullable=False) # Storing date as string
     player_handicap_index = db.Column(db.Float, nullable=True)
     player_playing_handicap = db.Column(db.Integer, nullable=True)
+    is_finalized = db.Column(db.Boolean, default=False, nullable=False)
 
     # Summary scores
     gross_score_front_9 = db.Column(db.Integer, nullable=True)
@@ -184,6 +185,7 @@ class Round(db.Model):
             'stableford_total': self.stableford_total,
             'player_handicap_index': self.player_handicap_index,
             'player_playing_handicap': self.player_playing_handicap,
+            'is_finalized': self.is_finalized, # New field
             'hole_scores': [score.to_dict() for score in self.hole_scores]
         }
 
@@ -634,6 +636,250 @@ def get_rounds_summary_for_tournament(tournament_id):
     
     return jsonify(rounds_data)
 
+@app.route('/tournaments/<int:tournament_id>/rounds/end', methods=['POST'])
+def end_round(tournament_id):
+    data = request.get_json()
+    round_number_to_end = data.get('round_number')
+
+    if round_number_to_end is None:
+        return jsonify({'error': 'Round number to end is required.'}), 400
+
+    # 1. Validation: Check if all players in the tournament have submitted scores for this round
+    #    and if it's the correct sequential round.
+
+    # Get all rounds for this tournament and the specified round_number
+    rounds_for_current_number = Round.query.filter_by(
+        tournament_id=tournament_id,
+        round_number=round_number_to_end
+    ).all()
+
+    if not rounds_for_current_number:
+        return jsonify({'error': f'No rounds found for tournament {tournament_id} and round number {round_number_to_end}.'}), 404
+
+    # Check if all players have submitted scores (stableford_total is not None)
+    for r in rounds_for_current_number:
+        if r.stableford_total is None:
+            return jsonify({'error': f'Scores not submitted for all players in round {round_number_to_end}. Player {r.player_id} is missing scores.'}), 400
+
+    # Check for sequential round submission
+    # Find the highest finalized round number for this tournament
+    highest_finalized_round = db.session.query(func.max(Round.round_number)).filter_by(
+        tournament_id=tournament_id,
+        is_finalized=True
+    ).scalar()
+
+    if highest_finalized_round is None: # No rounds finalized yet
+        if round_number_to_end != 1:
+            return jsonify({'error': 'First round to be finalized must be round number 1.'}), 400
+    else:
+        if round_number_to_end != highest_finalized_round + 1:
+            return jsonify({'error': f'Round {round_number_to_end} cannot be finalized. Expected round {highest_finalized_round + 1}.'}), 400
+
+    # 2. Handicap Calculation & Storage for next round
+    players_in_tournament = Player.query.join(Tournament.players).filter(Tournament.id == tournament_id).all()
+    next_round_number = round_number_to_end + 1
+    today = date.today().isoformat()
+
+    for player in players_in_tournament:
+        # Get the current round entry for this player
+        player_current_round = next((r for r in rounds_for_current_number if r.player_id == player.id), None)
+
+        if player_current_round:
+            stableford_score = player_current_round.stableford_total
+            current_handicap_index = player.handicap # Get player's current overall handicap
+
+            # Calculate new handicap index
+            new_handicap_index = calculate_new_handicap_index(current_handicap_index, stableford_score)
+
+            # Update player's overall handicap
+            player.handicap = new_handicap_index
+            db.session.add(player) # Mark player for update
+
+            # Create new Round entry for the next round, carrying forward the new handicap
+            # Check if a round for the next_round_number already exists for this player in this tournament
+            existing_next_round = Round.query.filter_by(
+                tournament_id=tournament_id,
+                player_id=player.id,
+                round_number=next_round_number
+            ).first()
+
+            if not existing_next_round:
+                # Determine the course for the next round based on sequence_number
+                # This assumes courses are added to tournaments with sequence numbers
+                next_course_association = db.session.query(tournament_courses.c.course_id).filter_by(
+                    tournament_id=tournament_id,
+                    sequence_number=next_round_number
+                ).first()
+
+                next_course_id = None
+                if next_course_association:
+                    next_course_id = next_course_association[0]
+                else:
+                    # If no next course is defined, the tournament might be over or not fully set up
+                    # For now, we'll just not create a new round if no next course.
+                    # In a real app, you might want to handle this more robustly (e.g., end tournament).
+                    print(f"No course found for tournament {tournament_id} at sequence {next_round_number}. Not creating next round for player {player.id}.")
+                    continue # Skip creating next round for this player if no course
+
+                # Calculate playing handicap for the next round based on the new handicap index
+                # This requires course slope rating. Assuming a default or fetching it.
+                # For simplicity, let's assume playing handicap is rounded new_handicap_index for now.
+                # A more accurate calculation would involve course slope and par.
+                # For now, let's just use the new_handicap_index as playing handicap for simplicity.
+                # This is a placeholder and needs proper implementation.
+                next_playing_handicap = round(new_handicap_index) # Placeholder
+
+                new_round_entry = Round(
+                    tournament_id=tournament_id,
+                    player_id=player.id,
+                    course_id=next_course_id,
+                    round_number=next_round_number,
+                    date_played=today,
+                    player_handicap_index=new_handicap_index,
+                    player_playing_handicap=next_playing_handicap,
+                    is_finalized=False # New round is not finalized
+                )
+                db.session.add(new_round_entry)
+            else:
+                # If next round already exists, update its handicap index and playing handicap
+                existing_next_round.player_handicap_index = new_handicap_index
+                existing_next_round.player_playing_handicap = round(new_handicap_index) # Placeholder
+                db.session.add(existing_next_round)
+
+    # 3. Mark current round as Finalized
+    for r in rounds_for_current_number:
+        r.is_finalized = True
+        db.session.add(r)
+
+    db.session.commit()
+    return jsonify({'message': f'Round {round_number_to_end} finalized and handicaps updated successfully!'}), 200
+
+@app.route('/rounds/<int:round_id>/reopen', methods=['POST'])
+def reopen_round(round_id):
+    round_to_reopen = Round.query.get_or_404(round_id)
+    if not round_to_reopen.is_finalized:
+        return jsonify({'error': 'Round is not finalized.'}), 400
+
+    round_to_reopen.is_finalized = False
+    db.session.add(round_to_reopen)
+    db.session.commit()
+    return jsonify({'message': f'Round {round_id} re-opened successfully!'}), 200
+    data = request.get_json()
+    round_number_to_end = data.get('round_number')
+
+    if round_number_to_end is None:
+        return jsonify({'error': 'Round number to end is required.'}), 400
+
+    # 1. Validation: Check if all players in the tournament have submitted scores for this round
+    #    and if it's the correct sequential round.
+
+    # Get all rounds for this tournament and the specified round_number
+    rounds_for_current_number = Round.query.filter_by(
+        tournament_id=tournament_id,
+        round_number=round_number_to_end
+    ).all()
+
+    if not rounds_for_current_number:
+        return jsonify({'error': f'No rounds found for tournament {tournament_id} and round number {round_number_to_end}.'}), 404
+
+    # Check if all players have submitted scores (stableford_total is not None)
+    for r in rounds_for_current_number:
+        if r.stableford_total is None:
+            return jsonify({'error': f'Scores not submitted for all players in round {round_number_to_end}. Player {r.player_id} is missing scores.'}), 400
+
+    # Check for sequential round submission
+    # Find the highest finalized round number for this tournament
+    highest_finalized_round = db.session.query(func.max(Round.round_number)).filter_by(
+        tournament_id=tournament_id,
+        is_finalized=True
+    ).scalar()
+
+    if highest_finalized_round is None: # No rounds finalized yet
+        if round_number_to_end != 1:
+            return jsonify({'error': 'First round to be finalized must be round number 1.'}), 400
+    else:
+        if round_number_to_end != highest_finalized_round + 1:
+            return jsonify({'error': f'Round {round_number_to_end} cannot be finalized. Expected round {highest_finalized_round + 1}.'}), 400
+
+    # 2. Handicap Calculation & Storage for next round
+    players_in_tournament = Player.query.join(Tournament.players).filter(Tournament.id == tournament_id).all()
+    next_round_number = round_number_to_end + 1
+    today = date.today().isoformat()
+
+    for player in players_in_tournament:
+        # Get the current round entry for this player
+        player_current_round = next((r for r in rounds_for_current_number if r.player_id == player.id), None)
+
+        if player_current_round:
+            stableford_score = player_current_round.stableford_total
+            current_handicap_index = player.handicap # Get player's current overall handicap
+
+            # Calculate new handicap index
+            new_handicap_index = calculate_new_handicap_index(current_handicap_index, stableford_score)
+
+            # Update player's overall handicap
+            player.handicap = new_handicap_index
+            db.session.add(player) # Mark player for update
+
+            # Create new Round entry for the next round, carrying forward the new handicap
+            # Check if a round for the next_round_number already exists for this player in this tournament
+            existing_next_round = Round.query.filter_by(
+                tournament_id=tournament_id,
+                player_id=player.id,
+                round_number=next_round_number
+            ).first()
+
+            if not existing_next_round:
+                # Determine the course for the next round based on sequence_number
+                # This assumes courses are added to tournaments with sequence numbers
+                next_course_association = db.session.query(tournament_courses.c.course_id).filter_by(
+                    tournament_id=tournament_id,
+                    sequence_number=next_round_number
+                ).first()
+
+                next_course_id = None
+                if next_course_association:
+                    next_course_id = next_course_association[0]
+                else:
+                    # If no next course is defined, the tournament might be over or not fully set up
+                    # For now, we'll just not create a new round if no next course.
+                    # In a real app, you might want to handle this more robustly (e.g., end tournament).
+                    print(f"No course found for tournament {tournament_id} at sequence {next_round_number}. Not creating next round for player {player.id}.")
+                    continue # Skip creating next round for this player if no course
+
+                # Calculate playing handicap for the next round based on the new handicap index
+                # This requires course slope rating. Assuming a default or fetching it.
+                # For simplicity, let's assume playing handicap is rounded new_handicap_index for now.
+                # A more accurate calculation would involve course slope and par.
+                # For now, let's just use the new_handicap_index as playing handicap for simplicity.
+                # This is a placeholder and needs proper implementation.
+                next_playing_handicap = round(new_handicap_index) # Placeholder
+
+                new_round_entry = Round(
+                    tournament_id=tournament_id,
+                    player_id=player.id,
+                    course_id=next_course_id,
+                    round_number=next_round_number,
+                    date_played=today,
+                    player_handicap_index=new_handicap_index,
+                    player_playing_handicap=next_playing_handicap,
+                    is_finalized=False # New round is not finalized
+                )
+                db.session.add(new_round_entry)
+            else:
+                # If next round already exists, update its handicap index and playing handicap
+                existing_next_round.player_handicap_index = new_handicap_index
+                existing_next_round.player_playing_handicap = round(new_handicap_index) # Placeholder
+                db.session.add(existing_next_round)
+
+    # 3. Mark current round as Finalized
+    for r in rounds_for_current_number:
+        r.is_finalized = True
+        db.session.add(r)
+
+    db.session.commit()
+    return jsonify({'message': f'Round {round_number_to_end} finalized and handicaps updated successfully!'}), 200
+
 def calculate_stableford_points(hole_par, player_handicap, hole_stroke_index, gross_score):
     # This is a simplified Stableford calculation. 
     # Real Stableford calculation is more complex and depends on course rating, slope, etc.
@@ -672,6 +918,22 @@ def calculate_stableford_points(hole_par, player_handicap, hole_stroke_index, gr
         return 1  # Bogey
     else:
         return 0  # Double Bogey or worse
+
+def calculate_new_handicap_index(current_handicap_index, stableford_score):
+    # Find the adjustment value based on the stableford_score
+    # This assumes a direct lookup. If interpolation or ranges are needed, this logic will be more complex.
+    adjustment_entry = HandicapAdjustment.query.filter_by(stableford_score=stableford_score).first()
+
+    if adjustment_entry:
+        adjustment_value = adjustment_entry.adjustment
+        new_handicap_index = current_handicap_index + adjustment_value
+        # Ensure handicap index doesn't go below a certain minimum if applicable (e.g., 0 or -ve)
+        # For now, no minimum enforced.
+        return new_handicap_index
+    else:
+        # If no specific adjustment found for the score, return original handicap or handle as error
+        # For now, return original handicap if no adjustment found
+        return current_handicap_index
 
 # New Model for Handicap Adjustments
 class HandicapAdjustment(db.Model):

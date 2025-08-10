@@ -1,3 +1,51 @@
+.course-manager {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.course-manager h2,
+.course-manager h3 {
+  color: #333;
+}
+
+.course-manager input[type="text"],
+.course-manager input[type="number"] {
+  padding: 8px;
+  margin-right: 10px;
+  margin-bottom: 10px; /* Added margin-bottom for inputs */
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+/* Table styles */
+.course-table {
+  width: 700px; /* Fixed width for the table */
+  margin: 0 auto; /* Center the table */
+  border-collapse: collapse;
+  table-layout: fixed; /* Ensure column widths are respected */
+}
+
+.course-table td {
+  border: none; /* Make borders invisible */
+  padding: 8px; /* Adjust padding as needed */
+  text-align: center; /* Center content horizontally */
+  vertical-align: middle; /* Center content vertically */
+}
+
+.course-table td:nth-child(1) {
+  width: 70%; /* Reduced width for name and details column to bring buttons closer */
+}
+
+.course-table td:nth-child(2) {
+  width: 22%; /* Increased width to shift button left */
+}
+
+.course-table td:nth-child(3) {
+  width: 8%; /* Keep same width */
+}
+
+/* Button styles (retained from previous) */
 .initiate-scoring-button {
   background-color: #4CAF50; /* Green */
   border: none;

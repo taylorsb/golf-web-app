@@ -1,8 +1,9 @@
 .scorecard-container {
   padding: 10px;
+  padding-top: 70px; /* Increased padding-top to clear menu */
   font-family: Arial, sans-serif;
   font-size: 0.9em; /* Overall larger font size for the container */
-  margin-top: 80px; /* Reduced margin-top to move content higher */
+  margin-top: 0px; /* Removed margin-top */
 }
 
 .scorecard-container h2 {
@@ -15,7 +16,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr; /* Two equal columns */
   gap: 0px; /* Reduced space between columns and rows */
-  margin-bottom: 20px;
+  margin-bottom: 10px; /* Reduced margin */
   justify-items: center; /* Center the items within the grid */
 }
 
@@ -56,9 +57,9 @@
 .scorecard-table th,
 .scorecard-table td {
   border: 1px solid #ddd;
-  padding: 3px; /* Slightly increased padding */
+  padding: 2px; /* Reduced padding */
   text-align: center;
-  font-size: 0.9em; /* Increased font size for table cells */
+  font-size: 0.8em; /* Reduced font size for table cells */
   white-space: normal; /* Allow text wrapping in headers/cells */
 }
 
@@ -79,16 +80,16 @@
 .scorecard-table input[type="number"],
 .stableford-value,
 .summary-value {
-  width: 35px; /* Slightly larger width */
-  padding: 5px; /* Increased padding */
-  font-size: 1.1em; /* Increased font size */
+  width: 30px; /* Reduced width */
+  padding: 2px; /* Reduced padding */
+  font-size: 0.9em; /* Reduced font size */
   border: 1px solid #ccc;
   border-radius: 2px;
   text-align: center;
-  display: inline-block; /* Ensure span behaves like a block for width/padding */
-  box-sizing: border-box; /* Include padding and border in the element's total width and height */
-  height: 28px; /* Explicit height */
-  line-height: 18px; /* Adjust line-height to vertically center text */
+  display: inline-block;
+  box-sizing: border-box;
+  height: 24px; /* Reduced height */
+  line-height: 20px; /* Adjusted line-height */
 }
 
 /* Hide spin buttons for Chrome, Safari, Edge */
@@ -100,16 +101,16 @@
 
 .details-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(150px, 1fr)); /* Adjusted for narrower columns */
-  gap: 10px; /* Reduced gap */
-  margin-top: 10px; /* Already reduced */
+  grid-template-columns: repeat(3, minmax(120px, 1fr)); /* Further adjusted for narrower columns */
+  gap: 5px; /* Further reduced gap */
+  margin-top: 5px; /* Reduced margin */
 }
 
 .tournament-details,
 .course-details,
 .player-handicaps {
   border: 1px solid #ddd;
-  padding: 5px; /* Already reduced */
+  padding: 3px; /* Further reduced padding */
   border-radius: 5px;
   background-color: #f9f9f9;
 }
@@ -123,9 +124,9 @@
 .player-handicaps th,
 .player-handicaps td {
   border: 1px solid #eee;
-  padding: 4px; /* Already reduced */
+  padding: 2px; /* Further reduced padding */
   text-align: left;
-  font-size: 0.9em; /* Increased font size */
+  font-size: 0.8em; /* Slightly smaller font size */
 }
 
 .player-handicaps th {
@@ -140,7 +141,10 @@
   width: 60%; /* Adjust width for handicap details column */
 }
 
-.initiate-scoring-button {
+.initiate-scoring-button,
+.submit-scores-button,
+.end-round-button {
+  margin-right: 10px; /* Add some space between buttons */
   background-color: #4CAF50; /* Green */
   border: none;
   color: white;
@@ -179,8 +183,8 @@
 }
 
 .scorecard-color-key {
-  margin-bottom: 15px;
-  padding: 10px;
+  margin-bottom: 5px; /* Reduced margin */
+  padding: 5px; /* Reduced padding */
   border: 1px solid #ddd;
   border-radius: 5px;
   background-color: #f9f9f9;
@@ -189,8 +193,8 @@
 
 .scorecard-color-key h4 {
   margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 1.1em;
+  margin-bottom: 5px; /* Reduced margin */
+  font-size: 1.0em; /* Slightly smaller heading */
   color: #333;
 }
 
@@ -200,7 +204,7 @@
   margin: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 8px; /* Reduced gap */
   justify-content: center;
 }
 

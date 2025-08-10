@@ -158,15 +158,17 @@ function CourseManager() {
       )}
 
       <h3>Courses List</h3>
-      <ul>
-        {courses.map((course) => (
-          <li key={course.id}>
-            {course.name} ({course.country}) - Slope: {course.slope_rating}
-            <button onClick={() => handleEditClick(course)} className="initiate-scoring-button" style={{ marginLeft: '10px' }}>Edit</button>
-            <button onClick={() => handleDeleteCourse(course.id)} className="initiate-scoring-button">Delete</button>
-          </li>
-        ))}
-      </ul>
+      <table className="course-table">
+        <tbody>
+          {courses.map((course) => (
+            <tr key={course.id}>
+              <td>{course.name} ({course.country}) - Slope: {course.slope_rating}</td>
+              <td><button onClick={() => handleEditClick(course)} className="initiate-scoring-button">Edit</button></td>
+              <td><button onClick={() => handleDeleteCourse(course.id)} className="initiate-scoring-button">Delete</button></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
