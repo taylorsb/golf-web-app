@@ -446,6 +446,7 @@ def get_rounds():
     tournament_id = request.args.get('tournament_id', type=int)
     player_id = request.args.get('player_id', type=int)
     course_id = request.args.get('course_id', type=int)
+    sequence_number = request.args.get('sequence_number', type=int)
     player_id_str = request.args.get('player_ids')
 
     from sqlalchemy.orm import joinedload
@@ -457,6 +458,8 @@ def get_rounds():
         query = query.filter_by(player_id=player_id)
     if course_id:
         query = query.filter_by(course_id=course_id)
+    if sequence_number:
+        query = query.filter_by(round_number=sequence_number)
     if player_id_str:
         player_ids = [int(pid) for pid in player_id_str.split(',')]
         query = query.filter(Round.player_id.in_(player_ids))
@@ -570,10 +573,11 @@ def initiate_round():
     data = request.get_json()
     tournament_id = data.get('tournament_id')
     course_id = data.get('course_id')
+    sequence_number = data.get('sequence_number') # Retrieve sequence_number from request
     players_data = data.get('players_data', [])
 
-    if not tournament_id or not course_id or not players_data:
-        return jsonify({'error': 'Missing tournament_id, course_id, or players_data'}), 400
+    if not tournament_id or not course_id or not players_data or sequence_number is None:
+        return jsonify({'error': 'Missing tournament_id, course_id, sequence_number, or players_data'}), 400
 
     today = date.today().isoformat()
 
@@ -588,11 +592,12 @@ def initiate_round():
 
         # Determine the next round number for this player in this tournament/course
         # This is now the sequence number of the course in the tournament
-        course_sequence = db.session.query(tournament_courses.c.sequence_number).filter_by(
+        course_sequence_result = db.session.query(tournament_courses.c.sequence_number).filter_by(
             tournament_id=tournament_id,
-            course_id=course_id
-        ).scalar()
-        round_number = course_sequence if course_sequence is not None else 1 # Default to 1 if not found or not set
+            course_id=course_id,
+            sequence_number=sequence_number # Filter by sequence_number
+        ).first()
+        round_number = course_sequence_result[0] if course_sequence_result is not None else 1
         
 
         new_round = Round(

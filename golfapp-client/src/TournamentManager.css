@@ -7,6 +7,11 @@
     align-items: center;
 }
 
+.tournament-manager .initiate-scoring-button {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
 .assignment-section {
     display: flex;
     justify-content: center;

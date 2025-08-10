@@ -230,9 +230,9 @@ function TournamentManager() {
           onChange={(e) => setNewTournamentLocation(e.target.value)}
         />
         {editingTournament ? (
-          <button onClick={handleUpdateTournament}>Update Tournament</button>
+          <button onClick={handleUpdateTournament} className="initiate-scoring-button">Update Tournament</button>
         ) : (
-          <button onClick={handleAddTournament}>Add Tournament</button>
+          <button onClick={handleAddTournament} className="initiate-scoring-button">Add Tournament</button>
         )}
       </div>
 
@@ -241,8 +241,8 @@ function TournamentManager() {
         {tournaments.map((tournament) => (
           <li key={tournament.id}>
             {tournament.name} ({tournament.date}, {tournament.location})
-            <button onClick={() => handleEditClick(tournament)}>Edit</button>
-            <button onClick={() => handleDeleteTournament(tournament.id)}>Delete</button>
+            <button onClick={() => handleEditClick(tournament)} className="initiate-scoring-button">Edit</button>
+            <button onClick={() => handleDeleteTournament(tournament.id)} className="initiate-scoring-button">Delete</button>
           </li>
         ))}
       </ul>

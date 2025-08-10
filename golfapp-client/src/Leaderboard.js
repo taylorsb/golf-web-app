@@ -6,6 +6,7 @@ const Leaderboard = () => {
   const [selectedTournament, setSelectedTournament] = useState('');
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState('');
+  const [selectedCourseSequence, setSelectedCourseSequence] = useState(null);
   const [allRoundsData, setAllRoundsData] = useState([]); // Raw data from backend
   const [displayedLeaderboard, setDisplayedLeaderboard] = useState([]); // Processed and sorted data
   const [sortColumn, setSortColumn] = useState('roundStablefordPoints'); // Default sort
@@ -40,9 +41,13 @@ const Leaderboard = () => {
           const data = await response.json();
           setCourses(data);
           if (data.length > 0) {
-            setSelectedCourse(data[0].id);
+            // Sort courses by sequence_number
+            const sortedCourses = [...data].sort((a, b) => a.sequence_number - b.sequence_number);
+            setSelectedCourse(sortedCourses[0].id);
+            setSelectedCourseSequence(sortedCourses[0].sequence_number);
           } else {
             setSelectedCourse(''); // No courses for this tournament
+            setSelectedCourseSequence(null);
           }
         } catch (error) {
           console.error('Error fetching courses:', error);
@@ -91,8 +96,11 @@ const Leaderboard = () => {
 
       // Then, filter rounds based on selected course for display
       let roundsToDisplay = allRoundsData;
-      if (selectedCourse) {
-        roundsToDisplay = allRoundsData.filter(round => round.course_id === selectedCourse);
+      if (selectedCourse && selectedCourseSequence !== null) {
+        roundsToDisplay = allRoundsData.filter(round => 
+          round.course_id === selectedCourse && 
+          round.round_number === selectedCourseSequence // Assuming round_number stores sequence
+        );
       }
 
       // Now, combine the filtered rounds with the tournament aggregates
@@ -130,7 +138,7 @@ const Leaderboard = () => {
     };
 
     processLeaderboardData();
-  }, [allRoundsData, selectedCourse, sortColumn, sortDirection]);
+  }, [allRoundsData, selectedCourse, selectedCourseSequence, sortColumn, sortDirection]);
 
   const handleTournamentChange = (event) => {
     setSelectedTournament(event.target.value);
@@ -138,7 +146,15 @@ const Leaderboard = () => {
   };
 
   const handleCourseChange = (event) => {
-    setSelectedCourse(parseInt(event.target.value));
+    const value = event.target.value;
+    if (value === "") {
+      setSelectedCourse('');
+      setSelectedCourseSequence(null);
+    } else {
+      const [courseId, sequenceNumber] = value.split('-');
+      setSelectedCourse(parseInt(courseId));
+      setSelectedCourseSequence(parseInt(sequenceNumber));
+    }
   };
 
   const handleSort = (column) => {
@@ -169,10 +185,10 @@ const Leaderboard = () => {
         {selectedTournament && (
           <>
             <label htmlFor="course-select">Golf Course:</label>
-            <select id="course-select" onChange={handleCourseChange} value={selectedCourse} disabled={courses.length === 0}>
+            <select id="course-select" onChange={handleCourseChange} value={selectedCourse && selectedCourseSequence !== null ? `${selectedCourse}-${selectedCourseSequence}` : ""} disabled={courses.length === 0}>
               <option value="">All Courses</option>
               {courses.map((course) => (
-                <option key={course.id} value={course.id}>
+                <option key={`${course.id}-${course.sequence_number}`} value={`${course.id}-${course.sequence_number}`}>
                   {course.name} - {course.sequence_number}
                 </option>
               ))}
