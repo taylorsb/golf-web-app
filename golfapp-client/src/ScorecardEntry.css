@@ -1,14 +1,14 @@
 .scorecard-container {
   padding: 10px;
   font-family: Arial, sans-serif;
-  font-size: 0.8em; /* Overall smaller font size for the container */
+  font-size: 0.9em; /* Overall larger font size for the container */
   margin-top: 80px; /* Reduced margin-top to move content higher */
 }
 
 .scorecard-container h2 {
   color: #333;
   margin-bottom: 10px;
-  font-size: 1.2em; /* Smaller heading */
+  font-size: 1.3em; /* Slightly larger heading */
 }
 
 .dropdown-grid {
@@ -35,7 +35,7 @@
   padding: 8px;
   border-radius: 5px;
   border: 1px solid #ddd;
-  font-size: 1em;
+  font-size: 1.1em;
   width: 80%; /* Reduced width */
   max-width: 250px; /* Max width to prevent excessive widening */
   box-sizing: border-box;
@@ -56,9 +56,9 @@
 .scorecard-table th,
 .scorecard-table td {
   border: 1px solid #ddd;
-  padding: 2px; /* Reduced padding */
+  padding: 3px; /* Slightly increased padding */
   text-align: center;
-  font-size: 0.7em; /* Smaller font size for table cells */
+  font-size: 0.9em; /* Increased font size for table cells */
   white-space: normal; /* Allow text wrapping in headers/cells */
 }
 
@@ -79,16 +79,16 @@
 .scorecard-table input[type="number"],
 .stableford-value,
 .summary-value {
-  width: 30px; /* Even smaller width */
-  padding: 4px;
-  font-size: 0.7em;
+  width: 35px; /* Slightly larger width */
+  padding: 5px; /* Increased padding */
+  font-size: 1.1em; /* Increased font size */
   border: 1px solid #ccc;
   border-radius: 2px;
   text-align: center;
   display: inline-block; /* Ensure span behaves like a block for width/padding */
   box-sizing: border-box; /* Include padding and border in the element's total width and height */
-  height: 24px; /* Explicit height */
-  line-height: 16px; /* Adjust line-height to vertically center text */
+  height: 28px; /* Explicit height */
+  line-height: 18px; /* Adjust line-height to vertically center text */
 }
 
 /* Hide spin buttons for Chrome, Safari, Edge */
@@ -125,7 +125,7 @@
   border: 1px solid #eee;
   padding: 4px; /* Already reduced */
   text-align: left;
-  font-size: 0.8em; /* Already reduced */
+  font-size: 0.9em; /* Increased font size */
 }
 
 .player-handicaps th {
@@ -156,4 +156,24 @@
 
 .initiate-scoring-button:hover {
   background-color: #45a049;
+}
+
+.eagle-score {
+  background-color: yellow;
+}
+
+.birdie-score {
+  background-color: red;
+}
+
+.bogey-score {
+  background-color: blue;
+}
+
+.double-bogey-score {
+  background-color: grey;
+}
+
+.worse-than-double-bogey-score {
+  background-color: purple;
 }

@@ -348,9 +348,28 @@ const ScorecardEntry = () => {
     return hole ? hole.stroke_index : 0; // Return 0 or appropriate default if not found
   };
 
-  
+  const getScoreClass = (grossScore, par) => {
+    if (grossScore === '' || isNaN(grossScore) || par === '' || isNaN(par)) {
+      return ''; // No class if score or par is not a valid number
+    }
 
+    const scoreDiff = grossScore - par;
 
+    if (scoreDiff <= -2) {
+      return 'eagle-score'; // Yellow
+    } else if (scoreDiff === -1) {
+      return 'birdie-score'; // Red
+    } else if (scoreDiff === 0) {
+      return ''; // No color for par
+    } else if (scoreDiff === 1) {
+      return 'bogey-score'; // Blue
+    } else if (scoreDiff === 2) {
+      return 'double-bogey-score'; // Grey
+    } else if (scoreDiff > 2) {
+      return 'worse-than-double-bogey-score'; // Purple
+    }
+    return '';
+  };
 
   return (
     <div className="scorecard-container">
@@ -474,6 +493,7 @@ const ScorecardEntry = () => {
                     <td key={`${player.id}-hole-${i + 1}`}>
                       <input
                         type="number"
+                        className={getScoreClass(parseInt(scores[player.id]?.[i + 1]), holeData[i]?.par)}
                         value={scores[player.id]?.[i + 1] || ''}
                         onChange={(e) => handleScoreChange(player.id, i + 1, e.target.value)}
                         disabled={!roundInitiated} // Re-add disabled attribute
