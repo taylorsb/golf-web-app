@@ -7,6 +7,7 @@ import CourseManager from './CourseManager';
 import TournamentManager from './TournamentManager';
 import ScorecardEntry from './ScorecardEntry';
 import Leaderboard from './Leaderboard';
+import HandicapAdjustmentManager from './HandicapAdjustmentManager';
 import backgroundImage from './theopenimage.jpg'; // Import the image
 
 function Home() {
@@ -46,6 +47,7 @@ function App() {
           <Route path="/courses" element={<CourseManager />} />
           <Route path="/tournaments" element={<TournamentManager />} />
           <Route path="/tournaments/scorecard-entry" element={<ScorecardEntry />} />
+          <Route path="/handicap-adjustments" element={<HandicapAdjustmentManager />} />
         </Routes>
       </div>
     </Router>

@@ -1,0 +1,108 @@
+.handicap-adjustment-manager {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.handicap-adjustment-manager h1,
+.handicap-adjustment-manager h2 {
+    text-align: center;
+    width: 100%;
+    font-size: 1.5em; /* Smaller font size */
+    margin-bottom: 10px; /* Reduced margin */
+}
+
+.adjustment-form { /* New style for the form container */
+    display: flex;
+    gap: 5px; /* Reduced gap */
+    margin-bottom: 10px; /* Reduced margin */
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 800px; /* Limit form width */
+}
+
+.handicap-adjustment-manager input[type="number"] {
+    padding: 5px; /* Reduced padding */
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 0.9em; /* Reduced font size */
+    text-align: center;
+}
+
+.adjustments-display-grid { /* New grid container for columns */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Three equal columns */
+    gap: 10px; /* Reduced space between columns */
+    width: 100%;
+    max-width: 900px; /* Limit overall width of the grid */
+    margin-top: 10px; /* Reduced margin */
+}
+
+.adjustment-column { /* Style for each column */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.adjustment-column table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.adjustment-column th,
+.adjustment-column td {
+    border: 1px solid #ddd;
+    padding: 2px 4px; /* Further reduced padding */
+    text-align: center;
+    font-size: 0.8em; /* Even smaller font for compression */
+}
+
+.adjustment-column th {
+    background-color: #f2f2f2;
+}
+
+.initiate-scoring-button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.initiate-scoring-button:hover {
+  background-color: #45a049;
+}
+
+.handicap-adjustment-manager .initiate-scoring-button {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.table-action-button {
+    background-color: #f8f8f8; /* Very light grey */
+    color: black; /* Change text color to black for contrast */
+    border: 1px solid #ccc; /* Add a light border */
+    padding: 3px 8px;
+    font-size: 0.8em;
+    cursor: pointer;
+    border-radius: 3px;
+    margin: 0 2px; /* Small margin between buttons */
+}
+
+.table-action-button.delete {
+    background-color: #f8f8f8; /* Very light grey */
+    color: black; /* Change text color to black for contrast */
+    border: 1px solid #ccc; /* Add a light border */
+}
+
+.table-action-button:hover {
+    opacity: 0.9;
+}

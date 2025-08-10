@@ -672,3 +672,60 @@ def calculate_stableford_points(hole_par, player_handicap, hole_stroke_index, gr
         return 1  # Bogey
     else:
         return 0  # Double Bogey or worse
+
+# New Model for Handicap Adjustments
+class HandicapAdjustment(db.Model):
+    stableford_score = db.Column(db.Integer, primary_key=True)
+    adjustment = db.Column(db.Float, nullable=False)
+
+    def __repr__(self):
+        return f'<HandicapAdjustment {self.stableford_score}: {self.adjustment}>'
+
+    def to_dict(self):
+        return {
+            'stableford_score': self.stableford_score,
+            'adjustment': self.adjustment
+        }
+
+# New API Endpoints for Handicap Adjustments
+@app.route('/handicap_adjustments', methods=['GET'])
+def get_handicap_adjustments():
+    adjustments = HandicapAdjustment.query.all()
+    return jsonify([adj.to_dict() for adj in adjustments])
+
+@app.route('/handicap_adjustments', methods=['POST'])
+def add_handicap_adjustment():
+    data = request.get_json()
+    if not data or 'stableford_score' not in data or 'adjustment' not in data:
+        return jsonify({'error': 'Stableford score and adjustment are required'}), 400
+
+    # Check if an adjustment for this score already exists
+    existing_adjustment = HandicapAdjustment.query.get(data['stableford_score'])
+    if existing_adjustment:
+        return jsonify({'error': 'Adjustment for this Stableford score already exists'}), 409 # Conflict
+
+    new_adjustment = HandicapAdjustment(
+        stableford_score=data['stableford_score'],
+        adjustment=data['adjustment']
+    )
+    db.session.add(new_adjustment)
+    db.session.commit()
+    return jsonify(new_adjustment.to_dict()), 201
+
+@app.route('/handicap_adjustments/<int:stableford_score>', methods=['PUT'])
+def update_handicap_adjustment(stableford_score):
+    adjustment = HandicapAdjustment.query.get_or_404(stableford_score)
+    data = request.get_json()
+
+    if 'adjustment' in data:
+        adjustment.adjustment = data['adjustment']
+    
+    db.session.commit()
+    return jsonify(adjustment.to_dict())
+
+@app.route('/handicap_adjustments/<int:stableford_score>', methods=['DELETE'])
+def delete_handicap_adjustment(stableford_score):
+    adjustment = HandicapAdjustment.query.get_or_404(stableford_score)
+    db.session.delete(adjustment)
+    db.session.commit()
+    return '', 204

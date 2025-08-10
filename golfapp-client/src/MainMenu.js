@@ -23,6 +23,9 @@ const MainMenu = () => {
             </li>
           </ul>
         </li>
+        <li>
+          <Link to="/handicap-adjustments">Hcp Adjust</Link>
+        </li>
       </ul>
     </nav>
   );
