@@ -437,6 +437,16 @@ const ScorecardEntry = () => {
 
       {selectedTournament && selectedCourse && players.length > 0 && (
         <div className="scorecard-grid-container">
+          <div className="scorecard-color-key">
+            <h4>Scorecard Color Key:</h4>
+            <ul>
+              <li><span className="eagle-score-key"></span> Eagle or Better</li>
+              <li><span className="birdie-score-key"></span> Birdie</li>
+              <li><span className="bogey-score-key"></span> Bogey</li>
+              <li><span className="double-bogey-score-key"></span> Double Bogey</li>
+              <li><span className="worse-than-double-bogey-score-key"></span> Worse than Double Bogey</li>
+            </ul>
+          </div>
           {!isLoadingRounds && !roundInitiated && (
             <button className="initiate-scoring-button" onClick={handleInitiateScoring}>Initiate Scoring</button>
           )}

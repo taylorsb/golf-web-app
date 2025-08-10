@@ -159,21 +159,81 @@
 }
 
 .eagle-score {
-  background-color: yellow;
+  background-color: #FFFFCC;
 }
 
 .birdie-score {
-  background-color: red;
+  background-color: #FFCCCC;
 }
 
 .bogey-score {
-  background-color: blue;
+  background-color: #CCEEFF;
 }
 
 .double-bogey-score {
-  background-color: grey;
+  background-color: #EEEEEE;
 }
 
 .worse-than-double-bogey-score {
-  background-color: purple;
+  background-color: #E0CCFF;
+}
+
+.scorecard-color-key {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  font-size: 0.8em;
+}
+
+.scorecard-color-key h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.scorecard-color-key ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+.scorecard-color-key li {
+  display: flex;
+  align-items: center;
+}
+
+.scorecard-color-key span {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #ccc;
+  margin-right: 8px;
+  border-radius: 3px;
+}
+
+.eagle-score-key {
+  background-color: #FFFFCC;
+}
+
+.birdie-score-key {
+  background-color: #FFCCCC;
+}
+
+.bogey-score-key {
+  background-color: #CCEEFF;
+}
+
+.double-bogey-score-key {
+  background-color: #EEEEEE;
+}
+
+.worse-than-double-bogey-score-key {
+  background-color: #E0CCFF;
 }
