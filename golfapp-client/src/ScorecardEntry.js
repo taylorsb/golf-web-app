@@ -201,21 +201,20 @@ const ScorecardEntry = () => {
   };
 
   const handleReopenRound = async () => {
-    // Assuming all players in a round have the same round_id for a given sequence
-    // We can take any player's round_id from the roundIds state
-    const anyPlayerId = Object.keys(roundIds)[0];
-    if (!anyPlayerId) {
-      alert("No round found to re-open.");
+    if (!selectedTournament || !selectedCourseSequence) {
+      alert("Please select a tournament and a course sequence to re-open the round.");
       return;
     }
-    const roundIdToReopen = roundIds[anyPlayerId];
 
     try {
-      const response = await fetch(`http://localhost:5000/rounds/${roundIdToReopen}/reopen`, {
+      const response = await fetch(`http://localhost:5000/tournaments/${selectedTournament}/rounds/reopen_all`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          sequence_number: selectedCourseSequence,
+        }),
       });
 
       if (!response.ok) {
@@ -232,16 +231,10 @@ const ScorecardEntry = () => {
       console.log('handleReopenRound: isCurrentRoundFinalized set to', false);
       setUpdatedPlayerHandicaps({}); // Clear updated handicaps display
 
-      // Re-fetch existing scores and hole data to refresh the state
-      // This will re-populate scores and summaries, and ensure roundInitiated is true
-      // based on the re-opened round's status.
-      // This part is a bit tricky as useEffect might not re-run immediately
-      // if selectedCourse, selectedCourseSequence, selectedTournament, players haven't changed.
-      // A simple way is to re-trigger the fetchHoleDataAndExistingScores logic.
-      // For now, relying on setRoundInitiated(true) to enable input.
-      // A full re-fetch might be needed for complete state consistency.
-      
-
+      // Force re-fetch of round data to synchronize state with backend
+      if (selectedCourse && selectedCourseSequence && selectedTournament && players.length > 0) {
+        fetchHoleDataAndExistingScores();
+      }
 
     } catch (error) {
       console.error("Error re-opening round:", error);
@@ -312,130 +305,150 @@ const ScorecardEntry = () => {
     }
   }, [selectedTournament]);
 
-  const [isLoadingRounds, setIsLoadingRounds] = useState(true); // New state for loading indicator
-
   useEffect(() => {
     if (selectedCourse && selectedCourseSequence && selectedTournament && players.length > 0) {
-      const fetchHoleDataAndExistingScores = async () => {
-        try {
-          setIsLoadingRounds(true); // Set loading to true at the start
-          // Aggressively clear states for a clean slate on each course/tournament/player change
-          setScores({});
-          setSubmittedSummaryScores({});
-          setRoundIds({});
-          setRoundInitiated(false);
-          setIsCurrentRoundFinalized(false); // Clear finalized status
-          setRoundPlayerHandicaps({}); // Clear round-specific handicaps
-
-          console.log('useEffect: selectedCourse changed', { selectedCourse, selectedCourseSequence, selectedTournament, players });
-
-          // Fetch hole data (par, stroke index)
-          const holeDataResponse = await fetch(`http://localhost:5000/courses/${selectedCourse}/holes`);
-          if (!holeDataResponse.ok) {
-            throw new Error(`HTTP error! status: ${holeDataResponse.status}`);
-          }
-          const data = await holeDataResponse.json();
-          const sortedHoleData = data.sort((a, b) => (a.sequence || a.hole_number) - (b.sequence || b.hole_number));
-          setHoleData(sortedHoleData);
-
-          const newRoundIds = {};
-          const fetchedScores = {};
-          const fetchedSummaries = {};
-          let allPlayersHaveExistingRound = true; // Renamed for clarity
-
-          // Collect all player IDs for a single API call
-          const playerIds = players.map(p => p.id);
-          const playerIdsString = playerIds.join(',');
-
-          // Fetch all existing rounds for all players in a single API call
-          console.log(`Fetching existing rounds for players: ${playerIdsString}, course ${selectedCourse}, sequence ${selectedCourseSequence}, tournament ${selectedTournament}`);
-          const allExistingRoundsResponse = await fetch(`http://localhost:5000/rounds?tournament_id=${selectedTournament}&player_ids=${playerIdsString}&course_id=${selectedCourse}&sequence_number=${selectedCourseSequence}`);
-          if (!allExistingRoundsResponse.ok) {
-            console.error("Error fetching all existing rounds.");
-            allPlayersHaveExistingRound = false; // If fetch itself fails, assume no rounds for any player
-          }
-          const allExistingRounds = allExistingRoundsResponse.ok ? await allExistingRoundsResponse.json() : [];
-          console.log('All existing rounds fetched:', allExistingRounds);
-
-          // Process existing rounds for each player
-          for (const player of players) {
-            // Initialize for each player
-            fetchedScores[player.id] = {};
-            fetchedSummaries[player.id] = {};
-
-            const existingRound = allExistingRounds.find(r => r.player_id === player.id && r.round_number === selectedCourseSequence);
-
-            if (existingRound) {
-              newRoundIds[player.id] = existingRound.id;
-              console.log(`Found existing round ${existingRound.id} for player ${player.id} (Sequence: ${selectedCourseSequence}). Using embedded hole scores.`);
-              const playerHoleScores = {};
-              existingRound.hole_scores.forEach(hs => {
-                playerHoleScores[hs.hole_number] = hs.gross_score;
-              });
-              fetchedScores[player.id] = playerHoleScores;
-              fetchedSummaries[player.id] = existingRound; // Store the whole round object for summaries
-
-              // Store round-specific handicaps
-              setRoundPlayerHandicaps(prev => ({
-                ...prev,
-                [player.id]: {
-                  handicap_index: existingRound.handicap_index,
-                  playing_handicap: existingRound.playing_handicap,
-                }
-              }));
-              console.log(`Stored round-specific handicaps for player ${player.id}: Index=${existingRound.handicap_index}, Playing=${existingRound.playing_handicap}`);
-
-              // Set finalized status if this round is finalized
-              if (existingRound.is_finalized) {
-                setIsCurrentRoundFinalized(true);
-                console.log('useEffect: existingRound.is_finalized is TRUE, setting isCurrentRoundFinalized to TRUE');
-              } else {
-                setIsCurrentRoundFinalized(false);
-                console.log('useEffect: existingRound.is_finalized is FALSE, setting isCurrentRoundFinalized to FALSE');
-              }
-            } else {
-              console.warn(`No existing round object found for player ${player.id} for sequence ${selectedCourseSequence}.`);
-              allPlayersHaveExistingRound = false; // If any player doesn't have a round, then not all are initiated
-            }
-          }
-          console.log('Final fetchedScores:', fetchedScores);
-          console.log('Final fetchedSummaries:', fetchedSummaries);
-          console.log('Final newRoundIds:', newRoundIds);
-          console.log('Final allPlayersHaveExistingRound:', allPlayersHaveExistingRound);
-
-          setRoundIds(newRoundIds);
-          setScores(fetchedScores);
-          setSubmittedSummaryScores(fetchedSummaries);
-          setRoundInitiated(allPlayersHaveExistingRound);
-
-        } catch (error) {
-          console.error("Error fetching hole data or existing scores:", error);
-          setHoleData([]);
-          setScores({});
-          setSubmittedSummaryScores({});
-          setRoundIds({}); // Ensure roundIds is also cleared on error
-          setRoundInitiated(false);
-        } finally {
-          setIsLoadingRounds(false); // Set loading to false after fetch completes (success or error)
-        }
-      };
       fetchHoleDataAndExistingScores();
-    } else {
+    }
+  }, [selectedCourse, selectedCourseSequence, selectedTournament, players]);
+
+  const [isLoadingRounds, setIsLoadingRounds] = useState(true); // New state for loading indicator
+
+  // Moved outside useEffect to be accessible by handleReopenRound
+  const fetchHoleDataAndExistingScores = async () => {
+    
+
+    try {
+      setIsLoadingRounds(true); // Set loading to true at the start
+      // Aggressively clear states for a clean slate on each course/tournament/player change
+      setScores({});
+      setSubmittedSummaryScores({});
+      setRoundIds({});
+      setRoundInitiated(false);
+      setIsCurrentRoundFinalized(false); // Clear finalized status
+      setRoundPlayerHandicaps({}); // Clear round-specific handicaps
+
+      console.log('fetchHoleDataAndExistingScores: selectedCourse changed', { selectedCourse, selectedCourseSequence, selectedTournament, players });
+      console.log('fetchHoleDataAndExistingScores: currentCourse before check', currentCourse);
+
+      if (!currentCourse) {
+        console.warn("currentCourse is not available, cannot set hole data.");
+        setIsLoadingRounds(false);
+        return;
+      }
+      console.log('fetchHoleDataAndExistingScores: currentCourse after check', currentCourse);
+
+      const newHoleData = [];
+      const pars = currentCourse.hole_pars || [];
+      const strokeIndices = currentCourse.hole_stroke_indices || [];
+      console.log('fetchHoleDataAndExistingScores: pars', pars, 'strokeIndices', strokeIndices);
+
+      for (let i = 0; i < 18; i++) {
+        newHoleData.push({
+          hole_number: i + 1,
+          par: pars[i] !== undefined ? pars[i] : null,
+          strokeIndex: strokeIndices[i] !== undefined ? strokeIndices[i] : null,
+        });
+      }
+      console.log('fetchHoleDataAndExistingScores: newHoleData', newHoleData);
+      setHoleData(newHoleData);
+
+      const newRoundIds = {};
+      const fetchedScores = {};
+      const fetchedSummaries = {};
+      let allPlayersHaveExistingRound = true; // Renamed for clarity
+      let tempIsCurrentRoundFinalized = true; // Assume true, set to false if any round is not finalized
+
+      // Collect all player IDs for a single API call
+      const playerIds = players.map(p => p.id);
+      const playerIdsString = playerIds.join(',');
+
+      // Fetch all existing rounds for all players in a single API call
+      console.log(`Fetching existing rounds for players: ${playerIdsString}, course ${selectedCourse}, sequence ${selectedCourseSequence}, tournament ${selectedTournament}`);
+      const allExistingRoundsResponse = await fetch(`http://localhost:5000/rounds?tournament_id=${selectedTournament}&player_ids=${playerIdsString}&course_id=${selectedCourse}&sequence_number=${selectedCourseSequence}`);
+      if (!allExistingRoundsResponse.ok) {
+        console.error("Error fetching all existing rounds.");
+        allPlayersHaveExistingRound = false; // If fetch itself fails, assume no rounds for any player
+        tempIsCurrentRoundFinalized = false; // If fetch fails, assume not finalized
+      }
+      const allExistingRounds = allExistingRoundsResponse.ok ? await allExistingRoundsResponse.json() : [];
+      console.log('All existing rounds fetched:', allExistingRounds);
+
+      // Process existing rounds for each player
+      for (const player of players) {
+        // Initialize for each player
+        fetchedScores[player.id] = {};
+        fetchedSummaries[player.id] = {};
+
+        const existingRound = allExistingRounds.find(r => r.player_id === player.id && r.round_number === selectedCourseSequence);
+
+        if (existingRound) {
+          newRoundIds[player.id] = existingRound.id;
+          console.log(`Found existing round ${existingRound.id} for player ${player.id} (Sequence: ${selectedCourseSequence}). Using embedded hole scores.`);
+          const playerHoleScores = {};
+          existingRound.hole_scores.forEach(hs => {
+            playerHoleScores[hs.hole_number] = hs.gross_score;
+          });
+          fetchedScores[player.id] = playerHoleScores;
+          fetchedSummaries[player.id] = existingRound; // Store the whole round object for summaries
+
+          // Store round-specific handicaps
+          console.log('Full existingRound object:', existingRound); // NEW LINE
+          const roundHandicapIndex = existingRound.player_handicap_index; // NEW
+          const roundPlayingHandicap = existingRound.player_playing_handicap; // NEW
+          console.log(`Attempting to store round-specific handicaps for player ${player.id}: roundHandicapIndex=${roundHandicapIndex}, roundPlayingHandicap=${roundPlayingHandicap}`); // MODIFIED
+          setRoundPlayerHandicaps(prev => ({
+            ...prev,
+            [player.id]: {
+              handicap_index: roundHandicapIndex, // MODIFIED
+              playing_handicap: roundPlayingHandicap, // MODIFIED
+            }
+          }));
+          console.log(`Stored round-specific handicaps for player ${player.id}: Index=${existingRound.handicap_index}, Playing=${existingRound.playing_handicap}`);
+
+          // Check if this specific round is finalized
+          if (!existingRound.is_finalized) {
+            tempIsCurrentRoundFinalized = false; // If any round is NOT finalized, then the overall round is not finalized
+          }
+          console.log(`Frontend received existingRound.is_finalized: ${existingRound.is_finalized} for player ${player.id}`);
+        } else {
+          console.warn(`No existing round object found for player ${player.id} for sequence ${selectedCourseSequence}.`);
+          allPlayersHaveExistingRound = false; // If any player doesn't have a round, then not all are initiated
+          tempIsCurrentRoundFinalized = false; // If a round doesn't exist, it's not finalized
+        }
+      }
+      console.log('Final fetchedScores:', fetchedScores);
+      console.log('Final fetchedSummaries:', fetchedSummaries);
+      console.log('Final newRoundIds:', newRoundIds);
+      console.log('Final allPlayersHaveExistingRound:', allPlayersHaveExistingRound);
+      console.log('Final tempIsCurrentRoundFinalized:', tempIsCurrentRoundFinalized);
+
+      setRoundIds(newRoundIds);
+      setScores(fetchedScores);
+      setSubmittedSummaryScores(fetchedSummaries);
+      setRoundInitiated(allPlayersHaveExistingRound);
+      setIsCurrentRoundFinalized(tempIsCurrentRoundFinalized); // Set overall finalized status after loop
+      console.log('After state updates: roundInitiated', allPlayersHaveExistingRound, 'isCurrentRoundFinalized', tempIsCurrentRoundFinalized);
+
+    } catch (error) {
+      console.error("Error fetching hole data or existing scores:", error);
       setHoleData([]);
       setScores({});
       setSubmittedSummaryScores({});
-      setRoundIds({}); // Ensure roundIds is cleared when no course/tournament/players selected
+      setRoundIds({}); // Ensure roundIds is also cleared on error
       setRoundInitiated(false);
-      setIsLoadingRounds(false); // Also set to false if no course/tournament/players selected
+    } finally {
+      setIsLoadingRounds(false); // Set loading to false after fetch completes (success or error)
     }
-  }, [selectedCourse, selectedCourseSequence, selectedTournament, players]);
+  };
 
   const currentTournament = useMemo(() => {
     return tournaments.find(tournament => tournament.id === selectedTournament);
   }, [tournaments, selectedTournament]);
 
   const currentCourse = useMemo(() => {
-    return courses.find(course => course.id === selectedCourse && course.sequence_number === selectedCourseSequence);
+    const foundCourse = courses.find(course => course.id === selectedCourse && course.sequence_number === selectedCourseSequence);
+    console.log('currentCourse useMemo: courses', courses, 'selectedCourse', selectedCourse, 'selectedCourseSequence', selectedCourseSequence, 'foundCourse', foundCourse);
+    return foundCourse;
   }, [courses, selectedCourse, selectedCourseSequence]);
 
   const handleTournamentChange = (e) => {
@@ -587,38 +600,38 @@ const ScorecardEntry = () => {
                 <th>Stableford Points</th>
               </tr>
               <tr>
-                <th></th> {/* Empty cell instead of "Par" */}
-                <th></th> {/* Empty cell for Player Handicap Index */}
-                <th>Par</th> {/* Hard-coded "Par" */}
+                <th></th>
+                <th></th>
+                <th>Par</th>
                 {holeData.map((hole, index) => (<th key={`par-header-${hole.hole_number}`}>{hole.par}</th>))}
-                <th></th> {/* Gross Front 9 */}
-                <th></th> {/* Gross Back 9 */}
-                <th></th> {/* Net Front 9 */}
-                <th></th> {/* Net Back 9 */}
-                <th></th> {/* Gross Total */}
-                <th></th> {/* Net Total */}
-                <th></th> {/* Stableford Points */} 
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
               </tr>
               <tr>
-                <th></th> {/* Empty cell for Player Name */}
-                <th></th> {/* Empty cell for Player Handicap Index */}
-                <th>SI</th> {/* Hard-coded "SI" */}
+                <th></th>
+                <th></th>
+                <th>SI</th>
                 {holeData.map((hole, index) => (<th key={`si-header-${hole.hole_number}`}>{hole.strokeIndex}</th>))}
-                <th></th> {/* Gross Front 9 */}
-                <th></th> {/* Gross Back 9 */}
-                <th></th> {/* Net Front 9 */}
-                <th></th> {/* Net Back 9 */}
-                <th></th> {/* Gross Total */}
-                <th></th> {/* Net Total */}
-                <th></th> {/* Stableford Points */}
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {players.map(player => (
                 <tr key={player.id}>
                   <td>{player.name}</td>
-                  <td>{roundPlayerHandicaps[player.id]?.handicap_index ?? player.handicap}</td>
-                  <td>{roundPlayerHandicaps[player.id]?.playing_handicap ?? calculatePlayingHandicap(player.handicap, currentCourse.slope_rating)}</td>
+                  <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
+                  <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
                   {Array.from({ length: 18 }, (_, i) => (
                     <td key={`${player.id}-hole-${i + 1}`}>
                       <input

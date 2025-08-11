@@ -224,8 +224,7 @@ const Leaderboard = () => {
             </thead>
             <tbody>
               {displayedLeaderboard.map((player) => (
-                <tr key={player.roundId}> {/* Use roundId as key for unique rows */}
-                  <td>{player.position}</td>
+                <tr key={player.roundId}><td>{player.position}</td>
                   <td className="player-name-cell">{player.playerName}</td>
                   <td className="points-cell">{player.tournamentStablefordPoints}</td>
                   <td className="points-cell">{player.roundStablefordPoints}</td>
