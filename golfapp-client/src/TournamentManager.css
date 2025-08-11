@@ -97,3 +97,8 @@
 .initiate-scoring-button:hover {
   background-color: #45a049;
 }
+
+.tournament-list {
+  list-style: none;
+  padding: 0;
+}

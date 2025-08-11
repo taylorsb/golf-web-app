@@ -99,6 +99,7 @@ nav a:hover {
 
 /* Nested menu for Scorecard Entry */
 nav ul ul {
+  list-style: none; /* Removed bullet points for nested lists */
   margin-left: 15px; /* Adjusted indent */
   margin-top: 0; /* Removed margin-top for tighter spacing */
   margin: 0 !important; /* Ensure no extra margin */

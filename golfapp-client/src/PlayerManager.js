@@ -85,7 +85,7 @@ const PlayerManager = () => {
       <h2>Players List</h2>
       <table className="player-table">
         <tbody>
-          {players.map((player) => (
+          {players.sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
             <tr key={player.id}>
               <td>{player.name} (Handicap: {player.handicap})</td>
               <td><button onClick={() => handleEditClick(player)} className="initiate-scoring-button">Edit</button></td>

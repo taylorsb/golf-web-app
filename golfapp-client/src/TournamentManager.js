@@ -237,7 +237,7 @@ function TournamentManager() {
       </div>
 
       <h2>Tournaments List</h2>
-      <ul>
+      <ul className="tournament-list">
         {tournaments.map((tournament) => (
           <li key={tournament.id}>
             {tournament.name} ({tournament.date}, {tournament.location})

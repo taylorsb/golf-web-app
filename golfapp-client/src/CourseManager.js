@@ -160,7 +160,7 @@ function CourseManager() {
       <h3>Courses List</h3>
       <table className="course-table">
         <tbody>
-          {courses.map((course) => (
+          {courses.sort((a, b) => a.name.localeCompare(b.name)).map((course) => (
             <tr key={course.id}>
               <td>{course.name} ({course.country}) - Slope: {course.slope_rating}</td>
               <td><button onClick={() => handleEditClick(course)} className="initiate-scoring-button">Edit</button></td>

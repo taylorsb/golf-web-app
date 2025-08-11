@@ -29,16 +29,16 @@
 .course-table td {
   border: none; /* Make borders invisible */
   padding: 8px; /* Adjust padding as needed */
-  text-align: center; /* Center content horizontally */
+  text-align: left; /* Align content to the left */
   vertical-align: middle; /* Center content vertically */
 }
 
 .course-table td:nth-child(1) {
-  width: 70%; /* Reduced width for name and details column to bring buttons closer */
+  width: 77%; /* Increased width for name and details column */
 }
 
 .course-table td:nth-child(2) {
-  width: 22%; /* Increased width to shift button left */
+  width: 15%; /* Reduced width for edit button column */
 }
 
 .course-table td:nth-child(3) {

@@ -32,7 +32,7 @@
 .player-table td {
   border: none; /* Make borders invisible */
   padding: 8px; /* Adjust padding as needed */
-  text-align: center; /* Center content horizontally */
+  text-align: left; /* Align content to the left */
   vertical-align: middle; /* Center content vertically */
 }
 
