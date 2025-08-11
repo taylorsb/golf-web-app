@@ -56,6 +56,7 @@ const ScorecardEntry = () => {
         newRoundIds[round.player_id] = round.id;
       });
       setRoundIds(newRoundIds);
+      fetchHoleDataAndExistingScores(); // Call this to fetch and populate handicaps for newly initiated rounds
 
     } catch (error) {
       console.error("Error initiating scoring:", error);
