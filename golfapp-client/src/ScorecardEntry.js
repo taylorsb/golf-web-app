@@ -559,7 +559,13 @@ const ScorecardEntry = () => {
                 {players.map(player => (
                   <tr key={player.id}>
                     <td>{player.name}</td>
-                    <td>Handicap Index: {player.handicap} | Playing Handicap: {calculatePlayingHandicap(player.handicap, currentCourse.slope_rating)}</td>
+                    <td>
+                      {roundInitiated || isCurrentRoundFinalized ? (
+                        `Handicap Index: ${roundPlayerHandicaps[player.id]?.handicap_index ?? 'N/A'} | Playing Handicap: ${roundPlayerHandicaps[player.id]?.playing_handicap ?? 'N/A'}`
+                      ) : (
+                        `Handicap Index: ${player.handicap} | Playing Handicap: ${calculatePlayingHandicap(player.handicap, currentCourse?.slope_rating)}`
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
