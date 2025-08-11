@@ -50,10 +50,10 @@
 
 /* Main Menu Navigation */
 nav {
-  background-color: #222;
+  background-color: #555; /* Changed to darker grey */
   padding: 0.5rem;
   position: fixed; /* Changed to fixed */
-  top: 0;
+  top: 0; /* Reverted to original position */
   left: 0;
   height: 100%; /* Full height */
   width: 200px; /* Fixed width for the menu */
@@ -69,15 +69,16 @@ nav.open {
 
 nav ul {
   list-style: none;
-  margin: 0;
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
   display: flex;
   flex-direction: column;
-  padding-top: 60px; /* Space for hamburger icon */
+  padding-top: 60px; /* Added to move menu items down and avoid overlap with hamburger icon */
 }
 
 nav li {
-  margin-bottom: 0.5rem; /* Adjusted vertical margin */
+  margin: 0 !important;
+  padding: 0 !important;
   text-align: left;
 }
 
@@ -88,7 +89,8 @@ nav a {
   font-weight: bold;
   transition: color 0.3s ease;
   display: block; /* Make links block-level for better click area */
-  padding: 0.5rem 1rem;
+  padding: 0.3rem 3rem; /* Increased horizontal padding to move text further right */
+  line-height: 1.2;
 }
 
 nav a:hover {
@@ -98,12 +100,16 @@ nav a:hover {
 /* Nested menu for Scorecard Entry */
 nav ul ul {
   margin-left: 15px; /* Adjusted indent */
-  margin-top: 5px; /* Adjusted margin */
+  margin-top: 0; /* Removed margin-top for tighter spacing */
+  margin: 0 !important; /* Ensure no extra margin */
+  padding: 0 !important; /* Ensure no extra padding */
 }
 
 nav ul ul li a {
   font-size: 1rem; /* Adjusted font size */
   font-weight: normal;
+  padding: 0.2rem 3rem; /* Increased horizontal padding for nested items */
+  line-height: 1.2;
 }
 
 /* Hamburger Icon */
