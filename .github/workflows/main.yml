@@ -3,7 +3,7 @@ name: Build and Deploy Flask Backend to Azure Container Apps
 on: 
   push:
     branches:
-      - master
+      - production-azure
     paths:
       - 'golfapp-server/**'
 
