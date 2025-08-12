@@ -37,6 +37,7 @@ jobs:
         containerAppName: golf-app-server-simon
         resourceGroup: golf-app-rg
         imageToDeploy: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+        acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
         # Add environment variables for the Flask app if needed
         # env: |
         #   DATABASE_URL=${{ secrets.DATABASE_URL }}
