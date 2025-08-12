@@ -32,10 +32,10 @@ jobs:
     - name: Deploy to Azure Container Apps
       uses: azure/container-apps-deploy-action@v1
       with:
-        containerAppSourcePath: golfapp-server
+        appSourcePath: golfapp-server
         containerAppName: golf-app-server-simon
         resourceGroup: golf-app-rg
-        image: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+        imageToDeploy: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
         # Add environment variables for the Flask app if needed
         # env: |
         #   DATABASE_URL=${{ secrets.DATABASE_URL }}
