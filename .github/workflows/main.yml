@@ -26,6 +26,7 @@ jobs:
 
     - name: Build and push Docker image
       run: |
+        echo "${{ secrets.AZURE_CREDENTIALS.clientSecret }}" | docker login ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io -u ${{ secrets.AZURE_CREDENTIALS.clientId }} --password-stdin
         docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest -f golfapp-server/Dockerfile .
         docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
 
