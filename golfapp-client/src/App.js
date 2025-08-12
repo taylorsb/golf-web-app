@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; // Trigger build - second time
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
 import MainMenu from './MainMenu';
