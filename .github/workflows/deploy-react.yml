@@ -1,0 +1,29 @@
+name: Deploy React Frontend to Azure Web App
+
+on:
+  push:
+    branches:
+      - production-azure
+    paths:
+      - 'golfapp-client/build/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: golf-app-client-simon
+        slot-name: 'production'
+        package: golfapp-client/build
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
