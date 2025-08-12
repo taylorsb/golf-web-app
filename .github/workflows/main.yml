@@ -27,7 +27,7 @@ jobs:
     - name: Build and push Docker image
       run: |
         az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
-        docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest -f golfapp-server/Dockerfile .
+        docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest -f golfapp-server/Dockerfile golfapp-server
         docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
 
     - name: Deploy to Azure Container Apps

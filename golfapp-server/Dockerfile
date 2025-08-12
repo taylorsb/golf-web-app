@@ -2,10 +2,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY golfapp-server/requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-COPY golfapp-server/. .
+COPY . .
 
 EXPOSE 5000
 
