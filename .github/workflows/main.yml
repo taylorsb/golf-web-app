@@ -1,0 +1,41 @@
+name: Build and Deploy Flask Backend to Azure Container Apps
+
+on: 
+  push:
+    branches:
+      - master
+    paths:
+      - 'golfapp-server/**'
+
+env:
+  AZURE_CONTAINER_REGISTRY: golfappacrsimon
+  IMAGE_NAME: golf-app-server
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest -f golfapp-server/Dockerfile .
+        docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+
+    - name: Deploy to Azure Container Apps
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        containerAppSourcePath: golfapp-server
+        containerAppName: golf-app-server-simon
+        resourceGroup: golf-app-rg
+        image: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+        # Add environment variables for the Flask app if needed
+        # env: |
+        #   DATABASE_URL=${{ secrets.DATABASE_URL }}
