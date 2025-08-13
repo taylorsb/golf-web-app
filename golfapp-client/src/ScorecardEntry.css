@@ -241,3 +241,36 @@
 .worse-than-double-bogey-score-key {
   background-color: #E0CCFF;
 }
+
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+
+    padding: 8px 15px; /* Reduced padding */
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 0.9em; /* Smaller font size */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Lighter shadow */
+    color: #333;
+    max-width: 300px; /* Further reduced max-width */
+    width: auto;
+    white-space: normal; /* Allow text wrapping */
+    overflow: visible; /* Allow content to be visible */
+    text-overflow: clip; /* Remove ellipsis */
+}
+
+.notification.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.notification.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}

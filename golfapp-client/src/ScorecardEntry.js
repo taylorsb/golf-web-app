@@ -15,10 +15,18 @@ const ScorecardEntry = () => {
   const [roundIds, setRoundIds] = useState({}); // To store round_id for each player
   const [isCurrentRoundFinalized, setIsCurrentRoundFinalized] = useState(false);
   const [roundPlayerHandicaps, setRoundPlayerHandicaps] = useState({}); // New state to store handicaps specific to the round
+  const [notification, setNotification] = useState({ message: '', type: '' });
+
+  const displayNotification = (message, type) => {
+    setNotification({ message, type });
+    setTimeout(() => {
+        setNotification({ message: '', type: '' });
+    }, 3000); // Hide after 3 seconds
+  };
 
   const handleInitiateScoring = async () => {
     if (!selectedTournament || !selectedCourse || players.length === 0) {
-      alert("Please select a tournament and course, and ensure players are loaded.");
+      displayNotification("Please select a tournament and course, and ensure players are loaded.", 'error');
       return;
     }
 
@@ -48,7 +56,7 @@ const ScorecardEntry = () => {
       }
 
       const result = await response.json();
-      alert(result.message);
+      displayNotification(result.message, 'success');
       setRoundInitiated(true);
       // Store round IDs for each player
       const newRoundIds = {};
@@ -60,7 +68,7 @@ const ScorecardEntry = () => {
 
     } catch (error) {
       console.error("Error initiating scoring:", error);
-      alert(`Failed to initiate scoring: ${error.message}`);
+      displayNotification(`Failed to initiate scoring: ${error.message}`, 'error');
     }
   };
 
@@ -69,7 +77,7 @@ const ScorecardEntry = () => {
 
   const handleSubmitFinalScores = async () => {
     if (!selectedTournament || !selectedCourse || players.length === 0) {
-      alert("Please select a tournament and course, and ensure players are loaded.");
+      displayNotification("Please select a tournament and course, and ensure players are loaded.", 'error');
       return;
     }
 
@@ -109,7 +117,7 @@ const ScorecardEntry = () => {
         return { playerId: player.id, summary: result };
       } catch (error) {
         console.error(`Error submitting scores for ${player.name}:`, error);
-        alert(`Failed to submit scores for ${player.name}: ${error.message}`);
+        displayNotification(`Failed to submit scores for ${player.name}: ${error.message}`, 'error');
         return null;
       }
     });
@@ -122,7 +130,7 @@ const ScorecardEntry = () => {
       }
     });
     setSubmittedSummaryScores(newSubmittedSummaryScores);
-    alert("Score submission process completed. Check console for individual player results.");
+    displayNotification("Score submission process completed.", 'success');
   };
 
   // Placeholder for calculateTotalStablefordPoints - now gets from submittedSummaryScores
@@ -156,7 +164,7 @@ const ScorecardEntry = () => {
 
   const handleEndRound = async () => {
     if (!selectedTournament || !selectedCourseSequence) {
-      alert("Please select a tournament and a course sequence to end the round.");
+      displayNotification("Please select a tournament and a course sequence to end the round.", 'error');
       return;
     }
 
@@ -177,7 +185,7 @@ const ScorecardEntry = () => {
       }
 
       const result = await response.json();
-      alert(result.message);
+      displayNotification(result.message, 'success');
       // Keep the current round displayed, but mark it as finalized
       setRoundInitiated(false); // No longer actively inputting scores for this round
       setIsCurrentRoundFinalized(true); // Mark as finalized
@@ -197,13 +205,13 @@ const ScorecardEntry = () => {
 
     } catch (error) {
       console.error("Error ending round:", error);
-      alert(`Failed to end round: ${error.message}`);
+      displayNotification(`Failed to end round: ${error.message}`, 'error');
     }
   };
 
   const handleReopenRound = async () => {
     if (!selectedTournament || !selectedCourseSequence) {
-      alert("Please select a tournament and a course sequence to re-open the round.");
+      displayNotification("Please select a tournament and a course sequence to re-open the round.", 'error');
       return;
     }
 
@@ -224,7 +232,7 @@ const ScorecardEntry = () => {
       }
 
       const result = await response.json();
-      alert(result.message);
+      displayNotification(result.message, 'success');
 
       // After re-opening, re-enable scoring and clear finalized status
       setRoundInitiated(true); // Allow score input again
@@ -239,7 +247,7 @@ const ScorecardEntry = () => {
 
     } catch (error) {
       console.error("Error re-opening round:", error);
-      alert(`Failed to re-open round: ${error.message}`);
+      displayNotification(`Failed to re-open round: ${error.message}`, 'error');
     }
   };
 
@@ -507,6 +515,13 @@ const ScorecardEntry = () => {
 
   return (
     <div className="scorecard-container">
+
+      {notification.message && (
+          <div className={`notification ${notification.type}`}>
+              {notification.message}
+          </div>
+      )}
+
       <h2>Scorecard Entry</h2>
 
       <div className="dropdown-grid">
@@ -590,7 +605,7 @@ const ScorecardEntry = () => {
           {!isLoadingRounds && !roundInitiated && !isCurrentRoundFinalized && (
             <button className="initiate-scoring-button" onClick={handleInitiateScoring}>Initiate Scoring</button>
           )}
-          <h3>Input Scores</h3>
+          <h3>Input Scores for Round {selectedCourseSequence} - {currentCourse?.name}</h3>
           <table className="scorecard-table">
             <thead>
               <tr>
