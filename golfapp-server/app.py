@@ -579,44 +579,47 @@ def initiate_round():
     data = request.get_json()
     tournament_id = data.get('tournament_id')
     course_id = data.get('course_id')
-    sequence_number = data.get('sequence_number') # Retrieve sequence_number from request
+    sequence_number = data.get('sequence_number')
     players_data = data.get('players_data', [])
 
-    if not tournament_id or not course_id or not players_data or sequence_number is None:
+    if not all([tournament_id, course_id, sequence_number is not None, players_data]):
         return jsonify({'error': 'Missing tournament_id, course_id, sequence_number, or players_data'}), 400
 
-    today = date.today().isoformat()
+    course = Course.query.get(course_id)
+    if not course or not course.slope_rating:
+        return jsonify({'error': 'Course not found or slope rating not set'}), 404
 
+    today = date.today().isoformat()
     rounds_created = []
+
     for player_data in players_data:
         player_id = player_data.get('player_id')
-        handicap_index = player_data.get('handicap_index')
-        playing_handicap = player_data.get('playing_handicap')
-
         if not player_id:
             continue
 
-        # Determine the next round number for this player in this tournament/course
-        # This is now the sequence number of the course in the tournament
-        course_sequence_result = db.session.query(tournament_courses.c.sequence_number).filter_by(
-            tournament_id=tournament_id,
-            course_id=course_id,
-            sequence_number=sequence_number # Filter by sequence_number
-        ).first()
-        round_number = course_sequence_result[0] if course_sequence_result is not None else 1
+        player = Player.query.get(player_id)
+        if not player:
+            # Optionally, handle cases where a player ID is invalid
+            continue
+
+        # Authoritative handicap lookup from the database
+        handicap_index = player.handicap
         
+        # Recalculate playing handicap on the server
+        # This assumes a standard calculation. Adjust if your formula is different.
+        playing_handicap = round(handicap_index * (course.slope_rating / 113)) if handicap_index is not None else None
 
         new_round = Round(
             tournament_id=tournament_id,
             player_id=player_id,
             course_id=course_id,
-            round_number=round_number,
+            round_number=sequence_number, # The sequence_number directly represents the round number
             date_played=today,
             player_handicap_index=handicap_index,
             player_playing_handicap=playing_handicap
         )
         db.session.add(new_round)
-        db.session.flush() # To get the ID of the new_round before commit
+        db.session.flush()  # Flush to get the new_round.id for the response if needed
         rounds_created.append(new_round.to_dict())
 
     db.session.commit()
@@ -803,7 +806,7 @@ def calculate_new_handicap_index(current_handicap_index, stableford_score):
 
     if adjustment_entry:
         adjustment_value = adjustment_entry.adjustment
-        new_handicap_index = current_handicap_index + adjustment_value
+        new_handicap_index = round(current_handicap_index + adjustment_value, 1)
         # Ensure handicap index doesn't go below a certain minimum if applicable (e.g., 0 or -ve)
         # For now, no minimum enforced.
         return new_handicap_index

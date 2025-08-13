@@ -1,0 +1,387 @@
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+CREATE TABLE alembic_version (
+	version_num VARCHAR(32) NOT NULL, 
+	CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
+);
+INSERT INTO alembic_version VALUES('90077322c263');
+CREATE TABLE player (
+	id INTEGER NOT NULL, 
+	name VARCHAR(80) NOT NULL, 
+	handicap FLOAT, 
+	PRIMARY KEY (id), 
+	UNIQUE (name)
+);
+INSERT INTO player VALUES(1,'Simon Taylor',9.199999999999999289);
+INSERT INTO player VALUES(2,'Matt Selby',9.80000000000000072);
+INSERT INTO player VALUES(3,'Darrel Jones',9.59999999999999965);
+INSERT INTO player VALUES(4,'Baz Bailey',16.0);
+INSERT INTO player VALUES(5,'Dan Stutchbury',-0.5);
+INSERT INTO player VALUES(6,'Ruaridh Mitchel',0.0);
+INSERT INTO player VALUES(7,'Phil Robson',0.0);
+INSERT INTO player VALUES(8,'Will Dickenson',14.5);
+CREATE TABLE course (
+	id INTEGER NOT NULL, 
+	name VARCHAR(120) NOT NULL, 
+	country VARCHAR(80), 
+	slope_rating FLOAT, 
+	hole_pars VARCHAR(500), 
+	hole_stroke_indices VARCHAR(500), 
+	PRIMARY KEY (id), 
+	UNIQUE (name)
+);
+INSERT INTO course VALUES(1,'The Drift','United Kingdon',126.0,'[4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 5, 5, 5]','[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]');
+INSERT INTO course VALUES(2,'Costa Navarino','Greece',133.0,'[4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3]','[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]');
+CREATE TABLE tournament (
+	id INTEGER NOT NULL, 
+	name VARCHAR(120) NOT NULL, 
+	date VARCHAR(80), 
+	location VARCHAR(120), 
+	PRIMARY KEY (id), 
+	UNIQUE (name)
+);
+INSERT INTO tournament VALUES(1,'Drift International','2026-04-01','Europe');
+CREATE TABLE tournament_players (
+	tournament_id INTEGER NOT NULL, 
+	player_id INTEGER NOT NULL, 
+	PRIMARY KEY (tournament_id, player_id), 
+	FOREIGN KEY(player_id) REFERENCES player (id), 
+	FOREIGN KEY(tournament_id) REFERENCES tournament (id)
+);
+INSERT INTO tournament_players VALUES(1,1);
+INSERT INTO tournament_players VALUES(1,2);
+INSERT INTO tournament_players VALUES(1,4);
+INSERT INTO tournament_players VALUES(1,3);
+CREATE TABLE tournament_courses (
+	tournament_id INTEGER NOT NULL, 
+	course_id INTEGER NOT NULL, 
+	sequence_number INTEGER NOT NULL, 
+	PRIMARY KEY (tournament_id, course_id, sequence_number), 
+	FOREIGN KEY(course_id) REFERENCES course (id), 
+	FOREIGN KEY(tournament_id) REFERENCES tournament (id)
+);
+INSERT INTO tournament_courses VALUES(1,1,1);
+INSERT INTO tournament_courses VALUES(1,2,2);
+INSERT INTO tournament_courses VALUES(1,1,3);
+CREATE TABLE hole_score (
+	id INTEGER NOT NULL, 
+	round_id INTEGER NOT NULL, 
+	hole_number INTEGER NOT NULL, 
+	gross_score INTEGER NOT NULL, 
+	nett_score INTEGER, 
+	stableford_points INTEGER, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(round_id) REFERENCES round (id)
+);
+INSERT INTO hole_score VALUES(1,1,1,4,3,3);
+INSERT INTO hole_score VALUES(2,1,2,4,3,3);
+INSERT INTO hole_score VALUES(3,1,3,4,3,3);
+INSERT INTO hole_score VALUES(4,1,4,4,3,3);
+INSERT INTO hole_score VALUES(5,1,5,4,3,3);
+INSERT INTO hole_score VALUES(6,1,6,5,5,1);
+INSERT INTO hole_score VALUES(7,1,7,5,5,1);
+INSERT INTO hole_score VALUES(8,1,8,5,5,1);
+INSERT INTO hole_score VALUES(9,1,9,5,5,1);
+INSERT INTO hole_score VALUES(10,1,10,4,4,2);
+INSERT INTO hole_score VALUES(11,1,11,4,4,2);
+INSERT INTO hole_score VALUES(12,1,12,4,4,2);
+INSERT INTO hole_score VALUES(13,1,13,4,4,1);
+INSERT INTO hole_score VALUES(14,1,14,4,4,1);
+INSERT INTO hole_score VALUES(15,1,15,4,4,1);
+INSERT INTO hole_score VALUES(16,1,16,4,4,3);
+INSERT INTO hole_score VALUES(17,1,17,4,4,3);
+INSERT INTO hole_score VALUES(18,1,18,4,4,3);
+INSERT INTO hole_score VALUES(19,4,1,8,6,0);
+INSERT INTO hole_score VALUES(20,4,2,8,6,0);
+INSERT INTO hole_score VALUES(21,4,3,5,3,3);
+INSERT INTO hole_score VALUES(22,4,4,5,3,3);
+INSERT INTO hole_score VALUES(23,4,5,5,3,3);
+INSERT INTO hole_score VALUES(24,4,6,5,3,3);
+INSERT INTO hole_score VALUES(25,4,7,5,3,3);
+INSERT INTO hole_score VALUES(26,4,8,5,3,3);
+INSERT INTO hole_score VALUES(27,4,9,5,3,3);
+INSERT INTO hole_score VALUES(28,4,10,4,2,4);
+INSERT INTO hole_score VALUES(29,4,11,4,2,4);
+INSERT INTO hole_score VALUES(30,4,12,4,2,4);
+INSERT INTO hole_score VALUES(31,4,13,4,2,3);
+INSERT INTO hole_score VALUES(32,4,14,4,3,2);
+INSERT INTO hole_score VALUES(33,4,15,4,3,2);
+INSERT INTO hole_score VALUES(34,4,16,4,3,4);
+INSERT INTO hole_score VALUES(35,4,17,4,3,4);
+INSERT INTO hole_score VALUES(36,4,18,4,3,4);
+INSERT INTO hole_score VALUES(37,2,1,6,5,1);
+INSERT INTO hole_score VALUES(38,2,2,6,5,1);
+INSERT INTO hole_score VALUES(39,2,3,6,6,0);
+INSERT INTO hole_score VALUES(40,2,4,6,6,0);
+INSERT INTO hole_score VALUES(41,2,5,6,6,0);
+INSERT INTO hole_score VALUES(42,2,6,5,5,1);
+INSERT INTO hole_score VALUES(43,2,7,5,5,1);
+INSERT INTO hole_score VALUES(44,2,8,5,5,1);
+INSERT INTO hole_score VALUES(45,2,9,5,5,1);
+INSERT INTO hole_score VALUES(46,2,10,4,4,2);
+INSERT INTO hole_score VALUES(47,2,11,4,4,2);
+INSERT INTO hole_score VALUES(48,2,12,4,4,2);
+INSERT INTO hole_score VALUES(49,2,13,4,4,1);
+INSERT INTO hole_score VALUES(50,2,14,4,4,1);
+INSERT INTO hole_score VALUES(51,2,15,4,4,1);
+INSERT INTO hole_score VALUES(52,2,16,4,4,3);
+INSERT INTO hole_score VALUES(53,2,17,4,4,3);
+INSERT INTO hole_score VALUES(54,2,18,4,4,3);
+INSERT INTO hole_score VALUES(55,3,1,6,5,1);
+INSERT INTO hole_score VALUES(56,3,2,5,4,2);
+INSERT INTO hole_score VALUES(57,3,3,5,4,2);
+INSERT INTO hole_score VALUES(58,3,4,5,4,2);
+INSERT INTO hole_score VALUES(59,3,5,5,5,1);
+INSERT INTO hole_score VALUES(60,3,6,5,5,1);
+INSERT INTO hole_score VALUES(61,3,7,5,5,1);
+INSERT INTO hole_score VALUES(62,3,8,5,5,1);
+INSERT INTO hole_score VALUES(63,3,9,5,5,1);
+INSERT INTO hole_score VALUES(64,3,10,4,4,2);
+INSERT INTO hole_score VALUES(65,3,11,4,4,2);
+INSERT INTO hole_score VALUES(66,3,12,4,4,2);
+INSERT INTO hole_score VALUES(67,3,13,4,4,1);
+INSERT INTO hole_score VALUES(68,3,14,4,4,1);
+INSERT INTO hole_score VALUES(69,3,15,4,4,1);
+INSERT INTO hole_score VALUES(70,3,16,4,4,3);
+INSERT INTO hole_score VALUES(71,3,17,4,4,3);
+INSERT INTO hole_score VALUES(72,3,18,4,4,3);
+INSERT INTO hole_score VALUES(73,5,1,6,5,1);
+INSERT INTO hole_score VALUES(74,5,2,6,5,1);
+INSERT INTO hole_score VALUES(75,5,3,5,4,2);
+INSERT INTO hole_score VALUES(76,5,4,5,4,2);
+INSERT INTO hole_score VALUES(77,5,5,5,4,2);
+INSERT INTO hole_score VALUES(78,5,6,5,5,1);
+INSERT INTO hole_score VALUES(79,5,7,5,5,2);
+INSERT INTO hole_score VALUES(80,5,8,5,5,2);
+INSERT INTO hole_score VALUES(81,5,9,5,5,2);
+INSERT INTO hole_score VALUES(82,5,10,5,5,2);
+INSERT INTO hole_score VALUES(83,5,11,5,5,2);
+INSERT INTO hole_score VALUES(84,5,12,5,5,2);
+INSERT INTO hole_score VALUES(85,5,13,5,5,0);
+INSERT INTO hole_score VALUES(86,5,14,5,5,0);
+INSERT INTO hole_score VALUES(87,5,15,5,5,0);
+INSERT INTO hole_score VALUES(88,5,16,5,5,0);
+INSERT INTO hole_score VALUES(89,5,17,5,5,0);
+INSERT INTO hole_score VALUES(90,5,18,5,5,0);
+INSERT INTO hole_score VALUES(91,6,1,6,5,1);
+INSERT INTO hole_score VALUES(92,6,2,6,5,1);
+INSERT INTO hole_score VALUES(93,6,3,5,4,2);
+INSERT INTO hole_score VALUES(94,6,4,5,4,2);
+INSERT INTO hole_score VALUES(95,6,5,5,4,2);
+INSERT INTO hole_score VALUES(96,6,6,5,5,1);
+INSERT INTO hole_score VALUES(97,6,7,5,5,2);
+INSERT INTO hole_score VALUES(98,6,8,5,5,2);
+INSERT INTO hole_score VALUES(99,6,9,5,5,2);
+INSERT INTO hole_score VALUES(100,6,10,5,5,2);
+INSERT INTO hole_score VALUES(101,6,11,5,5,2);
+INSERT INTO hole_score VALUES(102,6,12,5,5,2);
+INSERT INTO hole_score VALUES(103,6,13,5,5,0);
+INSERT INTO hole_score VALUES(104,6,14,5,5,0);
+INSERT INTO hole_score VALUES(105,6,15,5,5,0);
+INSERT INTO hole_score VALUES(106,6,16,5,5,0);
+INSERT INTO hole_score VALUES(107,6,17,5,5,0);
+INSERT INTO hole_score VALUES(108,6,18,5,5,0);
+INSERT INTO hole_score VALUES(109,7,1,6,5,1);
+INSERT INTO hole_score VALUES(110,7,2,6,5,1);
+INSERT INTO hole_score VALUES(111,7,3,5,4,2);
+INSERT INTO hole_score VALUES(112,7,4,5,4,2);
+INSERT INTO hole_score VALUES(113,7,5,5,4,2);
+INSERT INTO hole_score VALUES(114,7,6,5,4,2);
+INSERT INTO hole_score VALUES(115,7,7,5,5,2);
+INSERT INTO hole_score VALUES(116,7,8,5,5,2);
+INSERT INTO hole_score VALUES(117,7,9,5,5,2);
+INSERT INTO hole_score VALUES(118,7,10,5,5,2);
+INSERT INTO hole_score VALUES(119,7,11,5,5,2);
+INSERT INTO hole_score VALUES(120,7,12,5,5,2);
+INSERT INTO hole_score VALUES(121,7,13,5,5,0);
+INSERT INTO hole_score VALUES(122,7,14,5,5,0);
+INSERT INTO hole_score VALUES(123,7,15,5,5,0);
+INSERT INTO hole_score VALUES(124,7,16,5,5,0);
+INSERT INTO hole_score VALUES(125,7,17,5,5,0);
+INSERT INTO hole_score VALUES(126,7,18,5,5,0);
+INSERT INTO hole_score VALUES(127,8,1,6,4,2);
+INSERT INTO hole_score VALUES(128,8,2,6,4,2);
+INSERT INTO hole_score VALUES(129,8,3,5,3,3);
+INSERT INTO hole_score VALUES(130,8,4,5,3,3);
+INSERT INTO hole_score VALUES(131,8,5,5,3,3);
+INSERT INTO hole_score VALUES(132,8,6,5,3,3);
+INSERT INTO hole_score VALUES(133,8,7,5,4,3);
+INSERT INTO hole_score VALUES(134,8,8,5,4,3);
+INSERT INTO hole_score VALUES(135,8,9,5,4,3);
+INSERT INTO hole_score VALUES(136,8,10,5,4,3);
+INSERT INTO hole_score VALUES(137,8,11,5,4,3);
+INSERT INTO hole_score VALUES(138,8,12,5,4,3);
+INSERT INTO hole_score VALUES(139,8,13,5,4,1);
+INSERT INTO hole_score VALUES(140,8,14,5,4,1);
+INSERT INTO hole_score VALUES(141,8,15,5,4,1);
+INSERT INTO hole_score VALUES(142,8,16,5,4,1);
+INSERT INTO hole_score VALUES(143,8,17,5,4,1);
+INSERT INTO hole_score VALUES(144,8,18,5,4,1);
+INSERT INTO hole_score VALUES(145,9,1,3,2,4);
+INSERT INTO hole_score VALUES(146,9,2,3,2,4);
+INSERT INTO hole_score VALUES(147,9,3,7,6,0);
+INSERT INTO hole_score VALUES(148,9,4,7,6,0);
+INSERT INTO hole_score VALUES(149,9,5,7,6,0);
+INSERT INTO hole_score VALUES(150,9,6,7,6,0);
+INSERT INTO hole_score VALUES(151,9,7,7,6,0);
+INSERT INTO hole_score VALUES(152,9,8,7,6,0);
+INSERT INTO hole_score VALUES(153,9,9,7,7,0);
+INSERT INTO hole_score VALUES(154,9,10,4,4,2);
+INSERT INTO hole_score VALUES(155,9,11,4,4,2);
+INSERT INTO hole_score VALUES(156,9,12,4,4,2);
+INSERT INTO hole_score VALUES(157,9,13,4,4,1);
+INSERT INTO hole_score VALUES(158,9,14,4,4,1);
+INSERT INTO hole_score VALUES(159,9,15,4,4,1);
+INSERT INTO hole_score VALUES(160,9,16,4,4,3);
+INSERT INTO hole_score VALUES(161,9,17,4,4,3);
+INSERT INTO hole_score VALUES(162,9,18,2,2,4);
+INSERT INTO hole_score VALUES(163,10,1,3,2,4);
+INSERT INTO hole_score VALUES(164,10,2,3,2,4);
+INSERT INTO hole_score VALUES(165,10,3,7,6,0);
+INSERT INTO hole_score VALUES(166,10,4,7,6,0);
+INSERT INTO hole_score VALUES(167,10,5,7,6,0);
+INSERT INTO hole_score VALUES(168,10,6,7,6,0);
+INSERT INTO hole_score VALUES(169,10,7,7,6,0);
+INSERT INTO hole_score VALUES(170,10,8,7,6,0);
+INSERT INTO hole_score VALUES(171,10,9,7,6,0);
+INSERT INTO hole_score VALUES(172,10,10,4,4,2);
+INSERT INTO hole_score VALUES(173,10,11,4,4,2);
+INSERT INTO hole_score VALUES(174,10,12,4,4,2);
+INSERT INTO hole_score VALUES(175,10,13,4,4,1);
+INSERT INTO hole_score VALUES(176,10,14,4,4,1);
+INSERT INTO hole_score VALUES(177,10,15,4,4,1);
+INSERT INTO hole_score VALUES(178,10,16,4,4,3);
+INSERT INTO hole_score VALUES(179,10,17,4,4,3);
+INSERT INTO hole_score VALUES(180,10,18,4,4,3);
+INSERT INTO hole_score VALUES(181,11,1,3,2,4);
+INSERT INTO hole_score VALUES(182,11,2,3,2,4);
+INSERT INTO hole_score VALUES(183,11,3,6,5,1);
+INSERT INTO hole_score VALUES(184,11,4,6,5,1);
+INSERT INTO hole_score VALUES(185,11,5,6,5,1);
+INSERT INTO hole_score VALUES(186,11,6,6,5,1);
+INSERT INTO hole_score VALUES(187,11,7,6,5,1);
+INSERT INTO hole_score VALUES(188,11,8,6,5,1);
+INSERT INTO hole_score VALUES(189,11,9,6,5,1);
+INSERT INTO hole_score VALUES(190,11,10,5,5,1);
+INSERT INTO hole_score VALUES(191,11,11,5,5,1);
+INSERT INTO hole_score VALUES(192,11,12,5,5,1);
+INSERT INTO hole_score VALUES(193,11,13,3,3,2);
+INSERT INTO hole_score VALUES(194,11,14,4,4,1);
+INSERT INTO hole_score VALUES(195,11,15,2,2,3);
+INSERT INTO hole_score VALUES(196,11,16,5,5,2);
+INSERT INTO hole_score VALUES(197,11,17,5,5,2);
+INSERT INTO hole_score VALUES(198,11,18,7,7,0);
+INSERT INTO hole_score VALUES(199,12,1,3,1,4);
+INSERT INTO hole_score VALUES(200,12,2,3,1,4);
+INSERT INTO hole_score VALUES(201,12,3,5,4,2);
+INSERT INTO hole_score VALUES(202,12,4,5,4,2);
+INSERT INTO hole_score VALUES(203,12,5,5,4,2);
+INSERT INTO hole_score VALUES(204,12,6,5,4,2);
+INSERT INTO hole_score VALUES(205,12,7,5,4,2);
+INSERT INTO hole_score VALUES(206,12,8,5,4,2);
+INSERT INTO hole_score VALUES(207,12,9,5,4,2);
+INSERT INTO hole_score VALUES(208,12,10,5,4,2);
+INSERT INTO hole_score VALUES(209,12,11,5,4,2);
+INSERT INTO hole_score VALUES(210,12,12,5,4,2);
+INSERT INTO hole_score VALUES(211,12,13,5,4,1);
+INSERT INTO hole_score VALUES(212,12,14,5,4,1);
+INSERT INTO hole_score VALUES(213,12,15,5,4,1);
+INSERT INTO hole_score VALUES(214,12,16,5,4,3);
+INSERT INTO hole_score VALUES(215,12,17,5,4,3);
+INSERT INTO hole_score VALUES(216,12,18,5,4,3);
+CREATE TABLE IF NOT EXISTS "round" (
+	"id"	INTEGER NOT NULL,
+	"tournament_id"	INTEGER NOT NULL,
+	"player_id"	INTEGER NOT NULL,
+	"course_id"	INTEGER NOT NULL,
+	"round_number"	INTEGER NOT NULL,
+	"date_played"	VARCHAR(80) NOT NULL,
+	"player_handicap_index"	FLOAT,
+	"player_playing_handicap"	INTEGER,
+	"gross_score_front_9"	INTEGER,
+	"nett_score_front_9"	INTEGER,
+	"stableford_front_9"	INTEGER,
+	"gross_score_back_9"	INTEGER,
+	"nett_score_back_9"	INTEGER,
+	"stableford_back_9"	INTEGER,
+	"gross_score_total"	INTEGER,
+	"nett_score_total"	INTEGER,
+	"stableford_total"	INTEGER,
+	"is_finalized"	BOOLEAN NOT NULL DEFAULT 0,
+	PRIMARY KEY("id"),
+	FOREIGN KEY("course_id") REFERENCES "course"("id"),
+	FOREIGN KEY("player_id") REFERENCES "player"("id"),
+	FOREIGN KEY("tournament_id") REFERENCES "tournament"("id")
+);
+INSERT INTO round VALUES(1,1,1,1,1,'2025-08-11',4.5,5,40,35,19,36,36,18,76,71,37,1);
+INSERT INTO round VALUES(2,1,2,1,1,'2025-08-11',2.0,2,50,48,6,36,36,18,86,84,24,1);
+INSERT INTO round VALUES(3,1,3,1,1,'2025-08-11',4.0,4,46,42,12,36,36,18,82,78,30,1);
+INSERT INTO round VALUES(4,1,4,1,1,'2025-08-11',28.0,31,51,33,21,36,23,31,87,56,52,1);
+INSERT INTO round VALUES(5,1,1,2,2,'2025-08-11',4.0,5,47,42,15,45,45,6,92,87,21,1);
+INSERT INTO round VALUES(6,1,2,2,2,'2025-08-11',4.400000000000000356,5,47,42,15,45,45,6,92,87,21,1);
+INSERT INTO round VALUES(7,1,3,2,2,'2025-08-11',5.0,6,47,41,16,45,45,6,92,86,22,1);
+INSERT INTO round VALUES(8,1,4,2,2,'2025-08-11',20.0,24,47,32,25,45,36,15,92,68,40,1);
+INSERT INTO round VALUES(9,1,1,1,3,'2025-08-11',7.599999999999999645,8,55,47,8,34,34,19,89,81,27,1);
+INSERT INTO round VALUES(10,1,2,1,3,'2025-08-11',8.0,9,55,46,8,36,36,18,91,82,26,1);
+INSERT INTO round VALUES(11,1,3,1,3,'2025-08-11',8.199999999999999289,9,48,39,15,41,41,13,89,80,28,1);
+INSERT INTO round VALUES(12,1,4,1,3,'2025-08-11',18.0,20,41,30,22,45,36,18,86,66,40,1);
+CREATE TABLE handicap_adjustment (
+	stableford_score INTEGER NOT NULL, 
+	adjustment FLOAT NOT NULL, 
+	PRIMARY KEY (stableford_score)
+);
+INSERT INTO handicap_adjustment VALUES(1,21.80000000000000071);
+INSERT INTO handicap_adjustment VALUES(2,20.80000000000000071);
+INSERT INTO handicap_adjustment VALUES(3,19.80000000000000071);
+INSERT INTO handicap_adjustment VALUES(4,18.80000000000000071);
+INSERT INTO handicap_adjustment VALUES(5,17.80000000000000071);
+INSERT INTO handicap_adjustment VALUES(6,16.80000000000000071);
+INSERT INTO handicap_adjustment VALUES(7,15.80000000000000071);
+INSERT INTO handicap_adjustment VALUES(8,14.80000000000000071);
+INSERT INTO handicap_adjustment VALUES(9,13.80000000000000071);
+INSERT INTO handicap_adjustment VALUES(10,12.80000000000000071);
+INSERT INTO handicap_adjustment VALUES(11,11.80000000000000071);
+INSERT INTO handicap_adjustment VALUES(12,10.80000000000000072);
+INSERT INTO handicap_adjustment VALUES(13,9.80000000000000072);
+INSERT INTO handicap_adjustment VALUES(14,8.800000000000000711);
+INSERT INTO handicap_adjustment VALUES(15,7.799999999999999823);
+INSERT INTO handicap_adjustment VALUES(16,6.799999999999999823);
+INSERT INTO handicap_adjustment VALUES(17,5.799999999999999823);
+INSERT INTO handicap_adjustment VALUES(18,4.799999999999999823);
+INSERT INTO handicap_adjustment VALUES(19,4.400000000000000356);
+INSERT INTO handicap_adjustment VALUES(20,4.0);
+INSERT INTO handicap_adjustment VALUES(21,3.600000000000000088);
+INSERT INTO handicap_adjustment VALUES(22,3.200000000000000177);
+INSERT INTO handicap_adjustment VALUES(23,2.799999999999999823);
+INSERT INTO handicap_adjustment VALUES(24,2.399999999999999912);
+INSERT INTO handicap_adjustment VALUES(25,2.0);
+INSERT INTO handicap_adjustment VALUES(26,1.800000000000000044);
+INSERT INTO handicap_adjustment VALUES(27,1.600000000000000088);
+INSERT INTO handicap_adjustment VALUES(28,1.399999999999999912);
+INSERT INTO handicap_adjustment VALUES(29,1.199999999999999956);
+INSERT INTO handicap_adjustment VALUES(30,1.0);
+INSERT INTO handicap_adjustment VALUES(31,0.8000000000000000444);
+INSERT INTO handicap_adjustment VALUES(32,0.5999999999999999778);
+INSERT INTO handicap_adjustment VALUES(33,0.4000000000000000222);
+INSERT INTO handicap_adjustment VALUES(34,0.2000000000000000111);
+INSERT INTO handicap_adjustment VALUES(35,0.0);
+INSERT INTO handicap_adjustment VALUES(36,0.0);
+INSERT INTO handicap_adjustment VALUES(37,-0.5);
+INSERT INTO handicap_adjustment VALUES(38,-1.0);
+INSERT INTO handicap_adjustment VALUES(39,-1.5);
+INSERT INTO handicap_adjustment VALUES(40,-2.0);
+INSERT INTO handicap_adjustment VALUES(41,-2.5);
+INSERT INTO handicap_adjustment VALUES(42,-3.0);
+INSERT INTO handicap_adjustment VALUES(43,-3.5);
+INSERT INTO handicap_adjustment VALUES(44,-4.0);
+INSERT INTO handicap_adjustment VALUES(45,-4.5);
+INSERT INTO handicap_adjustment VALUES(46,-5.0);
+INSERT INTO handicap_adjustment VALUES(47,-5.5);
+INSERT INTO handicap_adjustment VALUES(48,-6.0);
+INSERT INTO handicap_adjustment VALUES(49,-6.5);
+INSERT INTO handicap_adjustment VALUES(50,-7.0);
+INSERT INTO handicap_adjustment VALUES(51,-7.5);
+INSERT INTO handicap_adjustment VALUES(52,-8.0);
+INSERT INTO handicap_adjustment VALUES(53,-8.5);
+INSERT INTO handicap_adjustment VALUES(54,-9.0);
+COMMIT;
