@@ -61,7 +61,6 @@ def run_migrations_online() -> None:
 
     """
     connectable_url = os.environ.get("DATABASE_URL")
-    print(f"DEBUG env.py: Raw DATABASE_URL: {connectable_url}")
 
     connect_args = {
         "ssl": {
@@ -78,10 +77,6 @@ def run_migrations_online() -> None:
             poolclass=pool.NullPool,
             connect_args=connect_args
         )
-    print(f"DEBUG env.py: Engine URL: {connectable.url}")
-    print(f"DEBUG env.py: Engine URL Query: {connectable.url.query}")
-    print(f"DEBUG env.py: Charset from URL: {connectable.url.query.get('charset')}")
-    print(f"DEBUG env.py: SSL Mode from URL: {connectable.url.query.get('ssl-mode')}")
 
     with connectable.connect() as connection:
         context.configure(
@@ -90,6 +85,12 @@ def run_migrations_online() -> None:
 
         with context.begin_transaction():
             context.run_migrations()
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
 
 
 if context.is_offline_mode():
