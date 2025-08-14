@@ -62,20 +62,13 @@ def run_migrations_online() -> None:
     """
     connectable_url = os.environ.get("DATABASE_URL")
 
-    connect_args = {
-        "ssl": {
-            "ca": "/etc/ssl/certs/ca-certificates.crt"
-        }
-    }
-
     if connectable_url:
-        connectable = create_engine(connectable_url, connect_args=connect_args)
+        connectable = create_engine(connectable_url)
     else:
         connectable = engine_from_config(
             config.get_section(config.config_ini_section, {}),
             prefix="sqlalchemy.",
             poolclass=pool.NullPool,
-            connect_args=connect_args
         )
 
     with connectable.connect() as connection:
