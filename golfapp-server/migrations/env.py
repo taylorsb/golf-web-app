@@ -63,12 +63,13 @@ def run_migrations_online() -> None:
     connectable_url = os.environ.get("DATABASE_URL")
 
     if connectable_url:
-        connectable = create_engine(connectable_url)
+        connectable = create_engine(connectable_url, query={'charset': 'utf8mb4', 'ssl_mode': 'REQUIRED'})
     else:
         connectable = engine_from_config(
             config.get_section(config.config_ini_section, {}),
             prefix="sqlalchemy.",
             poolclass=pool.NullPool,
+            query={'charset': 'utf8mb4', 'ssl_mode': 'REQUIRED'}
         )
 
     with connectable.connect() as connection:

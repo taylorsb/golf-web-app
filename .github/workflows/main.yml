@@ -42,9 +42,9 @@ jobs:
         pip install PyMySQL # Ensure MySQL driver is installed
 
     - name: Run Alembic Migrations
+      env:
+        DATABASE_URL: ${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?charset=utf8mb4
       run: |
-        export DATABASE_URL="${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?charset=utf8mb4&ssl-mode=REQUIRED"
-        echo "DEBUG: DATABASE_URL set to: $DATABASE_URL"
         alembic -c alembic.ini upgrade head
 
     - name: Deploy to Azure Container Apps
@@ -56,4 +56,4 @@ jobs:
         imageToDeploy: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
         acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
         env: |
-          DATABASE_URL=${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?charset=utf8mb4&ssl-mode=REQUIRED
+          DATABASE_URL=${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?charset=utf8mb4
