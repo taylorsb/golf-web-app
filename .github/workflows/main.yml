@@ -64,4 +64,4 @@ jobs:
         imageToDeploy: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
         acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
         env: |
-          DATABASE_URL=${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?charset=utf8mb4
+          DATABASE_URL="${{ env.DATABASE_URL }}"
