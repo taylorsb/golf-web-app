@@ -30,6 +30,24 @@ jobs:
         docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest -f golfapp-server/Dockerfile golfapp-server
         docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
 
+    - name: Set up Python for Alembic
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9' # Use a compatible Python version
+
+    - name: Install Python dependencies for Alembic
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r golfapp-server/requirements.txt
+        pip install PyMySQL # Ensure MySQL driver is installed
+
+    - name: Run Alembic Migrations
+      env:
+        DATABASE_URL: ${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}
+      run: |
+        cd golfapp-server
+        alembic upgrade head
+
     - name: Deploy to Azure Container Apps
       uses: azure/container-apps-deploy-action@v1
       with:
@@ -38,6 +56,5 @@ jobs:
         resourceGroup: golf-app-rg
         imageToDeploy: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
         acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
-        # Add environment variables for the Flask app if needed
-        # env: |
-        #   DATABASE_URL=${{ secrets.DATABASE_URL }}
+        env: |
+          DATABASE_URL=${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}
