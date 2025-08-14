@@ -61,6 +61,7 @@ def run_migrations_online() -> None:
 
     """
     connectable_url = os.environ.get("DATABASE_URL")
+    print(f"DATABASE_URL in env.py: {connectable_url}")
 
     if connectable_url:
         connectable = create_engine(connectable_url)

@@ -43,7 +43,7 @@ jobs:
 
     - name: Run Alembic Migrations
       env:
-        DATABASE_URL: ${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?charset=utf8&ssl_verify_cert=true&ssl_ca=/etc/ssl/certs/ca-certificates.crt
+        DATABASE_URL: ${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?charset=utf8mb4&ssl-mode=REQUIRED
       run: |
         alembic -c alembic.ini upgrade head
 
@@ -56,4 +56,4 @@ jobs:
         imageToDeploy: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
         acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
         env: |
-          DATABASE_URL=${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}
+          DATABASE_URL=${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?charset=utf8mb4&ssl-mode=REQUIRED
