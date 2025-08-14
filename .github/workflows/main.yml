@@ -46,7 +46,7 @@ jobs:
         DATABASE_URL: ${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}
       run: |
         cd golfapp-server
-        alembic upgrade head
+        alembic -c ../alembic.ini upgrade head
 
     - name: Deploy to Azure Container Apps
       uses: azure/container-apps-deploy-action@v1
