@@ -41,9 +41,17 @@ jobs:
         pip install -r golfapp-server/requirements.txt
         pip install PyMySQL # Ensure MySQL driver is installed
 
+    - name: Build DATABASE_URL for Azure MySQL
+      run: |
+        if [[ "${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}" == *\?* ]]; then
+          echo "DATABASE_URL=${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}&charset=utf8mb4&ssl-mode=REQUIRED" >> $GITHUB_ENV
+        else
+          echo "DATABASE_URL=${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?charset=utf8mb4&ssl-mode=REQUIRED" >> $GITHUB_ENV
+        fi
+
     - name: Run Alembic Migrations
       env:
-        DATABASE_URL: ${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?charset=utf8mb4
+        DATABASE_URL: ${{ env.DATABASE_URL }}
       run: |
         alembic -c alembic.ini upgrade head
 
@@ -55,5 +63,5 @@ jobs:
         resourceGroup: golf-app-rg
         imageToDeploy: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
         acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
-        env: |
+                env: |
           DATABASE_URL=${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?charset=utf8mb4
