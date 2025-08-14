@@ -43,7 +43,7 @@ jobs:
 
     - name: Run Alembic Migrations
       env:
-        DATABASE_URL: ${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?ssl_ca=/etc/ssl/certs/ca-certificates.crt
+        DATABASE_URL: ${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}?ssl_ca=/etc/ssl/certs/ca-certificates.crt&charset=utf8mb4
       run: |
         alembic -c alembic.ini upgrade head
 
