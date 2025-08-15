@@ -39,10 +39,7 @@ jobs:
           imageToDeploy: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
           acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
           environmentVariables: |
-            - name: DATABASE_URL
-              value: ${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}
-            - name: TEST_VAR
-              value: "HelloFromGitHub"
+            [{"name": "DATABASE_URL", "value": "${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}"}, {"name": "TEST_VAR", "value": "HelloFromGitHub"}]
 
   run-migrations:
     needs: build-and-deploy
