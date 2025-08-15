@@ -38,8 +38,11 @@ jobs:
           resourceGroup: golf-app-rg
           imageToDeploy: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
           acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
-          env: |
-            DATABASE_URL="${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}"
+          environmentVariables: |
+            - name: DATABASE_URL
+              value: ${{ secrets.AZURE_MYSQL_CONNECTION_STRING }}
+            - name: TEST_VAR
+              value: "HelloFromGitHub"
 
   run-migrations:
     needs: build-and-deploy
