@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './PlayerManager.css';
+import API_URL from './config';
 
 const PlayerManager = () => {
   const [players, setPlayers] = useState([]);
@@ -12,13 +13,13 @@ const PlayerManager = () => {
   }, []);
 
   const fetchPlayers = async () => {
-    const response = await fetch('http://127.0.0.1:5000/players');
+    const response = await fetch(`${API_URL}/players`);
     const data = await response.json();
     setPlayers(data);
   };
 
   const handleAddPlayer = async () => {
-    const response = await fetch('http://127.0.0.1:5000/players', {
+    const response = await fetch(`${API_URL}/players`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -38,7 +39,7 @@ const PlayerManager = () => {
   };
 
   const handleUpdatePlayer = async () => {
-    await fetch(`http://127.0.0.1:5000/players/${editingPlayer.id}`, {
+    await fetch(`${API_URL}/players/${editingPlayer.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -52,7 +53,7 @@ const PlayerManager = () => {
   };
 
   const handleDeletePlayer = async (id) => {
-    await fetch(`http://127.0.0.1:5000/players/${id}`, {
+    await fetch(`${API_URL}/players/${id}`, {
       method: 'DELETE',
     });
     fetchPlayers();

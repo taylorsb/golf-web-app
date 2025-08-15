@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './TournamentManager.css';
+import API_URL from './config';
 
 function TournamentManager() {
   const [tournaments, setTournaments] = useState([]);
@@ -24,25 +25,25 @@ function TournamentManager() {
   }, []);
 
   const fetchPlayers = async () => {
-    const response = await fetch('http://127.0.0.1:5000/players');
+    const response = await fetch(`${API_URL}/players`);
     const data = await response.json();
     setPlayers(data);
   };
 
   const fetchCourses = async () => {
-    const response = await fetch('http://127.0.0.1:5000/courses');
+    const response = await fetch(`${API_URL}/courses`);
     const data = await response.json();
     setCourses(data);
   };
 
   const fetchTournaments = async () => {
-    const response = await fetch('http://127.0.0.1:5000/tournaments');
+    const response = await fetch(`${API_URL}/tournaments`);
     const data = await response.json();
     setTournaments(data);
   };
 
   const handleAddTournament = async () => {
-    const response = await fetch('http://127.0.0.1:5000/tournaments', {
+    const response = await fetch(`${API_URL}/tournaments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -128,7 +129,7 @@ function TournamentManager() {
 
     // Add players
     if (playersToAdd.length > 0) {
-      await fetch(`http://127.0.0.1:5000/tournaments/${tournamentId}/players`, {
+      await fetch(`${API_URL}/tournaments/${tournamentId}/players`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ player_ids: playersToAdd.map(p => p.id) }),
@@ -137,7 +138,7 @@ function TournamentManager() {
 
     // Remove players
     if (playersToRemove.length > 0) {
-      await fetch(`http://127.0.0.1:5000/tournaments/${tournamentId}/players`, {
+      await fetch(`${API_URL}/tournaments/${tournamentId}/players`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ player_ids: playersToRemove.map(p => p.id) }),
@@ -146,7 +147,7 @@ function TournamentManager() {
 
     // Add courses
     if (coursesToAdd.length > 0) {
-      await fetch(`http://127.0.0.1:5000/tournaments/${tournamentId}/courses`, {
+      await fetch(`${API_URL}/tournaments/${tournamentId}/courses`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ courses: coursesToAdd.map(c => ({ id: c.id, sequence_number: c.sequence_number })) }),
@@ -155,7 +156,7 @@ function TournamentManager() {
 
     // Remove courses
     if (coursesToRemove.length > 0) {
-      await fetch(`http://127.0.0.1:5000/tournaments/${tournamentId}/courses`, {
+      await fetch(`${API_URL}/tournaments/${tournamentId}/courses`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ courses: coursesToRemove.map(c => ({ id: c.id, sequence_number: c.sequence_number })) }),
@@ -163,7 +164,7 @@ function TournamentManager() {
     }
 
     // Refresh the tournament data after all changes are submitted
-    const updatedTournamentResponse = await fetch(`http://127.0.0.1:5000/tournaments/${tournamentId}`);
+    const updatedTournamentResponse = await fetch(`${API_URL}/tournaments/${tournamentId}`);
     const updatedTournamentData = await updatedTournamentResponse.json();
     setEditingTournament(updatedTournamentData);
     setAssignedPlayers(updatedTournamentData.players);
@@ -181,7 +182,7 @@ function TournamentManager() {
   };
 
   const handleUpdateTournament = async () => {
-    await fetch(`http://127.0.0.1:5000/tournaments/${editingTournament.id}`, {
+    await fetch(`${API_URL}/tournaments/${editingTournament.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -200,7 +201,7 @@ function TournamentManager() {
   };
 
   const handleDeleteTournament = async (id) => {
-    await fetch(`http://127.0.0.1:5000/tournaments/${id}`, {
+    await fetch(`${API_URL}/tournaments/${id}`, {
       method: 'DELETE',
     });
     fetchTournaments();

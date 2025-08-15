@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './ScorecardEntry.css';
+import API_URL from './config';
 
 const ScorecardEntry = () => {
   const [tournaments, setTournaments] = useState([]);
@@ -37,7 +38,7 @@ const ScorecardEntry = () => {
     }));
 
     try {
-      const response = await fetch('http://localhost:5000/initiate_round', {
+      const response = await fetch(`${API_URL}/initiate_round`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ const ScorecardEntry = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:5000/rounds/${roundId}/scores`, {
+        const response = await fetch(`${API_URL}/rounds/${roundId}/scores`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -169,7 +170,7 @@ const ScorecardEntry = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/tournaments/${selectedTournament}/rounds/end`, {
+      const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/rounds/end`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +192,7 @@ const ScorecardEntry = () => {
       setIsCurrentRoundFinalized(true); // Mark as finalized
 
       // Fetch updated player handicaps
-      const updatedPlayersResponse = await fetch(`http://localhost:5000/tournaments/${selectedTournament}/players`);
+      const updatedPlayersResponse = await fetch(`${API_URL}/tournaments/${selectedTournament}/players`);
       if (updatedPlayersResponse.ok) {
         const updatedPlayersData = await updatedPlayersResponse.json();
         const newHandicaps = {};
@@ -216,7 +217,7 @@ const ScorecardEntry = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/tournaments/${selectedTournament}/rounds/reopen_all`, {
+      const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/rounds/reopen_all`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -264,7 +265,7 @@ const ScorecardEntry = () => {
   useEffect(() => {
     const fetchTournaments = async () => {
       try {
-        const response = await fetch('http://localhost:5000/tournaments');
+        const response = await fetch(`${API_URL}/tournaments`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -282,7 +283,7 @@ const ScorecardEntry = () => {
     if (selectedTournament) {
       const fetchPlayers = async () => {
         try {
-          const response = await fetch(`http://localhost:5000/tournaments/${selectedTournament}/players`);
+          const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/players`);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
@@ -295,7 +296,7 @@ const ScorecardEntry = () => {
 
       const fetchCoursesForTournament = async () => {
         try {
-          const response = await fetch(`http://localhost:5000/tournaments/${selectedTournament}/courses`);
+          const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/courses`);
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
@@ -373,7 +374,7 @@ const ScorecardEntry = () => {
 
       // Fetch all existing rounds for all players in a single API call
       console.log(`Fetching existing rounds for players: ${playerIdsString}, course ${selectedCourse}, sequence ${selectedCourseSequence}, tournament ${selectedTournament}`);
-      const allExistingRoundsResponse = await fetch(`http://localhost:5000/rounds?tournament_id=${selectedTournament}&player_ids=${playerIdsString}&course_id=${selectedCourse}&sequence_number=${selectedCourseSequence}`);
+      const allExistingRoundsResponse = await fetch(`${API_URL}/rounds?tournament_id=${selectedTournament}&player_ids=${playerIdsString}&course_id=${selectedCourse}&sequence_number=${selectedCourseSequence}`);
       if (!allExistingRoundsResponse.ok) {
         console.error("Error fetching all existing rounds.");
         allPlayersHaveExistingRound = false; // If fetch itself fails, assume no rounds for any player

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './CourseManager.css';
+import API_URL from './config';
 
 function CourseManager() {
   const [courses, setCourses] = useState([]);
@@ -16,13 +17,13 @@ function CourseManager() {
   }, []);
 
   const fetchCourses = async () => {
-    const response = await fetch('http://127.0.0.1:5000/courses');
+    const response = await fetch(`${API_URL}/courses`);
     const data = await response.json();
     setCourses(data);
   };
 
   const handleAddCourse = async () => {
-    const response = await fetch('http://127.0.0.1:5000/courses', {
+    const response = await fetch(`${API_URL}/courses`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +52,7 @@ function CourseManager() {
   };
 
   const handleUpdateCourse = async () => {
-    await fetch(`http://127.0.0.1:5000/courses/${editingCourse.id}`, {
+    await fetch(`${API_URL}/courses/${editingCourse.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -69,11 +70,12 @@ function CourseManager() {
   };
 
   const handleDeleteCourse = async (id) => {
-    await fetch(`http://127.0.0.1:5000/courses/${id}`, {
+    await fetch(`${API_URL}/courses/${id}`, {
       method: 'DELETE',
     });
     fetchCourses();
   };
+
 
   const resetForm = () => {
     setEditingCourse(null);

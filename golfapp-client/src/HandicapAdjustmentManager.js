@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './HandicapAdjustmentManager.css';
+import API_URL from './config';
 
 const HandicapAdjustmentManager = () => {
   const [adjustments, setAdjustments] = useState([]);
@@ -13,7 +14,7 @@ const HandicapAdjustmentManager = () => {
 
   const fetchAdjustments = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5000/handicap_adjustments');
+      const response = await fetch(`${API_URL}/handicap_adjustments`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -38,7 +39,7 @@ const HandicapAdjustmentManager = () => {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/handicap_adjustments', {
+      const response = await fetch(`${API_URL}/handicap_adjustments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,7 +79,7 @@ const HandicapAdjustmentManager = () => {
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:5000/handicap_adjustments/${editingAdjustment.stableford_score}`, {
+      const response = await fetch(`${API_URL}/handicap_adjustments/${editingAdjustment.stableford_score}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +105,7 @@ const HandicapAdjustmentManager = () => {
       return;
     }
     try {
-      const response = await fetch(`http://127.0.0.1:5000/handicap_adjustments/${stableford_score}`, {
+      const response = await fetch(`${API_URL}/handicap_adjustments/${stableford_score}`, {
         method: 'DELETE',
       });
       if (!response.ok) {

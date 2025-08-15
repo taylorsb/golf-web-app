@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Leaderboard.css';
+import API_URL from './config';
 
 const Leaderboard = () => {
   const [tournaments, setTournaments] = useState([]);
@@ -16,7 +17,7 @@ const Leaderboard = () => {
   useEffect(() => {
     const fetchTournaments = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5000/tournaments');
+        const response = await fetch(`${API_URL}/tournaments`);
         const data = await response.json();
         setTournaments(data);
         if (data.length > 0) {
@@ -37,7 +38,7 @@ const Leaderboard = () => {
     const fetchCourses = async () => {
       if (selectedTournament) {
         try {
-          const response = await fetch(`http://127.0.0.1:5000/tournaments/${selectedTournament}/courses`);
+          const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/courses`);
           const data = await response.json();
           setCourses(data);
           if (data.length > 0) {
@@ -64,7 +65,7 @@ const Leaderboard = () => {
     const fetchRoundsData = async () => {
       if (selectedTournament) {
         try {
-          const response = await fetch(`http://127.0.0.1:5000/tournaments/${selectedTournament}/rounds_summary`);
+          const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/rounds_summary`);
           const data = await response.json();
           setAllRoundsData(data);
         } catch (error) {
