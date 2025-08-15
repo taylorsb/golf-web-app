@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - production-azure
-    paths:
-      - 'golfapp-client/build/**'
+        paths:
+      - 'golfapp-client/src/**'
 
 jobs:
   deploy:
