@@ -11,6 +11,7 @@ on:
 env:
   AZURE_CONTAINER_REGISTRY: golfappacrsimon
   IMAGE_NAME: golf-app-server
+  IMAGE_TAG: ${{ github.sha }}
 
 jobs:
   build-and-deploy:
@@ -27,8 +28,8 @@ jobs:
       - name: Build and push Docker image
         run: |
           az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
-          docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest -f golfapp-server/Dockerfile golfapp-server
-          docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+          docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} -f golfapp-server/Dockerfile golfapp-server
+          docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
       - name: Deploy to Azure Container Apps
         uses: azure/container-apps-deploy-action@v1
@@ -36,7 +37,7 @@ jobs:
           appSourcePath: golfapp-server
           containerAppName: golf-app-server-simon
           resourceGroup: golf-app-rg
-          imageToDeploy: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:latest
+          imageToDeploy: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
           environmentVariables: "DATABASE_URL=secretref:azure-mysql-connection-string TEST_VAR=HelloFromGitHub"
 
