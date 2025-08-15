@@ -872,3 +872,5 @@ def delete_handicap_adjustment(stableford_score):
     db.session.delete(adjustment)
     db.session.commit()
     return '', 204
+
+# This is a non-functional change to trigger the workflow.
