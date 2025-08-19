@@ -19,7 +19,7 @@ function Home() {
     <div className="home-container" style={homeStyle}>
       <header className="app-header">
         <h1>
-          <span role="img" aria-label="golf-icon">⛳</span> Golf Tournament Manager
+          <span role="img" aria-label="golf-icon">⛳</span> Tournament Manager
         </h1>
         <p>
           <em>“Golf is the closest game to the game we call life. You get bad breaks from good shots;

@@ -32,6 +32,7 @@
 .app-header h1 {
   font-size: 3rem;
   margin-bottom: 0.5rem;
+  font-weight: 100;
 }
 
 .app-header p {
