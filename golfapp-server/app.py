@@ -26,6 +26,7 @@ app = Flask(__name__)
 
 db_url = os.environ.get("DATABASE_URL")
 if db_url:
+    print(f"DATABASE_URL: {db_url}")
     # Ensure pymysql dialect
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url.replace("mysql://", "mysql+pymysql://")
 
