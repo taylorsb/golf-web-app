@@ -1,3 +1,5 @@
+print("app.py is being executed")
+
 # Another non-functional change to trigger workflow (25)
 from flask import Flask, request, jsonify
 # Another non-functional change to trigger workflow (24)
@@ -24,12 +26,9 @@ def _detect_system_ca():
 
 app = Flask(__name__)
 
-db_url = os.environ.get("DATABASE_URL")
-if db_url:
-    print(f"DATABASE_URL: {db_url}")
-    # Ensure pymysql dialect
-    app.config["SQLALCHEMY_DATABASE_URI"] = db_url.replace("mysql://", "mysql+pymysql://")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 
+if "mysql" in app.config["SQLALCHEMY_DATABASE_URI"]:
     ssl_args = {}
     # Prefer system bundle; only fall back to your local PEM if you’ve actually baked it into the image
     ca_path = _detect_system_ca()
