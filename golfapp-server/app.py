@@ -10,45 +10,78 @@ from sqlalchemy import func
 import ssl
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
+from sqlalchemy.engine.url import make_url, URL
+
 app = Flask(__name__)
 
-# remove any bad SSL keys that might be lurking in DATABASE_URL
 BAD_SSL_KEYS = {
     "ssl_args", "ssl_ca", "ssl_cert", "ssl_key", "sslmode",
     "ssl_verify", "ssl_verify_cert", "sslverify", "ssl_verify_identity"
 }
 
-def _strip_bad_ssl_params(url: str) -> str:
-    if not url:
-        return url
-    u = urlsplit(url)
-    q = [(k, v) for k, v in parse_qsl(u.query, keep_blank_values=True) if k not in BAD_SSL_KEYS]
-    return urlunsplit((u.scheme, u.netloc, u.path, urlencode(q, doseq=True), u.fragment))
+def _detect_system_ca():
+    for p in (
+        "/etc/ssl/certs/ca-certificates.crt",  # Debian/Ubuntu
+        "/etc/ssl/cert.pem",                   # Alpine
+        "/etc/pki/tls/certs/ca-bundle.crt",    # RHEL/CentOS
+        "/app/certs/combined-ca-certificates.pem",  # your custom bundle if you COPY'd it
+    ):
+        if os.path.exists(p):
+            return p
+    return None
 
-# Build a clean SQLALCHEMY_DATABASE_URI
-raw_url = (os.environ.get("DATABASE_URL") or "").strip()
-if raw_url:
-    # force pymysql dialect
-    clean_url = raw_url.replace("mysql://", "mysql+pymysql://", 1)
-    clean_url = _strip_bad_ssl_params(clean_url)
-    print(f"DEBUG: Clean URL: {clean_url}")
-    print(f"DEBUG: Scheme: {urlsplit(clean_url).scheme}")
+def _normalize_mysql_url(raw_url: str) -> str | None:
+    if not raw_url:
+        return None
+    raw_url = raw_url.strip().strip('"').strip(''')
+
+    # Force the scheme to mysql+pymysql regardless of what's in the env var
+    if "://" not in raw_url:
+        return None
+    scheme, rest = raw_url.split("://", 1)
+    if scheme.startswith("mysql+"):
+        scheme = "mysql+pymysql"
+    elif scheme == "mysql":
+        scheme = "mysql+pymysql"
+    normalized = f"{scheme}://{rest}"
+
+    # Parse and rebuild with SQLAlchemy's URL to avoid funky driver specs
+    u = make_url(normalized)
+
+    # Strip any bad SSL keys and ensure charset
+    query = dict(u.query)
+    for k in list(query.keys()):
+        if k in BAD_SSL_KEYS:
+            query.pop(k, None)
+    query.setdefault("charset", "utf8mb4")
+
+    # Recreate with the exact drivername we want
+    clean_url = URL.create(
+        drivername="mysql+pymysql",
+        username=u.username,
+        password=u.password,
+        host=u.host,
+        port=u.port or 3306,
+        database=u.database,
+        query=query,
+    )
+    return str(clean_url)
+
+db_url_raw = os.environ.get("DATABASE_URL", "")
+clean_url = _normalize_mysql_url(db_url_raw)
+
+if clean_url:
     app.config["SQLALCHEMY_DATABASE_URI"] = clean_url
 else:
+    # local/dev fallback
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db"
 
-# Choose a CA that actually exists in your container
-CA_CANDIDATES = (
-    "/etc/ssl/certs/ca-certificates.crt",  # Debian/Ubuntu
-    "/etc/ssl/cert.pem",                   # Alpine
-    "/etc/pki/tls/certs/ca-bundle.crt",    # RHEL/CentOS
-    "/app/certs/combined-ca-certificates.pem",  # your custom bundle if you COPY'd it
-)
-ca_path = next((p for p in CA_CANDIDATES if os.path.exists(p)), None)
-
+# Choose a CA bundle that actually exists
+ca_path = _detect_system_ca()
 engine_opts = {"pool_pre_ping": True}
 if ca_path:
-    # PyMySQL expects a single 'ssl' dict; do NOT use 'ssl_ca' / 'ssl_cert' / 'ssl_key' here
+    # PyMySQL expects a single 'ssl' dict; do NOT use 'ssl_ca'
     engine_opts["connect_args"] = {"ssl": {"ca": ca_path}}
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = engine_opts
 
