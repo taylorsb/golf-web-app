@@ -12,6 +12,10 @@ from sqlalchemy import func
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+if 'mysql' in app.config['SQLALCHEMY_DATABASE_URI']:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'connect_args': {'ssl_ca': os.path.join(os.path.dirname(os.path.abspath(__file__)), 'combined-ca-certificates.pem')}}
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db) # Initialize Migrate
 CORS(app) # Enable CORS for all routes
