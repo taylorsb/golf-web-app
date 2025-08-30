@@ -8,28 +8,47 @@ from datetime import date
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 import ssl
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
 app = Flask(__name__)
 
-def _detect_system_ca():
-    # Common CA bundle locations across Debian/Ubuntu, Alpine, RHEL
-    for p in (
-        "/etc/ssl/certs/ca-certificates.crt",
-        "/etc/ssl/cert.pem",
-        "/etc/pki/tls/certs/ca-bundle.crt",
-    ):
-        if os.path.exists(p):
-            return p
-    return None
-
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "connect_args": {
-        "ssl_ca": "/app/certs/combined-ca-certificates.pem"
-    },
-    "pool_pre_ping": True
+# remove any bad SSL keys that might be lurking in DATABASE_URL
+BAD_SSL_KEYS = {
+    "ssl_args", "ssl_ca", "ssl_cert", "ssl_key", "sslmode",
+    "ssl_verify", "ssl_verify_cert", "sslverify", "ssl_verify_identity"
 }
+
+def _strip_bad_ssl_params(url: str) -> str:
+    if not url:
+        return url
+    u = urlsplit(url)
+    q = [(k, v) for k, v in parse_qsl(u.query, keep_blank_values=True) if k not in BAD_SSL_KEYS]
+    return urlunsplit((u.scheme, u.netloc, u.path, urlencode(q, doseq=True), u.fragment))
+
+# Build a clean SQLALCHEMY_DATABASE_URI
+raw_url = (os.environ.get("DATABASE_URL") or "").strip()
+if raw_url:
+    # force pymysql dialect
+    clean_url = raw_url.replace("mysql://", "mysql+pymysql://", 1)
+    clean_url = _strip_bad_ssl_params(clean_url)
+    app.config["SQLALCHEMY_DATABASE_URI"] = clean_url
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db"
+
+# Choose a CA that actually exists in your container
+CA_CANDIDATES = (
+    "/etc/ssl/certs/ca-certificates.crt",  # Debian/Ubuntu
+    "/etc/ssl/cert.pem",                   # Alpine
+    "/etc/pki/tls/certs/ca-bundle.crt",    # RHEL/CentOS
+    "/app/certs/combined-ca-certificates.pem",  # your custom bundle if you COPY'd it
+)
+ca_path = next((p for p in CA_CANDIDATES if os.path.exists(p)), None)
+
+engine_opts = {"pool_pre_ping": True}
+if ca_path:
+    # PyMySQL expects a single 'ssl' dict; do NOT use 'ssl_ca' / 'ssl_cert' / 'ssl_key' here
+    engine_opts["connect_args"] = {"ssl": {"ca": ca_path}}
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = engine_opts
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
