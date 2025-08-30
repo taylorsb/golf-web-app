@@ -11,7 +11,14 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db') + "?ssl_ca=" + os.path.join(os.path.dirname(os.path.abspath(__file__)), 'combined-ca-certificates.pem')
+if os.path.exists('/run/secrets/azure-mysql-connection-string'):
+    with open('/run/secrets/azure-mysql-connection-string', 'r') as f:
+        database_url = f.read().strip()
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url.replace('mysql://', 'mysql+pymysql://')
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'connect_args': {'ssl': {'ca': os.path.join(os.path.dirname(os.path.abspath(__file__)), 'combined-ca-certificates.pem')}}}
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db) # Initialize Migrate
