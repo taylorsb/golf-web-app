@@ -29,14 +29,19 @@ app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "connect_args": {
-        "ssl": {
-            "ca": "/etc/ssl/certs/ca-certificates.crt"
-        }
-    },
-    "pool_pre_ping": True
-}
+from flask import Flask, request, jsonify
+# Another non-functional change to trigger workflow (24)
+from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+from flask_migrate import Migrate # Import Migrate
+import os
+import json # Import json module
+from datetime import date
+from sqlalchemy.orm import joinedload
+from sqlalchemy import func
+import ssl
+
+app = Flask(__name__)
 
 
 # Association table for Tournament and Player
