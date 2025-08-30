@@ -34,7 +34,7 @@ def _detect_system_ca():
 def _normalize_mysql_url(raw_url: str) -> str | None:
     if not raw_url:
         return None
-    raw_url = raw_url.strip().strip('"').strip(''')
+    raw_url = raw_url.strip().strip('"').strip("'")
 
     # Force the scheme to mysql+pymysql regardless of what's in the env var
     if "://" not in raw_url:
