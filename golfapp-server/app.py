@@ -61,8 +61,6 @@ with app.app_context():
         app.logger.exception("DB startup probe failed")
         raise
 
-migrate = Migrate(app, db) # Initialize Migrate
-CORS(app) # Enable CORS for all routes
 
 # Association table for Tournament and Player
 tournament_players = db.Table('tournament_players',
