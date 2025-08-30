@@ -1,4 +1,5 @@
-print("app.py is being executed")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 # Another non-functional change to trigger workflow (25)
 from flask import Flask, request, jsonify
