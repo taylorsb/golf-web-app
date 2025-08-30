@@ -28,38 +28,14 @@ app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 
-if "mysql" in app.config["SQLALCHEMY_DATABASE_URI"]:
-    ssl_args = {}
-    # Prefer system bundle; only fall back to your local PEM if you’ve actually baked it into the image
-    ca_path = _detect_system_ca()
-    if not ca_path:
-        local_pem = os.path.join(os.path.dirname(os.path.abspath(__file__)), "combined-ca-certificates.pem")
-        if os.path.exists(local_pem):
-            ca_path = local_pem
-
-    if ca_path:
-        ssl_args = {"ssl": {"ca": ca_path}}  # keep it simple for PyMySQL
-
-    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-        "connect_args": ssl_args,
-        "pool_pre_ping": True,
-        # optional hardening for server timeouts:
-        # "pool_recycle": 1800,   # seconds
-        # "pool_timeout": 30,
-    }
-else:
-    # Local/dev fallback
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db"
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-with app.app_context():
-    try:
-        db.session.execute(db.text("SELECT 1"))
-    except Exception as e:
-        app.logger.exception("DB startup probe failed")
-        raise
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "connect_args": {
+        "ssl": {
+            "ca": "/etc/ssl/certs/ca-certificates.crt"
+        }
+    },
+    "pool_pre_ping": True
+}
 
 
 # Association table for Tournament and Player
