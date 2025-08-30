@@ -26,9 +26,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "connect_args": {
-        "ssl": {
-            "ca": "/etc/ssl/certs/ca-certificates.crt"
-        }
+        "ssl_ca": "/app/certs/combined-ca-certificates.pem"
     },
     "pool_pre_ping": True
 }
