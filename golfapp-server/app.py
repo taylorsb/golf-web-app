@@ -31,6 +31,8 @@ if raw_url:
     # force pymysql dialect
     clean_url = raw_url.replace("mysql://", "mysql+pymysql://", 1)
     clean_url = _strip_bad_ssl_params(clean_url)
+    print(f"DEBUG: Clean URL: {clean_url}")
+    print(f"DEBUG: Scheme: {urlsplit(clean_url).scheme}")
     app.config["SQLALCHEMY_DATABASE_URI"] = clean_url
 else:
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db"
