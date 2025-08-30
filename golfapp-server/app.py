@@ -1,58 +1,4 @@
 from flask import Flask, request, jsonify
-# Another non-functional change to trigger workflow (24)
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
-from flask_migrate import Migrate # Import Migrate
-import os
-import json # Import json module
-from datetime import date
-from sqlalchemy.orm import joinedload
-from sqlalchemy import func
-import ssl
-
-app = Flask(__name__)
-
-def _detect_system_ca():
-    # Common CA bundle locations across Debian/Ubuntu, Alpine, RHEL
-    for p in (
-        "/etc/ssl/certs/ca-certificates.crt",
-        "/etc/ssl/cert.pem",
-        "/etc/pki/tls/certs/ca-bundle.crt",
-    ):
-        if os.path.exists(p):
-            return p
-    return None
-
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-
-from flask import Flask, request, jsonify
-# Another non-functional change to trigger workflow (24)
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
-from flask_migrate import Migrate # Import Migrate
-import os
-import json # Import json module
-from datetime import date
-from sqlalchemy.orm import joinedload
-from sqlalchemy import func
-import ssl
-
-app = Flask(__name__)
-
-def _detect_system_ca():
-    # Common CA bundle locations across Debian/Ubuntu, Alpine, RHEL
-    for p in (
-        "/etc/ssl/certs/ca-certificates.crt",
-        "/etc/ssl/cert.pem",
-        "/etc/pki/tls/certs/ca-bundle.crt",
-    ):
-        if os.path.exists(p):
-            return p
-    return None
-
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-
-from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_migrate import Migrate # Import Migrate
@@ -92,60 +38,6 @@ db = SQLAlchemy(app)
 
 migrate = Migrate(app, db) # Initialize Migrate
 CORS(app) # Enable CORS for all routes
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-migrate = Migrate(app, db) # Initialize Migrate
-CORS(app) # Enable CORS for all routes
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-migrate = Migrate(app, db) # Initialize Migrate
-CORS(app) # Enable CORS for all routes
-
-# Another non-functional change to trigger workflow (25)
-from flask import Flask, request, jsonify
-# Another non-functional change to trigger workflow (24)
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
-from flask_migrate import Migrate # Import Migrate
-import os
-import json # Import json module
-from datetime import date
-from sqlalchemy.orm import joinedload
-from sqlalchemy import func
-import ssl
-
-def _detect_system_ca():
-    # Common CA bundle locations across Debian/Ubuntu, Alpine, RHEL
-    for p in (
-        "/etc/ssl/certs/ca-certificates.crt",
-        "/etc/ssl/cert.pem",
-        "/etc/pki/tls/certs/ca-bundle.crt",
-    ):
-        if os.path.exists(p):
-            return p
-    return None
-
-app = Flask(__name__)
-
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-
-from flask import Flask, request, jsonify
-# Another non-functional change to trigger workflow (24)
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
-from flask_migrate import Migrate # Import Migrate
-import os
-import json # Import json module
-from datetime import date
-from sqlalchemy.orm import joinedload
-from sqlalchemy import func
-import ssl
-
-app = Flask(__name__)
 
 
 # Association table for Tournament and Player
