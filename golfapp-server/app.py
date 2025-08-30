@@ -9,29 +9,58 @@ import json # Import json module
 from datetime import date
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
-
-app = Flask(__name__)
 import ssl
 
+def _detect_system_ca():
+    # Common CA bundle locations across Debian/Ubuntu, Alpine, RHEL
+    for p in (
+        "/etc/ssl/certs/ca-certificates.crt",
+        "/etc/ssl/cert.pem",
+        "/etc/pki/tls/certs/ca-bundle.crt",
+    ):
+        if os.path.exists(p):
+            return p
+    return None
+
 app = Flask(__name__)
 
-if os.environ.get('DATABASE_URL'):
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace('mysql://', 'mysql+pymysql://')
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'connect_args': {
-            "ssl": {
-                "ca": os.path.join(os.path.dirname(os.path.abspath(__file__)), 'combined-ca-certificates.pem'),
-                "check_hostname": True,
-                "cert_reqs": ssl.CERT_REQUIRED,
-            }
-        },
-        'pool_pre_ping': True
+db_url = os.environ.get("DATABASE_URL")
+if db_url:
+    # Ensure pymysql dialect
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url.replace("mysql://", "mysql+pymysql://")
+
+    ssl_args = {}
+    # Prefer system bundle; only fall back to your local PEM if you’ve actually baked it into the image
+    ca_path = _detect_system_ca()
+    if not ca_path:
+        local_pem = os.path.join(os.path.dirname(os.path.abspath(__file__)), "combined-ca-certificates.pem")
+        if os.path.exists(local_pem):
+            ca_path = local_pem
+
+    if ca_path:
+        ssl_args = {"ssl": {"ca": ca_path}}  # keep it simple for PyMySQL
+
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "connect_args": ssl_args,
+        "pool_pre_ping": True,
+        # optional hardening for server timeouts:
+        # "pool_recycle": 1800,   # seconds
+        # "pool_timeout": 30,
     }
 else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db'
+    # Local/dev fallback
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db"
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+with app.app_context():
+    try:
+        db.session.execute(db.text("SELECT 1"))
+    except Exception as e:
+        app.logger.exception("DB startup probe failed")
+        raise
+
 migrate = Migrate(app, db) # Initialize Migrate
 CORS(app) # Enable CORS for all routes
 
