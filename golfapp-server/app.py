@@ -72,6 +72,7 @@ db_url_raw = os.environ.get("DATABASE_URL", "")
 clean_url = _normalize_mysql_url(db_url_raw)
 
 if clean_url:
+    print(f"DEBUG: Using database URL: {clean_url}") # TEMPORARY: REMOVE AFTER DEBUGGING
     app.config["SQLALCHEMY_DATABASE_URI"] = clean_url
 else:
     # local/dev fallback
