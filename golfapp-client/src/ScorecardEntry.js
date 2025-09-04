@@ -18,6 +18,16 @@ const ScorecardEntry = () => {
   const [roundPlayerHandicaps, setRoundPlayerHandicaps] = useState({}); // New state to store handicaps specific to the round
   const [notification, setNotification] = useState({ message: '', type: '' });
 
+  const currentTournament = useMemo(() => {
+    return tournaments.find(tournament => tournament.id === selectedTournament);
+  }, [tournaments, selectedTournament]);
+
+  const currentCourse = useMemo(() => {
+    const foundCourse = courses.find(course => course.id === selectedCourse && course.sequence_number === selectedCourseSequence);
+    console.log('currentCourse useMemo: courses', courses, 'selectedCourse', selectedCourse, 'selectedCourseSequence', selectedCourseSequence, 'foundCourse', foundCourse);
+    return foundCourse;
+  }, [courses, selectedCourse, selectedCourseSequence]);
+
   const displayNotification = (message, type) => {
     setNotification({ message, type });
     setTimeout(() => {
@@ -447,7 +457,13 @@ const ScorecardEntry = () => {
     } finally {
       setIsLoadingRounds(false); // Set loading to false after fetch completes (success or error)
     }
-  }, [selectedCourse, selectedCourseSequence, selectedTournament, players, currentCourse, API_URL]);
+  }, [selectedCourse, selectedCourseSequence, selectedTournament, players, currentCourse]);
+
+  useEffect(() => {
+    if (selectedCourse && selectedCourseSequence && selectedTournament && players.length > 0) {
+      fetchHoleDataAndExistingScores();
+    }
+  }, [selectedCourse, selectedCourseSequence, selectedTournament, players, fetchHoleDataAndExistingScores]);
 
   const currentTournament = useMemo(() => {
     return tournaments.find(tournament => tournament.id === selectedTournament);
