@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './ScorecardEntry.css';
 import API_URL from './config';
 
@@ -323,10 +323,8 @@ const ScorecardEntry = () => {
 
   const [isLoadingRounds, setIsLoadingRounds] = useState(true); // New state for loading indicator
 
-  // Moved outside useEffect to be accessible by handleReopenRound
-  const fetchHoleDataAndExistingScores = async () => {
+  const fetchHoleDataAndExistingScores = useCallback(async () => {
     
-
     try {
       setIsLoadingRounds(true); // Set loading to true at the start
       // Aggressively clear states for a clean slate on each course/tournament/player change
@@ -449,6 +447,64 @@ const ScorecardEntry = () => {
     } finally {
       setIsLoadingRounds(false); // Set loading to false after fetch completes (success or error)
     }
+  }, [selectedCourse, selectedCourseSequence, selectedTournament, players, currentCourse, API_URL]);
+
+  const currentTournament = useMemo(() => {
+    return tournaments.find(tournament => tournament.id === selectedTournament);
+  }, [tournaments, selectedTournament]);
+
+  const currentCourse = useMemo(() => {
+    const foundCourse = courses.find(course => course.id === selectedCourse && course.sequence_number === selectedCourseSequence);
+    console.log('currentCourse useMemo: courses', courses, 'selectedCourse', selectedCourse, 'selectedCourseSequence', selectedCourseSequence, 'foundCourse', foundCourse);
+    return foundCourse;
+  }, [courses, selectedCourse, selectedCourseSequence]);
+
+  const handleTournamentChange = (e) => {
+    setSelectedTournament(parseInt(e.target.value));
+  };
+
+  const handleCourseChange = (e) => {
+    const [courseId, sequenceNumber] = e.target.value.split('-');
+    setSelectedCourse(parseInt(courseId));
+    setSelectedCourseSequence(parseInt(sequenceNumber));
+  };
+
+  const handleScoreChange = (playerId, holeIndex, value) => {
+    setScores(prevScores => ({
+      ...prevScores,
+      [playerId]: {
+        ...prevScores[playerId],
+        [holeIndex]: value
+      }
+    }));
+  };
+
+  const calculatePlayingHandicap = (handicapIndex, slopeRating) => {
+    if (handicapIndex === null || handicapIndex === undefined || slopeRating === null || slopeRating === undefined) return 'N/A';
+    return Math.round(handicapIndex * (slopeRating / 113));
+  };
+
+  const getScoreClass = (grossScore, par) => {
+    if (grossScore === '' || isNaN(grossScore) || par === '' || isNaN(par)) {
+      return ''; // No class if score or par is not a valid number
+    }
+
+    const scoreDiff = grossScore - par;
+
+    if (scoreDiff <= -2) {
+      return 'eagle-score'; // Yellow
+    } else if (scoreDiff === -1) {
+      return 'birdie-score'; // Red
+    } else if (scoreDiff === 0) {
+      return ''; // No color for par
+    } else if (scoreDiff === 1) {
+      return 'bogey-score'; // Blue
+    } else if (scoreDiff === 2) {
+      return 'double-bogey-score'; // Grey
+    } else if (scoreDiff > 2) {
+      return 'worse-than-double-bogey-score'; // Purple
+    }
+    return '';
   };
 
   const currentTournament = useMemo(() => {
