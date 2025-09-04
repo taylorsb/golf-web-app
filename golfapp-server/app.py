@@ -951,3 +951,4 @@ def delete_handicap_adjustment(stableford_score):
     return '', 204
 
 # This is a non-functional change to trigger the workflow (revert deployment).
+# Trigger workflow run

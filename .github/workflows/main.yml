@@ -35,11 +35,11 @@ jobs:
         uses: azure/container-apps-deploy-action@v1
         with:
           appSourcePath: golfapp-server
-          containerAppName: golf-app-server-simon
+          containerAppName: golf-app
           resourceGroup: golf-app-rg
           imageToDeploy: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           acrName: ${{ env.AZURE_CONTAINER_REGISTRY }}
-          environmentVariables: "DATABASE_URL=secretref:azure-mysql-connection-string TEST_VAR=HelloFromGitHub"
+          environmentVariables: "DATABASE_URL=secretref:database-url TEST_VAR=HelloFromGitHub"
 
   run-migrations:
     needs: build-and-deploy
