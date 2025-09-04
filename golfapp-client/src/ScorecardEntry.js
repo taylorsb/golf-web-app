@@ -329,7 +329,7 @@ const ScorecardEntry = () => {
     if (selectedCourse && selectedCourseSequence && selectedTournament && players.length > 0) {
       fetchHoleDataAndExistingScores();
     }
-  }, [selectedCourse, selectedCourseSequence, selectedTournament, players]);
+  }, [selectedCourse, selectedCourseSequence, selectedTournament, players, fetchHoleDataAndExistingScores]);
 
   const [isLoadingRounds, setIsLoadingRounds] = useState(true); // New state for loading indicator
 
