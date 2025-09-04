@@ -507,69 +507,6 @@ const ScorecardEntry = () => {
     return '';
   };
 
-  const currentTournament = useMemo(() => {
-    return tournaments.find(tournament => tournament.id === selectedTournament);
-  }, [tournaments, selectedTournament]);
-
-  const currentCourse = useMemo(() => {
-    const foundCourse = courses.find(course => course.id === selectedCourse && course.sequence_number === selectedCourseSequence);
-    console.log('currentCourse useMemo: courses', courses, 'selectedCourse', selectedCourse, 'selectedCourseSequence', selectedCourseSequence, 'foundCourse', foundCourse);
-    return foundCourse;
-  }, [courses, selectedCourse, selectedCourseSequence]);
-
-  const handleTournamentChange = (e) => {
-    setSelectedTournament(parseInt(e.target.value));
-  };
-
-  const handleCourseChange = (e) => {
-    const [courseId, sequenceNumber] = e.target.value.split('-');
-    setSelectedCourse(parseInt(courseId));
-    setSelectedCourseSequence(parseInt(sequenceNumber));
-  };
-
-  const handleScoreChange = (playerId, holeIndex, value) => {
-    setScores(prevScores => ({
-      ...prevScores,
-      [playerId]: {
-        ...prevScores[playerId],
-        [holeIndex]: value
-      }
-    }));
-  };
-
-  const calculatePlayingHandicap = (handicapIndex, slopeRating) => {
-    if (handicapIndex === null || handicapIndex === undefined || slopeRating === null || slopeRating === undefined) return 'N/A';
-    return Math.round(handicapIndex * (slopeRating / 113));
-  };
-
-  const getStrokeIndexForHole = (holeNumber) => {
-    const hole = holeData.find(h => h.hole_number === holeNumber);
-    return hole ? hole.stroke_index : 0; // Return 0 or appropriate default if not found
-  };
-
-  const getScoreClass = (grossScore, par) => {
-    if (grossScore === '' || isNaN(grossScore) || par === '' || isNaN(par)) {
-      return ''; // No class if score or par is not a valid number
-    }
-
-    const scoreDiff = grossScore - par;
-
-    if (scoreDiff <= -2) {
-      return 'eagle-score'; // Yellow
-    } else if (scoreDiff === -1) {
-      return 'birdie-score'; // Red
-    } else if (scoreDiff === 0) {
-      return ''; // No color for par
-    } else if (scoreDiff === 1) {
-      return 'bogey-score'; // Blue
-    } else if (scoreDiff === 2) {
-      return 'double-bogey-score'; // Grey
-    } else if (scoreDiff > 2) {
-      return 'worse-than-double-bogey-score'; // Purple
-    }
-    return '';
-  };
-
   return (
     <div className="scorecard-container">
 
