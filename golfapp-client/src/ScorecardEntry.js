@@ -325,11 +325,11 @@ const ScorecardEntry = () => {
     }
   }, [selectedTournament]);
 
-  useEffect(() => {
-    if (selectedCourse && selectedCourseSequence && selectedTournament && players.length > 0) {
-      fetchHoleDataAndExistingScores();
-    }
-  }, [selectedCourse, selectedCourseSequence, selectedTournament, players, fetchHoleDataAndExistingScores]);
+  const currentCourse = useMemo(() => {
+    const foundCourse = courses.find(course => course.id === selectedCourse && course.sequence_number === selectedCourseSequence);
+    console.log('currentCourse useMemo: courses', courses, 'selectedCourse', selectedCourse, 'selectedCourseSequence', selectedCourseSequence, 'foundCourse', foundCourse);
+    return foundCourse;
+  }, [courses, selectedCourse, selectedCourseSequence]);
 
   const [isLoadingRounds, setIsLoadingRounds] = useState(true); // New state for loading indicator
 
