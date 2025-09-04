@@ -5,7 +5,7 @@ on:
     branches:
       - production-azure
     paths:
-      - 'golfapp-client/build/**'
+      - 'golfapp-client/**' # Trigger on any change in golfapp-client
 
 jobs:
   deploy:
@@ -14,6 +14,19 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18' # Or your preferred Node.js version
+
+    - name: Install dependencies
+      run: npm install
+      working-directory: golfapp-client # Run npm install in the client directory
+
+    - name: Build React App
+      run: npm run build
+      working-directory: golfapp-client # Run npm run build in the client directory
 
     - name: Azure Login
       uses: azure/login@v1
@@ -25,5 +38,5 @@ jobs:
       with:
         app-name: golf-app-client-simon
         slot-name: 'production'
-        package: golfapp-client/build
+        package: golfapp-client/build # Deploy the build output
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
