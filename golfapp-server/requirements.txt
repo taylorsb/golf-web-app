@@ -1,7 +1,8 @@
 flask
-flask_sqlalchemy
+flask_sqlalchemy>=3.0
 flask_cors
 flask_migrate
 gunicorn
 python-dotenv
-PyMySQL
+PyMySQL>=1.1.0
+SQLAlchemy>=2.0
