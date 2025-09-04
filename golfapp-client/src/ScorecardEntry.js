@@ -465,6 +465,54 @@ const ScorecardEntry = () => {
     }
   }, [selectedCourse, selectedCourseSequence, selectedTournament, players, fetchHoleDataAndExistingScores]);
 
+  const handleScoreChange = (playerId, holeIndex, value) => {
+    setScores(prevScores => ({
+      ...prevScores,
+      [playerId]: {
+        ...prevScores[playerId],
+        [holeIndex]: value
+      }
+    }));
+  };
+
+  const calculatePlayingHandicap = (handicapIndex, slopeRating) => {
+    if (handicapIndex === null || handicapIndex === undefined || slopeRating === null || slopeRating === undefined) return 'N/A';
+    return Math.round(handicapIndex * (slopeRating / 113));
+  };
+
+  const getScoreClass = (grossScore, par) => {
+    if (grossScore === '' || isNaN(grossScore) || par === '' || isNaN(par)) {
+      return ''; // No class if score or par is not a valid number
+    }
+
+    const scoreDiff = grossScore - par;
+
+    if (scoreDiff <= -2) {
+      return 'eagle-score'; // Yellow
+    } else if (scoreDiff === -1) {
+      return 'birdie-score'; // Red
+    } else if (scoreDiff === 0) {
+      return ''; // No color for par
+    } else if (scoreDiff === 1) {
+      return 'bogey-score'; // Blue
+    } else if (scoreDiff === 2) {
+      return 'double-bogey-score'; // Grey
+    } else if (scoreDiff > 2) {
+      return 'worse-than-double-bogey-score'; // Purple
+    }
+    return '';
+  };
+
+  const handleTournamentChange = (e) => {
+    setSelectedTournament(parseInt(e.target.value));
+  };
+
+  const handleCourseChange = (e) => {
+    const [courseId, sequenceNumber] = e.target.value.split('-');
+    setSelectedCourse(parseInt(courseId));
+    setSelectedCourseSequence(parseInt(sequenceNumber));
+  };
+
   return (
     <div className="scorecard-container">
 
