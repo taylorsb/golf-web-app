@@ -289,47 +289,7 @@ const ScorecardEntry = () => {
     fetchTournaments();
   }, []);
 
-  useEffect(() => {
-    if (selectedTournament) {
-      const fetchPlayers = async () => {
-        try {
-          const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/players`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          setPlayers(data);
-        } catch (error) {
-          console.error("Error fetching players for tournament:", error);
-        }
-      };
-
-      const fetchCoursesForTournament = async () => {
-        try {
-          const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/courses`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          setCourses(data);
-        } catch (error) {
-          console.error("Error fetching courses for tournament:", error);
-        }
-      };
-
-      fetchPlayers();
-      fetchCoursesForTournament();
-    } else {
-      setPlayers([]);
-      setCourses([]); // Clear courses when no tournament is selected
-    }
   }, [selectedTournament]);
-
-  const currentCourse = useMemo(() => {
-    const foundCourse = courses.find(course => course.id === selectedCourse && course.sequence_number === selectedCourseSequence);
-    console.log('currentCourse useMemo: courses', courses, 'selectedCourse', selectedCourse, 'selectedCourseSequence', selectedCourseSequence, 'foundCourse', foundCourse);
-    return foundCourse;
-  }, [courses, selectedCourse, selectedCourseSequence]);
 
   const [isLoadingRounds, setIsLoadingRounds] = useState(true); // New state for loading indicator
 
