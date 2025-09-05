@@ -20,16 +20,7 @@ BAD_SSL_KEYS = {
     "ssl_verify", "ssl_verify_cert", "sslverify", "ssl_verify_identity"
 }
 
-def _detect_system_ca():
-    for p in (
-        "/etc/ssl/certs/ca-certificates.crt",  # Debian/Ubuntu
-        "/etc/ssl/cert.pem",                   # Alpine
-        "/etc/pki/tls/certs/ca-bundle.crt",    # RHEL/CentOS
-        "/app/certs/combined-ca-certificates.pem",  # your custom bundle if you COPY'd it
-    ):
-        if os.path.exists(p):
-            return p
-    return None
+# _detect_system_ca function removed as it is no longer needed
 
 def _normalize_mysql_url(raw_url: str) -> str | None:
     if not raw_url:
@@ -78,12 +69,17 @@ else:
     # local/dev fallback
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///C:/Users/simon/golf-web-app/golfapp-server/instance/golf.db"
 
-# Choose a CA bundle that actually exists
-ca_path = _detect_system_ca()
-engine_opts = {"pool_pre_ping": True}
-if ca_path:
-    # PyMySQL expects a single 'ssl' dict; do NOT use 'ssl_ca'
-    engine_opts["connect_args"] = {"ssl": {"ca": ca_path}}
+# SSL configuration
+# The path to the certificate is relative to the app.py file
+ca_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certs', 'combined-ca-certificates.pem')
+engine_opts = {
+    "pool_pre_ping": True,
+    "connect_args": {
+        "ssl": {
+            "ca": ca_path
+        }
+    }
+}
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = engine_opts
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
