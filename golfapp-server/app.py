@@ -72,6 +72,8 @@ else:
 # SSL configuration
 # The path to the certificate is relative to the app.py file
 ca_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'certs', 'combined-ca-certificates.pem')
+print(f"DEBUG: CA certificate path: {ca_path}")
+print(f"DEBUG: CA certificate file exists: {os.path.exists(ca_path)}")
 engine_opts = {
     "pool_pre_ping": True,
     "connect_args": {
