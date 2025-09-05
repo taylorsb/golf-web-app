@@ -283,12 +283,43 @@ const ScorecardEntry = () => {
         setTournaments(data);
       } catch (error) {
         console.error("Error fetching tournaments:", error);
-      } 
+      }
     };
 
     fetchTournaments();
   }, []);
 
+  useEffect(() => {
+    const fetchCoursesAndPlayers = async () => {
+      if (selectedTournament) {
+        try {
+          // Fetch courses for the selected tournament
+          const coursesResponse = await fetch(`${API_URL}/tournaments/${selectedTournament}/courses`);
+          if (!coursesResponse.ok) {
+            throw new Error(`HTTP error! status: ${coursesResponse.status}`);
+          }
+          const coursesData = await coursesResponse.json();
+          setCourses(coursesData);
+
+          // Fetch players for the selected tournament
+          const playersResponse = await fetch(`${API_URL}/tournaments/${selectedTournament}/players`);
+          if (!playersResponse.ok) {
+            throw new Error(`HTTP error! status: ${playersResponse.status}`);
+          }
+          const playersData = await playersResponse.json();
+          setPlayers(playersData);
+
+        } catch (error) {
+          console.error("Error fetching courses or players:", error);
+        }
+      } else {
+        // Reset courses and players when no tournament is selected
+        setCourses([]);
+        setPlayers([]);
+      }
+    };
+
+    fetchCoursesAndPlayers();
   }, [selectedTournament]);
 
   const [isLoadingRounds, setIsLoadingRounds] = useState(true); // New state for loading indicator

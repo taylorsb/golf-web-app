@@ -90,7 +90,14 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 migrate = Migrate(app, db) # Initialize Migrate
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True) # Enable CORS for all routes
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "https://golf-app-client-simon.azurewebsites.net",
+            "https://golf-app.greensky-eadbd98c.uksouth.azurecontainerapps.io"
+        ]
+    }
+}, supports_credentials=True)
 
 
 # Association table for Tournament and Player
