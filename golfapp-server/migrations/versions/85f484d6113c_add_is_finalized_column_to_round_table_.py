@@ -21,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     op.add_column('round', sa.Column('is_finalized', sa.Boolean(), nullable=True))
-    op.execute('UPDATE `round` SET is_finalized = FALSE')
+    op.execute('UPDATE "round" SET is_finalized = FALSE')
     op.alter_column('round', 'is_finalized',
                existing_type=sa.Boolean(),
                nullable=False,
