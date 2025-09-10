@@ -2,7 +2,7 @@ services:
   - type: web
     name: flask-backend
     runtime: python
-    repo: https://github.com/srevins/golf-web-app
+    repo: https://github.com/taylorsb/golf-web-app
     plan: free
     branch: production-azure
     healthCheckPath: /
@@ -20,7 +20,7 @@ services:
 
   - type: static
     name: react-frontend
-    repo: https://github.com/srevins/golf-web-app 
+    repo: https://github.com/taylorsb/golf-web-app 
     plan: free
     branch: production-azure
     staticPublishPath: golfapp-client/build
