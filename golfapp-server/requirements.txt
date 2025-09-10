@@ -4,5 +4,5 @@ flask_cors
 flask_migrate
 gunicorn
 python-dotenv
-PyMySQL>=1.1.0
+psycopg2-binary
 SQLAlchemy>=2.0

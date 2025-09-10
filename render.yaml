@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: flask-backend
+    runtime: python
+    repo: https://github.com/srevins/golf-web-app
+    plan: free
+    branch: production-azure
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: golf-db
+          property: connectionString
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+    buildCommand: "pip install -r golfapp-server/requirements.txt && cd golfapp-server && flask db upgrade"
+    startCommand: "cd golfapp-server && gunicorn app:app"
+    autoDeploy: true
+
+
+  - type: static
+    name: react-frontend
+    repo: https://github.com/srevins/golf-web-app 
+    plan: free
+    branch: production-azure
+    staticPublishPath: golfapp-client/build
+    buildCommand: "cd golfapp-client && npm install && npm run build"
+    autoDeploy: true
+
+databases:
+  - name: golf-db
+    databaseName: golf
+    user: golfadmin
+    plan: free
