@@ -28,7 +28,8 @@ def create_app():
             "origins": [
                 "https://golf-app-client-simon.azurewebsites.net",
                 "https://golf-app.greensky-eadbd98c.uksouth.azurecontainerapps.io",
-                "https://react-frontend-t8y9.onrender.com"
+                "https://react-frontend-t8y9.onrender.com",
+                "https://react-frontend-fe4n.onrender.com"
             ]
         }
     }, supports_credentials=True)
