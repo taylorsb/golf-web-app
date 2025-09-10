@@ -13,6 +13,9 @@ from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 from sqlalchemy.engine.url import make_url, URL
 
+db = SQLAlchemy()
+migrate = Migrate()
+
 def create_app():
     app = Flask(__name__)
 
@@ -25,7 +28,7 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
-    Migrate(app, db)
+    migrate.init_app(app, db)
     CORS(app, resources={
         r"/*": {
             "origins": [
@@ -35,14 +38,6 @@ def create_app():
             ]
         }
     }, supports_credentials=True)
-
-    with app.app_context():
-        # Import models here so they are registered with SQLAlchemy
-        from . import models 
-
-    # Register blueprints for API endpoints
-    # from .api import api_blueprint
-    # app.register_blueprint(api_blueprint)
 
     return app
 
