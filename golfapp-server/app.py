@@ -33,6 +33,10 @@ def create_app():
         }
     }, supports_credentials=True)
 
+    @app.route('/')
+    def index():
+        return "Hello, World!"
+
     with app.app_context():
         # Association table for Tournament and Player
         tournament_players = db.Table('tournament_players',
