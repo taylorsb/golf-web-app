@@ -18,8 +18,9 @@ services:
     autoDeploy: true
 
 
-  - type: static
+  - type: web
     name: react-frontend
+    runtime: static
     repo: https://github.com/taylorsb/golf-web-app 
     plan: free
     branch: production-azure
