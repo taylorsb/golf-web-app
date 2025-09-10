@@ -18,10 +18,10 @@ services:
     autoDeploy: true
 
 
-  - type: static_site
+  - type: web
     name: react-frontend
+    runtime: static
     repo: https://github.com/taylorsb/golf-web-app 
-    plan: free
     branch: production-azure
     staticPublishPath: golfapp-client/build
     buildCommand: "cd golfapp-client && npm install && npm run build"
