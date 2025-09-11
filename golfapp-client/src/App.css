@@ -5,7 +5,7 @@
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-smoothing: grayscale;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Home Page Container */
@@ -133,4 +133,18 @@ nav ul ul li a {
   background-color: #333; /* Dark color for visibility */
   border-radius: 5px;
   transition: all 0.3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .app-header h1 {
+    font-size: 2rem;
+  }
+
+  .app-header p {
+    font-size: 1rem;
+  }
+
+  .leaderboard-container {
+    width: 95%;
+  }
 }

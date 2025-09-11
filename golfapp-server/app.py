@@ -25,7 +25,7 @@ def create_app():
     migrate.init_app(app, db)
     CORS(app, resources={
         r"/*": {
-            "origins": ["https://react-frontend-mq4f.onrender.com"]
+            "origins": ["https://react-frontend-mq4f.onrender.com", "http://localhost:3000"]
         }
     }, supports_credentials=True)
 
