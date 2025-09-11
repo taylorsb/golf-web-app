@@ -211,7 +211,7 @@ function TournamentManager() {
     <div className="tournament-manager">
       <h1>Tournament Management</h1>
 
-      <div>
+      <div className="tournament-form">
         <input
           type="text"
           placeholder="Tournament Name"

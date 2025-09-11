@@ -66,3 +66,68 @@
     padding: 5px 10px;
     font-size: 12px;
 }
+
+@media (max-width: 768px) {
+  .course-manager .course-form-main-inputs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .course-manager .course-form-main-inputs input {
+    margin-right: 0;
+    margin-bottom: 10px;
+    width: 80%;
+  }
+
+  .course-manager .hole-details-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .course-table {
+    width: 100%;
+  }
+
+  .course-table thead {
+    display: none;
+  }
+
+  .course-table tr {
+    display: block;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+  }
+
+  .course-table td {
+    display: block;
+    text-align: right;
+    border-bottom: 1px dotted #ccc;
+  }
+
+  .course-table td:before {
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+  }
+
+  .course-table td:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .course-manager .hole-details-grid {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+
+  .course-manager .hole-details-grid h4 {
+    font-size: 1rem;
+    margin: 5px 0;
+  }
+
+  .course-manager .hole-details-grid input {
+    width: 90%;
+    padding: 5px;
+  }
+}
+

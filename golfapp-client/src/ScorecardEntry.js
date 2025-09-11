@@ -17,6 +17,26 @@ const ScorecardEntry = () => {
   const [isCurrentRoundFinalized, setIsCurrentRoundFinalized] = useState(false);
   const [roundPlayerHandicaps, setRoundPlayerHandicaps] = useState({}); // New state to store handicaps specific to the round
   const [notification, setNotification] = useState({ message: '', type: '' });
+  const [activeTab, setActiveTab] = useState('front9');
+  const [isMobileView, setIsMobileView] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 768px)'); // Define your mobile breakpoint
+    const handleMediaQueryChange = (e) => {
+      setIsMobileView(e.matches);
+    };
+
+    // Initial check
+    setIsMobileView(mediaQuery.matches);
+
+    // Listen for changes
+    mediaQuery.addEventListener('change', handleMediaQueryChange);
+
+    // Cleanup
+    return () => {
+      mediaQuery.removeEventListener('change', handleMediaQueryChange);
+    };
+  }, []);
 
   const currentTournament = useMemo(() => {
     return tournaments.find(tournament => tournament.id === selectedTournament);
@@ -140,126 +160,8 @@ const ScorecardEntry = () => {
         newSubmittedSummaryScores[result.playerId] = result.summary;
       }
     });
+    
     setSubmittedSummaryScores(newSubmittedSummaryScores);
-    displayNotification("Score submission process completed.", 'success');
-  };
-
-  // Placeholder for calculateTotalStablefordPoints - now gets from submittedSummaryScores
-  const calculateTotalStablefordPoints = (playerId) => {
-    return submittedSummaryScores[playerId]?.stableford_total ?? 'N/A';
-  };
-
-  const calculateGrossScore = (playerId) => {
-    return submittedSummaryScores[playerId]?.gross_score_total ?? 'N/A';
-  };
-
-  const calculateNetScore = (playerId) => {
-    return submittedSummaryScores[playerId]?.nett_score_total ?? 'N/A';
-  };
-
-  const calculateFront9Gross = (playerId) => {
-    return submittedSummaryScores[playerId]?.gross_score_front_9 ?? 'N/A';
-  };
-
-  const calculateBack9Gross = (playerId) => {
-    return submittedSummaryScores[playerId]?.gross_score_back_9 ?? 'N/A';
-  };
-
-  const calculateFront9Net = (playerId) => {
-    return submittedSummaryScores[playerId]?.nett_score_front_9 ?? 'N/A';
-  };
-
-  const calculateBack9Net = (playerId) => {
-    return submittedSummaryScores[playerId]?.nett_score_back_9 ?? 'N/A';
-  };
-
-  const handleEndRound = async () => {
-    if (!selectedTournament || !selectedCourseSequence) {
-      displayNotification("Please select a tournament and a course sequence to end the round.", 'error');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/rounds/end`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          round_number: selectedCourseSequence,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      displayNotification(result.message, 'success');
-      // Keep the current round displayed, but mark it as finalized
-      setRoundInitiated(false); // No longer actively inputting scores for this round
-      setIsCurrentRoundFinalized(true); // Mark as finalized
-
-      // Fetch updated player handicaps
-      const updatedPlayersResponse = await fetch(`${API_URL}/tournaments/${selectedTournament}/players`);
-      if (updatedPlayersResponse.ok) {
-        const updatedPlayersData = await updatedPlayersResponse.json();
-        const newHandicaps = {};
-        updatedPlayersData.forEach(player => {
-          newHandicaps[player.id] = player.handicap;
-        });
-        setUpdatedPlayerHandicaps(newHandicaps);
-      } else {
-        console.error("Failed to fetch updated player handicaps.");
-      }
-
-    } catch (error) {
-      console.error("Error ending round:", error);
-      displayNotification(`Failed to end round: ${error.message}`, 'error');
-    }
-  };
-
-  const handleReopenRound = async () => {
-    if (!selectedTournament || !selectedCourseSequence) {
-      displayNotification("Please select a tournament and a course sequence to re-open the round.", 'error');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/rounds/reopen_all`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sequence_number: selectedCourseSequence,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      displayNotification(result.message, 'success');
-
-      // After re-opening, re-enable scoring and clear finalized status
-      setRoundInitiated(true); // Allow score input again
-      setIsCurrentRoundFinalized(false); // Not finalized anymore
-      console.log('handleReopenRound: isCurrentRoundFinalized set to', false);
-      setUpdatedPlayerHandicaps({}); // Clear updated handicaps display
-
-      // Force re-fetch of round data to synchronize state with backend
-      if (selectedCourse && selectedCourseSequence && selectedTournament && players.length > 0) {
-        fetchHoleDataAndExistingScores();
-      }
-
-    } catch (error) {
-      console.error("Error re-opening round:", error);
-      displayNotification(`Failed to re-open round: ${error.message}`, 'error');
-    }
   };
 
   // Remove redundant client-side calculations
@@ -494,6 +396,136 @@ const ScorecardEntry = () => {
     return '';
   };
 
+  
+
+  // Placeholder for calculateTotalStablefordPoints - now gets from submittedSummaryScores
+  const calculateTotalStablefordPoints = (playerId) => {
+    return submittedSummaryScores[playerId]?.stableford_total ?? 'N/A';
+  };
+
+  const calculateGrossScore = (playerId) => {
+    return submittedSummaryScores[playerId]?.gross_score_total ?? 'N/A';
+  };
+
+  const calculateNetScore = (playerId) => {
+    return submittedSummaryScores[playerId]?.nett_score_total ?? 'N/A';
+  };
+
+  const calculateFront9Gross = (playerId) => {
+    return submittedSummaryScores[playerId]?.gross_score_front_9 ?? 'N/A';
+  };
+
+  const calculateBack9Gross = (playerId) => {
+    return submittedSummaryScores[playerId]?.gross_score_back_9 ?? 'N/A';
+  };
+
+  const calculateFront9Net = (playerId) => {
+    return submittedSummaryScores[playerId]?.nett_score_front_9 ?? 'N/A';
+  };
+
+  const calculateBack9Net = (playerId) => {
+    return submittedSummaryScores[playerId]?.nett_score_back_9 ?? 'N/A';
+  };
+
+  const handleEndRound = async () => {
+    if (!selectedTournament || !selectedCourseSequence) {
+      displayNotification("Please select a tournament and a course sequence to end the round.", 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/rounds/end`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          round_number: selectedCourseSequence,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      displayNotification(result.message, 'success');
+      // Keep the current round displayed, but mark it as finalized
+      setRoundInitiated(false); // No longer actively inputting scores for this round
+      setIsCurrentRoundFinalized(true); // Mark as finalized
+
+      // Fetch updated player handicaps
+      const updatedPlayersResponse = await fetch(`${API_URL}/tournaments/${selectedTournament}/players`);
+      if (updatedPlayersResponse.ok) {
+        const updatedPlayersData = await updatedPlayersResponse.json();
+        const newHandicaps = {};
+        updatedPlayersData.forEach(player => {
+          newHandicaps[player.id] = player.handicap;
+        });
+        setUpdatedPlayerHandicaps(newHandicaps);
+      } else {
+        console.error("Failed to fetch updated player handicaps.");
+      }
+
+    } catch (error) {
+      console.error("Error ending round:", error);
+      displayNotification(`Failed to end round: ${error.message}`, 'error');
+    }
+  };
+
+  const handleReopenRound = async () => {
+    if (!selectedTournament || !selectedCourseSequence) {
+      displayNotification("Please select a tournament and a course sequence to re-open the round.", 'error');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/rounds/reopen_all`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sequence_number: selectedCourseSequence,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      displayNotification(result.message, 'success');
+
+      // After re-opening, re-enable scoring and clear finalized status
+      setRoundInitiated(true); // Allow score input again
+      setIsCurrentRoundFinalized(false); // Not finalized anymore
+      console.log('handleReopenRound: isCurrentRoundFinalized set to', false);
+      setUpdatedPlayerHandicaps({}); // Clear updated handicaps display
+
+      // Force re-fetch of round data to synchronize state with backend
+      if (selectedCourse && selectedCourseSequence && selectedTournament && players.length > 0) {
+        fetchHoleDataAndExistingScores();
+      }
+
+    } catch (error) {
+      console.error("Error re-opening round:", error);
+      displayNotification(`Failed to re-open round: ${error.message}`, 'error');
+    }
+  };
+
+  // Remove redundant client-side calculations
+  // const calculateNetScore = (playerId) => { ... };
+  // const calculateFront9Net = (playerId) => { ... };
+  // const calculateBack9Net = (playerId) => { ... };
+  // const calculateTotalStablefordPoints = (playerId) => { ... };
+  // The above functions are now replaced by direct lookups from submittedSummaryScores
+  // and are included in the new_string for clarity.
+
+
+
   const handleTournamentChange = (e) => {
     setSelectedTournament(parseInt(e.target.value));
   };
@@ -597,76 +629,137 @@ const ScorecardEntry = () => {
             <button className="initiate-scoring-button" onClick={handleInitiateScoring}>Initiate Scoring</button>
           )}
           <h3>Input Scores for Round {selectedCourseSequence} - {currentCourse?.name}</h3>
-          <table className="scorecard-table">
-            <thead>
-              <tr>
-                <th>Player Name</th>
-                <th>Player Handicap Index</th>
-                <th>Playing Handicap</th>
-                {Array.from({ length: 18 }, (_, i) => (<th key={`hole-header-${i + 1}`}>Hole {i + 1}</th>))}
-                <th>Gross Front 9</th>
-                <th>Gross Back 9</th>
-                <th>Net Front 9</th>
-                <th>Net Back 9</th>
-                <th>Gross Total</th>
-                <th>Net Total</th>
-                <th>Stableford Points</th>
-              </tr>
-              <tr>
-                <th></th>
-                <th></th>
-                <th>Par</th>
-                {holeData.map((hole, index) => (<th key={`par-header-${hole.hole_number}`}>{hole.par}</th>))}
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-              </tr>
-              <tr>
-                <th></th>
-                <th></th>
-                <th>SI</th>
-                {holeData.map((hole, index) => (<th key={`si-header-${hole.hole_number}`}>{hole.strokeIndex}</th>))}
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {players.map(player => (
-                <tr key={player.id}>
-                  <td>{player.name}</td>
-                  <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
-                  <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
-                  {Array.from({ length: 18 }, (_, i) => (
-                    <td key={`${player.id}-hole-${i + 1}`}>
-                      <input
-                        type="number"
-                        className={getScoreClass(parseInt(scores[player.id]?.[i + 1]), holeData[i]?.par)}
-                        value={scores[player.id]?.[i + 1] || ''}
-                        onChange={(e) => handleScoreChange(player.id, i + 1, e.target.value)}
-                        disabled={!roundInitiated} // Re-add disabled attribute
-                      />
-                    </td>
+
+          {isMobileView && (
+            <div className="scorecard-tabs">
+              <button
+                className={`tab-button ${activeTab === 'front9' ? 'active' : ''}`}
+                onClick={() => setActiveTab('front9')}
+              >
+                Front 9
+              </button>
+              <button
+                className={`tab-button ${activeTab === 'back9' ? 'active' : ''}`}
+                onClick={() => setActiveTab('back9')}
+              >
+                Back 9
+              </button>
+            </div>
+          )}
+
+          {isMobileView ? (
+            <table className="scorecard-table">
+              <thead>
+                <tr>
+                  <th>Player Name</th>
+                  <th>Player Handicap Index</th>
+                  <th>Playing Handicap</th>
+                  {Array.from({ length: 9 }, (_, i) => (
+                    <th key={`hole-header-${i + (activeTab === 'front9' ? 1 : 10)}`}>Hole {i + (activeTab === 'front9' ? 1 : 10)}</th>
                   ))}
-                  <td>{calculateFront9Gross(player.id)}</td>
-                  <td>{calculateBack9Gross(player.id)}</td>
-                  <td>{calculateFront9Net(player.id)}</td>
-                  <td>{calculateBack9Net(player.id)}</td>
-                  <td>{calculateGrossScore(player.id)}</td>
-                  <td>{calculateNetScore(player.id)}</td>
-                  <td>{calculateTotalStablefordPoints(player.id)}</td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th>Par</th>
+                  {Array.from({ length: 9 }, (_, i) => (
+                    <th key={`par-header-${i + (activeTab === 'front9' ? 1 : 10)}`}>
+                      {holeData[i + (activeTab === 'front9' ? 0 : 9)]?.par}
+                    </th>
+                  ))}
+                </tr>
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th>SI</th>
+                  {Array.from({ length: 9 }, (_, i) => (
+                    <th key={`si-header-${i + (activeTab === 'front9' ? 1 : 10)}`}>
+                      {holeData[i + (activeTab === 'front9' ? 0 : 9)]?.strokeIndex}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {players.map(player => (
+                  <tr key={player.id}>
+                    <td>{player.name}</td>
+                    <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
+                    <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
+                    {Array.from({ length: 9 }, (_, i) => (
+                      <td key={`${player.id}-hole-${i + (activeTab === 'front9' ? 1 : 10)}`}>
+                        <input
+                          type="number"
+                          className={getScoreClass(
+                            parseInt(scores[player.id]?.[i + (activeTab === 'front9' ? 1 : 10)]),
+                            holeData[i + (activeTab === 'front9' ? 0 : 9)]?.par
+                          )}
+                          value={scores[player.id]?.[i + (activeTab === 'front9' ? 1 : 10)] || ''}
+                          onChange={(e) => handleScoreChange(player.id, i + (activeTab === 'front9' ? 1 : 10), e.target.value)}
+                          disabled={!roundInitiated}
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <table className="scorecard-table">
+              <thead>
+                <tr>
+                  <th>Player Name</th>
+                  <th>Player Handicap Index</th>
+                  <th>Playing Handicap</th>
+                  {Array.from({ length: 18 }, (_, i) => (
+                    <th key={`hole-header-${i + 1}`}>Hole {i + 1}</th>
+                  ))}
+                </tr>
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th>Par</th>
+                  {Array.from({ length: 18 }, (_, i) => (
+                    <th key={`par-header-${i + 1}`}>
+                      {holeData[i]?.par}
+                    </th>
+                  ))}
+                </tr>
+                <tr>
+                  <th></th>
+                  <th></th>
+                  <th>SI</th>
+                  {Array.from({ length: 18 }, (_, i) => (
+                    <th key={`si-header-${i + 1}`}>
+                      {holeData[i]?.strokeIndex}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {players.map(player => (
+                  <tr key={player.id}>
+                    <td>{player.name}</td>
+                    <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
+                    <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
+                    {Array.from({ length: 18 }, (_, i) => (
+                      <td key={`${player.id}-hole-${i + 1}`}>
+                        <input
+                          type="number"
+                          className={getScoreClass(
+                            parseInt(scores[player.id]?.[i + 1]),
+                            holeData[i]?.par
+                          )}
+                          value={scores[player.id]?.[i + 1] || ''}
+                          onChange={(e) => handleScoreChange(player.id, i + 1, e.target.value)}
+                          disabled={!roundInitiated}
+                        />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
           {roundInitiated && !isCurrentRoundFinalized && (
             <button className="submit-scores-button" onClick={handleSubmitFinalScores}>Submit Scores</button>
           )}
@@ -676,6 +769,39 @@ const ScorecardEntry = () => {
           {isCurrentRoundFinalized && (
             <button className="initiate-scoring-button" onClick={handleReopenRound}>Re-open Round</button>
           )}
+
+          {/* New Summary Section */}
+          <div className="scorecard-summary-section">
+            <h3>Round Summary</h3>
+            <table className="summary-table">
+              <thead>
+                <tr>
+                  <th>Player Name</th>
+                  <th>Gross Front 9</th>
+                  <th>Gross Back 9</th>
+                  <th>Net Front 9</th>
+                  <th>Net Back 9</th>
+                  <th>Gross Total</th>
+                  <th>Net Total</th>
+                  <th>Stableford Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                {players.map(player => (
+                  <tr key={player.id}>
+                    <td data-label="Player Name">{player.name}</td>
+                    <td data-label="Gross Front 9">{calculateFront9Gross(player.id)}</td>
+                    <td data-label="Gross Back 9">{calculateBack9Gross(player.id)}</td>
+                    <td data-label="Net Front 9">{calculateFront9Net(player.id)}</td>
+                    <td data-label="Net Back 9">{calculateBack9Net(player.id)}</td>
+                    <td data-label="Gross Total">{calculateGrossScore(player.id)}</td>
+                    <td data-label="Net Total">{calculateNetScore(player.id)}</td>
+                    <td data-label="Stableford Points">{calculateTotalStablefordPoints(player.id)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {Object.keys(updatedPlayerHandicaps).length > 0 && (
             <div className="updated-handicaps-section" style={{ marginTop: '20px', borderTop: '1px solid #ccc', paddingTop: '20px' }}>

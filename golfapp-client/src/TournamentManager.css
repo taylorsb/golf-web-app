@@ -102,3 +102,38 @@
   list-style: none;
   padding: 0;
 }
+
+@media (max-width: 768px) {
+  .tournament-manager .tournament-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .tournament-manager .tournament-form input {
+    margin-right: 0;
+    margin-bottom: 10px;
+    width: 80%;
+  }
+
+  .assignment-section,
+  .current-assignments {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .assignment-box,
+  .assignment-list {
+    width: 90%;
+    max-width: none;
+  }
+
+  .tournament-list li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding: 10px;
+  }
+}

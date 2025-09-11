@@ -88,9 +88,9 @@ const PlayerManager = () => {
         <tbody>
           {players.sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
             <tr key={player.id}>
-              <td>{player.name} (Handicap: {player.handicap})</td>
-              <td><button onClick={() => handleEditClick(player)} className="initiate-scoring-button">Edit</button></td>
-              <td><button onClick={() => handleDeletePlayer(player.id)} className="initiate-scoring-button">Delete</button></td>
+              <td data-label="Player">{player.name} (Handicap: {player.handicap})</td>
+              <td data-label="Actions"><button onClick={() => handleEditClick(player)} className="initiate-scoring-button">Edit</button></td>
+              <td data-label="Actions"><button onClick={() => handleDeletePlayer(player.id)} className="initiate-scoring-button">Delete</button></td>
             </tr>
           ))}
         </tbody>

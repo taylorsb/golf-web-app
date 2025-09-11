@@ -113,3 +113,18 @@
   text-overflow: ellipsis;
   max-width: 120px;
 }
+
+@media (max-width: 768px) {
+  .leaderboard-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .leaderboard-widget {
+    overflow-x: auto;
+  }
+
+  .leaderboard-table .player-name-cell {
+    white-space: normal;
+  }
+}

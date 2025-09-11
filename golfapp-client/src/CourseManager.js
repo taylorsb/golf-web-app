@@ -109,28 +109,30 @@ function CourseManager() {
 
       {(showCourseForm || editingCourse) && (
         <div>
-          <input
-            type="text"
-            placeholder="Course Name"
-            value={newCourseName}
-            onChange={(e) => setNewCourseName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Country"
-            value={newCourseCountry}
-            onChange={(e) => setNewCourseCountry(e.target.value)}
-          />
-          <input
-            type="number"
-            step="0.1"
-            placeholder="Slope Rating"
-            value={newCourseSlopeRating}
-            onChange={(e) => setNewCourseSlopeRating(e.target.value)}
-          />
+          <div className="course-form-main-inputs">
+            <input
+              type="text"
+              placeholder="Course Name"
+              value={newCourseName}
+              onChange={(e) => setNewCourseName(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Country"
+              value={newCourseCountry}
+              onChange={(e) => setNewCourseCountry(e.target.value)}
+            />
+            <input
+              type="number"
+              step="0.1"
+              placeholder="Slope Rating"
+              value={newCourseSlopeRating}
+              onChange={(e) => setNewCourseSlopeRating(e.target.value)}
+            />
+          </div>
           
           <h3>Hole Details</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '5px' }}>
+          <div className="hole-details-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '5px' }}>
             {[...Array(18)].map((_, index) => (
               <div key={index} style={{ border: '1px solid #ccc', padding: '5px' }}>
                 <h4>Hole {index + 1}</h4>
@@ -164,9 +166,9 @@ function CourseManager() {
         <tbody>
           {courses.sort((a, b) => a.name.localeCompare(b.name)).map((course) => (
             <tr key={course.id}>
-              <td>{course.name} ({course.country}) - Slope: {course.slope_rating}</td>
-              <td><button onClick={() => handleEditClick(course)} className="initiate-scoring-button">Edit</button></td>
-              <td><button onClick={() => handleDeleteCourse(course.id)} className="initiate-scoring-button">Delete</button></td>
+              <td data-label="Course">{course.name} ({course.country}) - Slope: {course.slope_rating}</td>
+              <td data-label="Actions"><button onClick={() => handleEditClick(course)} className="initiate-scoring-button">Edit</button></td>
+              <td data-label="Actions"><button onClick={() => handleDeleteCourse(course.id)} className="initiate-scoring-button">Delete</button></td>
             </tr>
           ))}
         </tbody>

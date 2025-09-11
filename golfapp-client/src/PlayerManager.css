@@ -66,3 +66,48 @@
     padding: 5px 10px;
     font-size: 12px;
 }
+
+@media (max-width: 768px) {
+  .player-manager div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .player-manager input[type="text"],
+  .player-manager input[type="number"] {
+    margin-right: 0;
+    margin-bottom: 10px;
+    width: 80%;
+  }
+
+  .player-table {
+    width: 100%;
+  }
+
+  .player-table thead {
+    display: none;
+  }
+
+  .player-table tr {
+    display: block;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+  }
+
+  .player-table td {
+    display: block;
+    text-align: right;
+    border-bottom: 1px dotted #ccc;
+  }
+
+  .player-table td:before {
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+  }
+
+  .player-table td:last-child {
+    border-bottom: 0;
+  }
+}
