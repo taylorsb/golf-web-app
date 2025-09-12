@@ -19,7 +19,7 @@ const MainMenu = () => {
       <nav className={isOpen ? 'open' : ''}>
         <ul>
           <li>
-            <Link to="/" onClick={toggleMenu}>Home</Link>
+            <Link to="/leaderboard" onClick={toggleMenu}>Leaderboard</Link>
           </li>
           <li>
             <Link to="/players" onClick={toggleMenu}>Players</Link>

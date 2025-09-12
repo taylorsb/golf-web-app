@@ -1,5 +1,5 @@
 import React from 'react'; // Trigger build - third time
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import './App.css';
 // Dummy change to trigger deployment
 import MainMenu from './MainMenu';
@@ -9,33 +9,6 @@ import TournamentManager from './TournamentManager';
 import ScorecardEntry from './ScorecardEntry';
 import Leaderboard from './Leaderboard';
 import HandicapAdjustmentManager from './HandicapAdjustmentManager';
-import backgroundImage from './theopenimage.jpg'; // Import the image
-
-function Home() {
-  const homeStyle = {
-    backgroundImage: `url(${backgroundImage})`
-  };
-
-  return (
-    <div className="home-container" style={homeStyle}>
-      <header className="app-header">
-        <h1>
-          <span role="img" aria-label="golf-icon">⛳</span> Golf Tournament Manager
-        </h1>
-        <p>
-          <em>“Golf is the closest game to the game we call life. You get bad breaks from good shots;
-          <br />
-          you get good breaks from bad shots – but you have to play the ball where it lies.”</em>
-          <br />
-          <span style={{ textAlign: 'center', display: 'block' }}>by Bobby Jones</span>
-        </p>
-      </header>
-      <main className="leaderboard-container">
-        <Leaderboard />
-      </main>
-    </div>
-  );
-}
 
 function App() {
   return (
@@ -43,7 +16,8 @@ function App() {
       <div className="App">
         <MainMenu />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Navigate to="/leaderboard" />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/players" element={<PlayerManager />} />
           <Route path="/courses" element={<CourseManager />} />
           <Route path="/tournaments" element={<TournamentManager />} />

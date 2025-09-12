@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './HandicapAdjustmentManager.css';
+import './monochrome.css';
 import API_URL from './config';
 
 const HandicapAdjustmentManager = () => {
@@ -126,7 +127,7 @@ const HandicapAdjustmentManager = () => {
   };
 
   return (
-    <div className="handicap-adjustment-manager">
+    <div className="handicap-adjustment-manager monochrome-container">
       <h1>Handicap Adjustment Reference</h1>
 
       <div className="adjustment-form"> {/* New div for the form */}
@@ -146,11 +147,11 @@ const HandicapAdjustmentManager = () => {
         />
         {editingAdjustment ? (
           <>
-            <button onClick={handleUpdateAdjustment} className="initiate-scoring-button">Update Adjustment</button>
-            <button onClick={handleCancelEdit} className="initiate-scoring-button">Cancel</button>
+            <button onClick={handleUpdateAdjustment}>Update Adjustment</button>
+            <button onClick={handleCancelEdit}>Cancel</button>
           </>
         ) : (
-          <button onClick={handleAddAdjustment} className="initiate-scoring-button">Add Adjustment</button>
+          <button onClick={handleAddAdjustment}>Add Adjustment</button>
         )}
       </div>
 
@@ -172,8 +173,8 @@ const HandicapAdjustmentManager = () => {
                   <td>{adj.stableford_score}</td>
                   <td>{adj.adjustment}</td>
                   <td>
-                    <button className="table-action-button" onClick={() => handleEditClick(adj)}>✏️</button>
-                    <button className="table-action-button delete" onClick={() => handleDeleteAdjustment(adj.stableford_score)}>🗑️</button>
+                    <button onClick={() => handleEditClick(adj)}>✏️</button>
+                    <button onClick={() => handleDeleteAdjustment(adj.stableford_score)}>🗑️</button>
                   </td>
                 </tr>
               ))}
@@ -197,8 +198,8 @@ const HandicapAdjustmentManager = () => {
                   <td>{adj.stableford_score}</td>
                   <td>{adj.adjustment}</td>
                   <td>
-                    <button className="table-action-button" onClick={() => handleEditClick(adj)}>✏️</button>
-                    <button className="table-action-button delete" onClick={() => handleDeleteAdjustment(adj.stableford_score)}>🗑️</button>
+                    <button onClick={() => handleEditClick(adj)}>✏️</button>
+                    <button onClick={() => handleDeleteAdjustment(adj.stableford_score)}>🗑️</button>
                   </td>
                 </tr>
               ))}
@@ -222,8 +223,8 @@ const HandicapAdjustmentManager = () => {
                   <td>{adj.stableford_score}</td>
                   <td>{adj.adjustment}</td>
                   <td>
-                    <button className="table-action-button" onClick={() => handleEditClick(adj)}>✏️</button>
-                    <button className="table-action-button delete" onClick={() => handleDeleteAdjustment(adj.stableford_score)}>🗑️</button>
+                    <button onClick={() => handleEditClick(adj)}>✏️</button>
+                    <button onClick={() => handleDeleteAdjustment(adj.stableford_score)}>🗑️</button>
                   </td>
                 </tr>
               ))}

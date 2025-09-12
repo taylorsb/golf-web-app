@@ -9,7 +9,7 @@
   margin-bottom: 1rem; /* Space below controls */
   align-items: center;
   padding: 0.5rem;
-  background-color: rgba(240, 240, 240, 0.5); /* Light grey background with 50% transparency */
+  background-color: #f0f0f0; /* Light grey background */
   border-radius: 5px;
   width: fit-content; /* Make width fit content */
   margin-left: auto; /* Center the block */
@@ -112,6 +112,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 120px;
+}
+
+.narrow-column {
+  max-width: 80px;
 }
 
 @media (max-width: 768px) {

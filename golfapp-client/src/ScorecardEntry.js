@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import './ScorecardEntry.css';
+import './monochrome.css';
 import API_URL from './config';
 
 const ScorecardEntry = () => {
@@ -537,7 +538,7 @@ const ScorecardEntry = () => {
   };
 
   return (
-    <div className="scorecard-container">
+    <div className="scorecard-container monochrome-container">
 
       {notification.message && (
           <div className={`notification ${notification.type}`}>
@@ -626,7 +627,7 @@ const ScorecardEntry = () => {
             </ul>
           </div>
           {!isLoadingRounds && !roundInitiated && !isCurrentRoundFinalized && (
-            <button className="initiate-scoring-button" onClick={handleInitiateScoring}>Initiate Scoring</button>
+            <button onClick={handleInitiateScoring}>Initiate Scoring</button>
           )}
           <h3>Input Scores for Round {selectedCourseSequence} - {currentCourse?.name}</h3>
 
@@ -761,13 +762,13 @@ const ScorecardEntry = () => {
             </table>
           )}
           {roundInitiated && !isCurrentRoundFinalized && (
-            <button className="submit-scores-button" onClick={handleSubmitFinalScores}>Submit Scores</button>
+            <button onClick={handleSubmitFinalScores}>Submit Scores</button>
           )}
           {roundInitiated && !isCurrentRoundFinalized && (
-            <button className="end-round-button" onClick={handleEndRound}>End Round</button>
+            <button onClick={handleEndRound}>End Round</button>
           )}
           {isCurrentRoundFinalized && (
-            <button className="initiate-scoring-button" onClick={handleReopenRound}>Re-open Round</button>
+            <button onClick={handleReopenRound}>Re-open Round</button>
           )}
 
           {/* New Summary Section */}

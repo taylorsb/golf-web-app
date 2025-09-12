@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import './Leaderboard.css';
 import API_URL from './config';
+import backgroundImage from './theopenimage.jpg'; // Import the image
 
 const Leaderboard = () => {
   const [tournaments, setTournaments] = useState([]);
   const [selectedTournament, setSelectedTournament] = useState('');
-  const [courses, setCourses] = useState([]);
-  const [selectedCourse, setSelectedCourse] = useState('');
-  const [selectedCourseSequence, setSelectedCourseSequence] = useState(null);
+  
   const [allRoundsData, setAllRoundsData] = useState([]); // Raw data from backend
-  const [displayedLeaderboard, setDisplayedLeaderboard] = useState([]); // Processed and sorted data
-  const [sortColumn, setSortColumn] = useState('roundStablefordPoints'); // Default sort
+  const [leaderboardData, setLeaderboardData] = useState([]); // Processed and sorted data
+  const [sortColumn, setSortColumn] = useState('tournamentStablefordPoints'); // Default sort
   const [sortDirection, setSortDirection] = useState('desc'); // Default sort direction
+
+  const homeStyle = {
+    backgroundImage: `url(${backgroundImage})`
+  };
 
   // Fetch tournaments
   useEffect(() => {
@@ -33,43 +36,19 @@ const Leaderboard = () => {
     fetchTournaments();
   }, []);
 
-  // Fetch courses for selected tournament
-  useEffect(() => {
-    const fetchCourses = async () => {
-      if (selectedTournament) {
-        try {
-          const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/courses`);
-          const data = await response.json();
-          setCourses(data);
-          if (data.length > 0) {
-            // Sort courses by sequence_number
-            const sortedCourses = [...data].sort((a, b) => a.sequence_number - b.sequence_number);
-            setSelectedCourse(sortedCourses[0].id);
-            setSelectedCourseSequence(sortedCourses[0].sequence_number);
-          } else {
-            setSelectedCourse(''); // No courses for this tournament
-            setSelectedCourseSequence(null);
-          }
-        } catch (error) {
-          console.error('Error fetching courses:', error);
-          setCourses([]);
-          setSelectedCourse('');
-        }
-      }
-    };
-    fetchCourses();
-  }, [selectedTournament]);
+  
 
-  // Fetch all rounds data for the selected tournament (and optionally course)
+  // Fetch all rounds data for the selected tournament
   useEffect(() => {
     const fetchRoundsData = async () => {
       if (selectedTournament) {
         try {
           const response = await fetch(`${API_URL}/tournaments/${selectedTournament}/rounds_summary`);
           const data = await response.json();
+          console.log('Raw rounds data:', data);
           setAllRoundsData(data);
         } catch (error) {
-          console.error('Error fetching rounds summary:', error);
+          console.error('Error fetching rounds data:', error);
           setAllRoundsData([]);
         }
       }
@@ -80,46 +59,32 @@ const Leaderboard = () => {
   // Process and sort leaderboard data
   useEffect(() => {
     const processLeaderboardData = () => {
-      console.log('Processing leaderboard data. Sort Column:', sortColumn, 'Sort Direction:', sortDirection);
-      // First, calculate tournament-wide aggregates for each player
-      const playerTournamentAggregates = {};
+      const players = {};
+
       allRoundsData.forEach(round => {
-        if (!playerTournamentAggregates[round.player_id]) {
-          playerTournamentAggregates[round.player_id] = {
+        if (!players[round.player_id]) {
+          players[round.player_id] = {
             playerName: round.player_name,
             tournamentStablefordPoints: 0,
             tournamentGross: 0,
+            rounds: [],
           };
         }
-        playerTournamentAggregates[round.player_id].tournamentStablefordPoints += round.stableford_total || 0;
-        playerTournamentAggregates[round.player_id].tournamentGross += round.gross_score_total || 0;
+
+        players[round.player_id].rounds[round.round_number - 1] = round.stableford_total || 0;
+        players[round.player_id].tournamentStablefordPoints += round.stableford_total || 0;
+        players[round.player_id].tournamentGross += round.gross_score_total || 0;
+        
       });
 
-      // Then, filter rounds based on selected course for display
-      let roundsToDisplay = allRoundsData;
-      if (selectedCourse && selectedCourseSequence !== null) {
-        roundsToDisplay = allRoundsData.filter(round => 
-          round.course_id === selectedCourse && 
-          round.round_number === selectedCourseSequence // Assuming round_number stores sequence
-        );
-      }
-
-      // Now, combine the filtered rounds with the tournament aggregates
-      let processedData = roundsToDisplay.map(round => ({
-        playerName: round.player_name,
-        tournamentStablefordPoints: playerTournamentAggregates[round.player_id]?.tournamentStablefordPoints || 0,
-        tournamentGross: playerTournamentAggregates[round.player_id]?.tournamentGross || 0,
-        roundStablefordPoints: round.stableford_total || 0,
-        roundGross: round.gross_score_total || 0,
-        roundId: round.id, // Unique key for the row
-      }));
+      let processedData = Object.values(players);
 
       // Apply sorting
       processedData.sort((a, b) => {
         let comparison = 0;
-        if (sortColumn === 'roundStablefordPoints' || sortColumn === 'tournamentStablefordPoints') {
+        if (sortColumn === 'tournamentStablefordPoints') {
           comparison = b[sortColumn] - a[sortColumn]; // High to low
-        } else if (sortColumn === 'roundGross' || sortColumn === 'tournamentGross') {
+        } else if (sortColumn === 'tournamentGross') {
           comparison = a[sortColumn] - b[sortColumn]; // Low to high
         }
 
@@ -135,28 +100,18 @@ const Leaderboard = () => {
         position: index + 1,
       }));
 
-      setDisplayedLeaderboard(processedData);
+      setLeaderboardData(processedData);
+      console.log('Processed leaderboard data:', processedData);
     };
 
     processLeaderboardData();
-  }, [allRoundsData, selectedCourse, selectedCourseSequence, sortColumn, sortDirection]);
+  }, [allRoundsData, sortColumn, sortDirection]);
 
   const handleTournamentChange = (event) => {
     setSelectedTournament(event.target.value);
-    setSelectedCourse(''); // Reset selected course when tournament changes
   };
 
-  const handleCourseChange = (event) => {
-    const value = event.target.value;
-    if (value === "") {
-      setSelectedCourse('');
-      setSelectedCourseSequence(null);
-    } else {
-      const [courseId, sequenceNumber] = value.split('-');
-      setSelectedCourse(parseInt(courseId));
-      setSelectedCourseSequence(parseInt(sequenceNumber));
-    }
-  };
+  
 
   const handleSort = (column) => {
     if (sortColumn === column) {
@@ -173,34 +128,35 @@ const Leaderboard = () => {
   };
 
   return (
-    <> {/* Use a React Fragment to wrap multiple top-level elements */}
-      <div className="leaderboard-controls"> {/* New container for controls */}
-        <label htmlFor="tournament-select">Tournament:</label>
-        <select id="tournament-select" onChange={handleTournamentChange} value={selectedTournament}>
-          {tournaments.map((tournament) => (
-            <option key={tournament.id} value={tournament.id}>
-              {tournament.name}
-            </option>
-          ))}
-        </select>
-        {selectedTournament && (
-          <>
-            <label htmlFor="course-select">Golf Course:</label>
-            <select id="course-select" onChange={handleCourseChange} value={selectedCourse && selectedCourseSequence !== null ? `${selectedCourse}-${selectedCourseSequence}` : ""} disabled={courses.length === 0}>
-              <option value="">All Courses</option>
-              {courses.map((course) => (
-                <option key={`${course.id}-${course.sequence_number}`} value={`${course.id}-${course.sequence_number}`}>
-                  {course.name} - {course.sequence_number}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-      </div>
-      <div className="leaderboard-widget">
-        <h2>Leaderboard</h2> {/* Renamed title */}
-        <div className="leaderboard-body">
-          <table className="leaderboard-table">
+    <div className="home-container" style={homeStyle}>
+      <header className="app-header">
+        <h1>
+          <span role="img" aria-label="golf-icon">⛳</span> Golf Tournament Manager
+        </h1>
+        <p>
+          <em>“Golf is the closest game to the game we call life. You get bad breaks from good shots;
+          <br />
+          you get good breaks from bad shots – but you have to play the ball where it lies.”</em>
+          <br />
+          <span style={{ textAlign: 'center', display: 'block' }}>by Bobby Jones</span>
+        </p>
+      </header>
+      <main className="leaderboard-container">
+        <div className="leaderboard-controls"> {/* New container for controls */}
+          <label htmlFor="tournament-select">Tournament:</label>
+          <select id="tournament-select" onChange={handleTournamentChange} value={selectedTournament}>
+            {tournaments.map((tournament) => (
+              <option key={tournament.id} value={tournament.id}>
+                {tournament.name}
+              </option>
+            ))}
+          </select>
+          
+        </div>
+        <div className="leaderboard-widget">
+          <h2>Leaderboard</h2> {/* Renamed title */}
+          <div className="leaderboard-body">
+            <table className="leaderboard-table">
             <thead>
               <tr>
                 <th onClick={() => handleSort('position')}>
@@ -209,36 +165,40 @@ const Leaderboard = () => {
                 <th onClick={() => handleSort('playerName')}>
                   Player {sortColumn === 'playerName' && (sortDirection === 'asc' ? '▲' : '▼')}
                 </th>
-                <th onClick={() => handleSort('tournamentStablefordPoints')}>
+                <th className="narrow-column" onClick={() => handleSort('tournamentStablefordPoints')}>
                   Tourn. Stableford {sortColumn === 'tournamentStablefordPoints' && (sortDirection === 'asc' ? '▲' : '▼')}
                 </th>
-                <th onClick={() => handleSort('roundStablefordPoints')}>
-                  Round Stableford {sortColumn === 'roundStablefordPoints' && (sortDirection === 'asc' ? '▲' : '▼')}
-                </th>
-                <th onClick={() => handleSort('tournamentGross')}>
+                {leaderboardData.length > 0 && leaderboardData[0].rounds.map((_, index) => (
+                  <th key={index}>
+                    R{index + 1}
+                  </th>
+                ))}
+                <th className="narrow-column" onClick={() => handleSort('tournamentGross')}>
                   Tourn. Gross {sortColumn === 'tournamentGross' && (sortDirection === 'asc' ? '▲' : '▼')}
                 </th>
-                <th onClick={() => handleSort('roundGross')}>
-                  Round Gross {sortColumn === 'roundGross' && (sortDirection === 'asc' ? '▲' : '▼')}
-                </th>
+                
               </tr>
             </thead>
             <tbody>
-              {displayedLeaderboard.map((player) => (
-                <tr key={player.roundId}><td>{player.position}</td>
+              {leaderboardData.map((player) => (
+                <tr key={player.playerName}>
+                  <td>{player.position}</td>
                   <td className="player-name-cell">{player.playerName}</td>
-                  <td className="points-cell">{player.tournamentStablefordPoints}</td>
-                  <td className="points-cell">{player.roundStablefordPoints}</td>
-                  <td className="gross-score-cell">{player.tournamentGross}</td>
-                  <td className="gross-score-cell">{player.roundGross}</td>
+                  <td className="points-cell narrow-column">{player.tournamentStablefordPoints}</td>
+                  {player.rounds.map((round, index) => (
+                    <td key={index} className="points-cell">{round}</td>
+                  ))}
+                  <td className="gross-score-cell narrow-column">{player.tournamentGross}</td>
+                  
                 </tr>
               ))}
             </tbody>
-            <tfoot><tr><td colSpan="6"></td></tr></tfoot>
+            <tfoot><tr><td colSpan={leaderboardData.length > 0 ? 5 + leaderboardData[0].rounds.length : 5}></td></tr></tfoot>
           </table>
+          </div>
         </div>
-      </div>
-    </>
+      </main>
+    </div>
   );
 };
 

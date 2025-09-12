@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './CourseManager.css';
+import './monochrome.css';
 import API_URL from './config';
 
 function CourseManager() {
@@ -100,11 +101,11 @@ function CourseManager() {
   };
 
   return (
-    <div className="course-manager">
+    <div className="course-manager monochrome-container">
       <h2>Golf Courses</h2>
 
       {!showCourseForm && !editingCourse && (
-        <button onClick={() => setShowCourseForm(true)} className="initiate-scoring-button">Add New Course</button>
+        <button onClick={() => setShowCourseForm(true)}>Add New Course</button>
       )}
 
       {(showCourseForm || editingCourse) && (
@@ -153,11 +154,11 @@ function CourseManager() {
           </div>
 
           {editingCourse ? (
-            <button onClick={handleUpdateCourse} className="initiate-scoring-button">Update Course</button>
+            <button onClick={handleUpdateCourse}>Update Course</button>
           ) : (
-            <button onClick={handleAddCourse} className="initiate-scoring-button">Add Course</button>
+            <button onClick={handleAddCourse}>Add Course</button>
           )}
-          <button onClick={resetForm} className="initiate-scoring-button">Cancel</button>
+          <button onClick={resetForm}>Cancel</button>
         </div>
       )}
 
@@ -167,8 +168,8 @@ function CourseManager() {
           {courses.sort((a, b) => a.name.localeCompare(b.name)).map((course) => (
             <tr key={course.id}>
               <td data-label="Course">{course.name} ({course.country}) - Slope: {course.slope_rating}</td>
-              <td data-label="Actions"><button onClick={() => handleEditClick(course)} className="initiate-scoring-button">Edit</button></td>
-              <td data-label="Actions"><button onClick={() => handleDeleteCourse(course.id)} className="initiate-scoring-button">Delete</button></td>
+              <td data-label="Actions"><button onClick={() => handleEditClick(course)}>Edit</button></td>
+              <td data-label="Actions"><button onClick={() => handleDeleteCourse(course.id)}>Delete</button></td>
             </tr>
           ))}
         </tbody>

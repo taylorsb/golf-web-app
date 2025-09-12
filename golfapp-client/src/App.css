@@ -23,7 +23,7 @@
 
 /* App Header */
 .app-header {
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent background */
   padding: 2rem;
   border-radius: 10px;
   margin-bottom: 2rem;
@@ -41,7 +41,7 @@
 
 /* Leaderboard Container */
 .leaderboard-container {
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent background */
   padding: 2rem;
   border-radius: 10px;
   width: 80%;

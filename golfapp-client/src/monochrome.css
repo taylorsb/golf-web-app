@@ -1,0 +1,30 @@
+/* monochrome.css */
+
+.monochrome-container {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.monochrome-container h2 {
+  color: #333;
+}
+
+.monochrome-container button,
+.monochrome-container input,
+.monochrome-container select {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 16px;
+  margin: 5px;
+}
+
+.monochrome-container button {
+  cursor: pointer;
+  background-color: #ddd;
+}
+
+.monochrome-container button:hover {
+  background-color: #ccc;
+}

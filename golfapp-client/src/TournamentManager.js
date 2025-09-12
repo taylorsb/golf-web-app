@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './TournamentManager.css';
+import './monochrome.css';
 import API_URL from './config';
 
 function TournamentManager() {
@@ -208,7 +209,7 @@ function TournamentManager() {
   };
 
   return (
-    <div className="tournament-manager">
+    <div className="tournament-manager monochrome-container">
       <h1>Tournament Management</h1>
 
       <div className="tournament-form">
@@ -231,9 +232,9 @@ function TournamentManager() {
           onChange={(e) => setNewTournamentLocation(e.target.value)}
         />
         {editingTournament ? (
-          <button onClick={handleUpdateTournament} className="initiate-scoring-button">Update Tournament</button>
+          <button onClick={handleUpdateTournament}>Update Tournament</button>
         ) : (
-          <button onClick={handleAddTournament} className="initiate-scoring-button">Add Tournament</button>
+          <button onClick={handleAddTournament}>Add Tournament</button>
         )}
       </div>
 
@@ -242,8 +243,8 @@ function TournamentManager() {
         {tournaments.map((tournament) => (
           <li key={tournament.id}>
             {tournament.name} ({tournament.date}, {tournament.location})
-            <button onClick={() => handleEditClick(tournament)} className="initiate-scoring-button">Edit</button>
-            <button onClick={() => handleDeleteTournament(tournament.id)} className="initiate-scoring-button">Delete</button>
+            <button onClick={() => handleEditClick(tournament)}>Edit</button>
+            <button onClick={() => handleDeleteTournament(tournament.id)}>Delete</button>
           </li>
         ))}
       </ul>
@@ -360,7 +361,7 @@ function TournamentManager() {
               </table>
             </div>
           </div>
-          <button onClick={handleSubmitChanges} className="initiate-scoring-button" style={{ marginTop: '20px', padding: '10px 20px', fontSize: '1.2em' }}>Update Assignments</button>
+          <button onClick={handleSubmitChanges} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '1.2em' }}>Update Assignments</button>
           {successMessage && <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>}
         </div>
       )}

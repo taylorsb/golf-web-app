@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './PlayerManager.css';
+import './monochrome.css';
 import API_URL from './config';
 
 const PlayerManager = () => {
@@ -60,7 +61,7 @@ const PlayerManager = () => {
   };
 
   return (
-    <div className="player-manager">
+    <div className="player-manager monochrome-container">
       <h1>Golf Players</h1>
 
       <div>
@@ -77,9 +78,9 @@ const PlayerManager = () => {
           onChange={(e) => setNewPlayerHandicap(e.target.value)}
         />
         {editingPlayer ? (
-          <button onClick={handleUpdatePlayer} className="initiate-scoring-button">Update Player</button>
+          <button onClick={handleUpdatePlayer}>Update Player</button>
         ) : (
-          <button onClick={handleAddPlayer} className="initiate-scoring-button">Add Player</button>
+          <button onClick={handleAddPlayer}>Add Player</button>
         )}
       </div>
 
@@ -89,8 +90,8 @@ const PlayerManager = () => {
           {players.sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
             <tr key={player.id}>
               <td data-label="Player">{player.name} (Handicap: {player.handicap})</td>
-              <td data-label="Actions"><button onClick={() => handleEditClick(player)} className="initiate-scoring-button">Edit</button></td>
-              <td data-label="Actions"><button onClick={() => handleDeletePlayer(player.id)} className="initiate-scoring-button">Delete</button></td>
+              <td data-label="Actions"><button onClick={() => handleEditClick(player)}>Edit</button></td>
+              <td data-label="Actions"><button onClick={() => handleDeletePlayer(player.id)}>Delete</button></td>
             </tr>
           ))}
         </tbody>
