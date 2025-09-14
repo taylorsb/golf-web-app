@@ -1,0 +1,72 @@
+/* BBC Leaderboard Styles */
+
+.leaderboard-container {
+  background-color: #f2f2f2;
+  padding: 1rem;
+}
+
+.leaderboard-widget h2 {
+  background-color: #333;
+  color: white;
+  padding: 0.5rem;
+  margin: 0;
+}
+
+.leaderboard-table {
+  background-color: white;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard-table th {
+  background-color: #e6e6e6;
+  color: #333;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.leaderboard-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.leaderboard-table td {
+  text-align: center;
+  color: #333;
+}
+
+.score-square {
+  width: 30px;
+  height: 30px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+}
+
+.stableford-square {
+  background-color: #d71920;
+  color: white;
+}
+
+.round-square {
+  background-color: #e6e6e6;
+  color: #333;
+}
+
+.gross-square {
+  background-color: #007bc0;
+  color: white;
+}
+
+.leaderboard-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.leaderboard-controls label {
+  color: #333;
+  margin-right: 0.5rem;
+}

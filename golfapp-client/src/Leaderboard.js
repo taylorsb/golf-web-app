@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './Leaderboard.css';
+import './leaderboard_bbc.css';
 import API_URL from './config';
 import backgroundImage from './theopenimage.jpg'; // Import the image
 
@@ -159,12 +159,8 @@ const Leaderboard = () => {
             <table className="leaderboard-table">
             <thead>
               <tr>
-                <th onClick={() => handleSort('position')}>
-                  Pos {sortColumn === 'position' && (sortDirection === 'asc' ? '▲' : '▼')}
-                </th>
-                <th onClick={() => handleSort('playerName')}>
-                  Player {sortColumn === 'playerName' && (sortDirection === 'asc' ? '▲' : '▼')}
-                </th>
+                <th style={{color: '#333'}}>Pos {sortColumn === 'position' && (sortDirection === 'asc' ? '▲' : '▼')}</th>
+                <th style={{color: '#333'}}>Player {sortColumn === 'playerName' && (sortDirection === 'asc' ? '▲' : '▼')}</th>
                 <th className="narrow-column" onClick={() => handleSort('tournamentStablefordPoints')}>
                   Tourn. Stableford {sortColumn === 'tournamentStablefordPoints' && (sortDirection === 'asc' ? '▲' : '▼')}
                 </th>
@@ -183,13 +179,12 @@ const Leaderboard = () => {
               {leaderboardData.map((player) => (
                 <tr key={player.playerName}>
                   <td>{player.position}</td>
-                  <td className="player-name-cell">{player.playerName}</td>
-                  <td className="points-cell narrow-column">{player.tournamentStablefordPoints}</td>
+                  <td>{player.playerName}</td>
+                  <td><div className="score-square stableford-square">{player.tournamentStablefordPoints}</div></td>
                   {player.rounds.map((round, index) => (
-                    <td key={index} className="points-cell">{round}</td>
+                    <td key={index}><div className="score-square round-square">{round}</div></td>
                   ))}
-                  <td className="gross-score-cell narrow-column">{player.tournamentGross}</td>
-                  
+                  <td><div className="score-square gross-square">{player.tournamentGross}</div></td>
                 </tr>
               ))}
             </tbody>
