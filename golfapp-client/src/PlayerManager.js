@@ -86,12 +86,21 @@ const PlayerManager = () => {
 
       <h2>Players List</h2>
       <table className="player-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Handicap Index</th>
+            <th>Edit</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
         <tbody>
           {players.sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
             <tr key={player.id}>
-              <td data-label="Player">{player.name} (Handicap: {player.handicap})</td>
-              <td data-label="Actions"><button onClick={() => handleEditClick(player)}>Edit</button></td>
-              <td data-label="Actions"><button onClick={() => handleDeletePlayer(player.id)}>Delete</button></td>
+              <td>{player.name}</td>
+              <td>{player.handicap}</td>
+              <td><button onClick={() => handleEditClick(player)}>Edit</button></td>
+              <td><button onClick={() => handleDeletePlayer(player.id)}>Del</button></td>
             </tr>
           ))}
         </tbody>

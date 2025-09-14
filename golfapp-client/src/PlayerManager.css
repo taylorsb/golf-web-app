@@ -29,42 +29,32 @@
   table-layout: fixed; /* Ensure column widths are respected */
 }
 
+.player-table th,
 .player-table td {
-  border: none; /* Make borders invisible */
-  padding: 8px; /* Adjust padding as needed */
-  text-align: left; /* Align content to the left */
-  vertical-align: middle; /* Center content vertically */
-}
-
-.player-table td:nth-child(1) {
-  width: 70%; /* Increased width for name and handicap column */
-}
-
-.player-table td:nth-child(2),
-.player-table td:nth-child(3) {
-  width: 15%; /* Reduced width for edit and delete button columns */
-}
-
-/* Button styles (retained from previous) */
-.initiate-scoring-button {
-  background-color: #4CAF50; /* Green */
-  border: none;
-  color: white;
+  border: 1px solid #ddd;
+  padding: 8px;
   text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  margin: 4px 2px;
-  cursor: pointer;
+  vertical-align: middle;
+}
+
+.player-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.player-table button {
+  padding: 8px 12px;
   border-radius: 5px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  background-color: #808080; /* Grey background for all buttons */
+  font-size: 14px;
+  white-space: nowrap;
 }
 
-.initiate-scoring-button:hover {
-  background-color: #45a049;
-}
-
-.player-manager .initiate-scoring-button {
-    padding: 5px 10px;
-    font-size: 12px;
+.player-table button:hover {
+  background-color: #666;
 }
 
 @media (max-width: 768px) {
@@ -78,45 +68,36 @@
   .player-manager input[type="number"] {
     margin-right: 0;
     margin-bottom: 10px;
-    width: 80%;
+    width: 90%;
+    box-sizing: border-box;
+    margin: 0 auto;
   }
 
   .player-table {
     width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
   }
 
-  .player-table thead {
-    display: none;
-  }
-
-  .player-table tr {
-    display: block;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    padding: 10px;
-    border-radius: 5px;
-  }
-
+  .player-table th,
   .player-table td {
-    display: flex;
-    justify-content: space-between;
-    text-align: right;
-    border-bottom: 1px dotted #ccc;
-    padding: 5px 0;
+    padding: 5px;
+    font-size: 0.9em;
+    word-break: break-word; /* Allow long words to break */
+    overflow-wrap: break-word; /* Ensure player names wrap */
   }
 
-  .player-table td:before {
-    content: attr(data-label);
-    float: left;
-    font-weight: bold;
-    text-align: left;
-  }
-
-  .player-table td:last-child {
-    border-bottom: 0;
-  }
+  .player-table th:nth-child(1),
+  .player-table td:nth-child(1) { width: 25%; } /* Name */
+  .player-table th:nth-child(2),
+  .player-table td:nth-child(2) { width: 20%; } /* Handicap Index */
+  .player-table th:nth-child(3),
+  .player-table td:nth-child(3) { width: 27.5%; } /* Edit Button */
+  .player-table th:nth-child(4),
+  .player-table td:nth-child(4) { width: 27.5%; } /* Delete Button */
 
   .player-table button {
-    width: 48%;
+    padding: 1px 2px;
+    font-size: 0.5em;
   }
 }
