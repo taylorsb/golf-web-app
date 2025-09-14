@@ -16,6 +16,7 @@ const MainMenu = () => {
         <div className="bar"></div>
         <div className="bar"></div>
       </div>
+      <div className={`content-overlay ${isOpen ? 'open' : ''}`} onClick={toggleMenu}></div>
       <nav className={isOpen ? 'open' : ''}>
         <ul>
           <li>

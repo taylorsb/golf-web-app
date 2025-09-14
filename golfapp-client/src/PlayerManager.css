@@ -93,21 +93,30 @@
     display: block;
     margin-bottom: 15px;
     border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
   }
 
   .player-table td {
-    display: block;
+    display: flex;
+    justify-content: space-between;
     text-align: right;
     border-bottom: 1px dotted #ccc;
+    padding: 5px 0;
   }
 
   .player-table td:before {
     content: attr(data-label);
     float: left;
     font-weight: bold;
+    text-align: left;
   }
 
   .player-table td:last-child {
     border-bottom: 0;
+  }
+
+  .player-table button {
+    width: 48%;
   }
 }

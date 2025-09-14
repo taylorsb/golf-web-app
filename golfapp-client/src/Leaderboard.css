@@ -128,7 +128,17 @@
     overflow-x: auto;
   }
 
+  .leaderboard-table {
+    font-size: 0.8rem;
+  }
+
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 0.2rem;
+  }
+
   .leaderboard-table .player-name-cell {
     white-space: normal;
+    max-width: 100px;
   }
 }
