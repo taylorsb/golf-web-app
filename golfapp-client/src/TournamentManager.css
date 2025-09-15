@@ -1,62 +1,104 @@
-/* TournamentManager.css */
-
+/* Main tournament manager layout */
 .tournament-manager {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  padding: 0 20px 20px 20px;
+  font-family: Arial, sans-serif;
+  text-align: center;
 }
 
-.tournament-manager .initiate-scoring-button {
-    padding: 5px 10px;
-    font-size: 12px;
+.tournament-manager h1,
+.tournament-manager h2,
+.tournament-manager h3 {
+  color: #333;
 }
 
-.assignment-section {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    width: 100%;
-    max-width: 800px;
-    margin-bottom: 20px;
+/* Main tournament list table */
+.tournament-table {
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
-.assignment-box {
-    width: 45%;
-    max-width: 350px;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+.tournament-table th,
+.tournament-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+  vertical-align: middle;
+  word-break: break-word;
 }
 
-.assignment-box > div > div {
-    align-items: start;
+.tournament-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
 }
 
+.tournament-table button {
+  background-color: #6c757d;
+  color: white;
+  padding: 5px 10px;
+  font-size: 0.9em;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Edit/Assignment Section */
+.assignment-section,
 .current-assignments-section {
-    margin-top: 20px;
-    width: 100%;
-    max-width: 800px;
-    text-align: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
+.assignment-container,
 .current-assignments {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
 }
 
+.assignment-box,
 .assignment-list {
-    width: 45%;
-    max-width: 350px;
-    padding: 20px;
+    flex: 1;
+    min-width: 0; /* Prevents flex items from overflowing */
     border: 1px solid #ccc;
+    padding: 10px;
     border-radius: 5px;
 }
 
-.assignment-list table td {
-  vertical-align: top;
+/* Smaller tables within the edit view */
+.assignment-table {
+  width: 100%;
+  font-size: 0.8em;
+}
+
+.assignment-table th,
+.assignment-table td {
+  padding: 2px;
+  text-align: left;
+}
+
+/* Smaller tables within the edit view */
+.assignment-table {
+  width: 100%;
+  font-size: 0.9em;
+}
+
+.assignment-table th,
+.assignment-table td {
+  padding: 4px;
+  text-align: left;
+}
+
+.assignment-table button {
+  padding: 2px 5px;
+  font-size: 0.8em;
 }
 
 .course-assignment-row {
@@ -66,74 +108,21 @@
   margin-bottom: 5px;
 }
 
-.course-assignment-row span {
-  flex-grow: 1;
-  text-align: left;
-}
-
-.course-assignment-row input {
-  width: 50px;
-  margin-right: 5px;
-}
-
-.course-assignment-row button {
-  width: 30px;
-}
-
-.initiate-scoring-button {
-  background-color: #4CAF50; /* Green */
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin-top: 20px;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.initiate-scoring-button:hover {
-  background-color: #45a049;
-}
-
-.tournament-list {
-  list-style: none;
-  padding: 0;
-}
-
+/* Mobile adjustments */
 @media (max-width: 768px) {
-  .tournament-manager .tournament-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  .tournament-table th:nth-child(1),
+  .tournament-table td:nth-child(1) { width: 30%; } /* Name */
+  .tournament-table th:nth-child(2),
+  .tournament-table td:nth-child(2) { width: 25%; } /* Date */
+  .tournament-table th:nth-child(3),
+  .tournament-table td:nth-child(3) { display: none; } /* Hide Location on mobile */
+  .tournament-table th:nth-child(4),
+  .tournament-table td:nth-child(4) { width: 22.5%; } /* Edit */
+  .tournament-table th:nth-child(5),
+  .tournament-table td:nth-child(5) { width: 22.5%; } /* Delete */
 
-  .tournament-manager .tournament-form input {
-    margin-right: 0;
-    margin-bottom: 10px;
-    width: 80%;
-  }
-
-  .assignment-section,
+  .assignment-container,
   .current-assignments {
     flex-direction: column;
-    align-items: center;
-  }
-
-  .assignment-box,
-  .assignment-list {
-    width: 90%;
-    max-width: none;
-  }
-
-  .tournament-list li {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 1px solid #ddd;
-    margin-bottom: 10px;
-    padding: 10px;
   }
 }

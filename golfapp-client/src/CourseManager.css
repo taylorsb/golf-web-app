@@ -1,133 +1,113 @@
 .course-manager {
-  padding: 20px;
+  padding: 0 20px 20px 20px;
   font-family: Arial, sans-serif;
   text-align: center;
 }
 
-.course-manager h2,
+.course-manager h1,
+.course-manager h2, 
 .course-manager h3 {
   color: #333;
+}
+
+.course-manager div {
+  margin-bottom: 20px;
 }
 
 .course-manager input[type="text"],
 .course-manager input[type="number"] {
   padding: 8px;
   margin-right: 10px;
-  margin-bottom: 10px; /* Added margin-bottom for inputs */
   border-radius: 5px;
   border: 1px solid #ddd;
 }
 
 /* Table styles */
 .course-table {
-  width: 700px; /* Fixed width for the table */
+  width: 600px; /* Fixed width for the table */
   margin: 0 auto; /* Center the table */
   border-collapse: collapse;
   table-layout: fixed; /* Ensure column widths are respected */
 }
 
+.course-table th,
 .course-table td {
-  border: none; /* Make borders invisible */
-  padding: 8px; /* Adjust padding as needed */
-  text-align: left; /* Align content to the left */
-  vertical-align: middle; /* Center content vertically */
-}
-
-.course-table td:nth-child(1) {
-  width: 77%; /* Increased width for name and details column */
-}
-
-.course-table td:nth-child(2) {
-  width: 15%; /* Reduced width for edit button column */
-}
-
-.course-table td:nth-child(3) {
-  width: 8%; /* Keep same width */
-}
-
-/* Button styles (retained from previous) */
-.initiate-scoring-button {
-  background-color: #4CAF50; /* Green */
-  border: none;
-  color: white;
+  border: 1px solid #ddd;
+  padding: 8px;
   text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  margin: 4px 2px;
-  cursor: pointer;
+  vertical-align: middle;
+}
+
+.course-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.course-table button {
+  padding: 8px 12px;
   border-radius: 5px;
+  color: white;
+  border: none;
+  cursor: pointer;
+  background-color: #808080; /* Grey background for all buttons */
+  font-size: 14px;
+  white-space: nowrap;
 }
 
-.initiate-scoring-button:hover {
-  background-color: #45a049;
-}
-
-.course-manager .initiate-scoring-button {
-    padding: 5px 10px;
-    font-size: 12px;
+.course-table button:hover {
+  background-color: #666;
 }
 
 @media (max-width: 768px) {
-  .course-manager .course-form-main-inputs {
+  .course-manager div {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
-  .course-manager .course-form-main-inputs input {
+  .course-manager input[type="text"],
+  .course-manager input[type="number"] {
     margin-right: 0;
     margin-bottom: 10px;
-    width: 80%;
-  }
-
-  .course-manager .hole-details-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
+    width: 90%;
+    box-sizing: border-box;
+    margin: 0 auto;
   }
 
   .course-table {
     width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
   }
 
-  .course-table thead {
-    display: none;
-  }
-
-  .course-table tr {
-    display: block;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-  }
-
+  .course-table th,
   .course-table td {
-    display: block;
-    text-align: right;
-    border-bottom: 1px dotted #ccc;
-  }
-
-  .course-table td:before {
-    content: attr(data-label);
-    float: left;
-    font-weight: bold;
-  }
-
-  .course-table td:last-child {
-    border-bottom: 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .course-manager .hole-details-grid {
-    grid-template-columns: repeat(1, 1fr) !important;
-  }
-
-  .course-manager .hole-details-grid h4 {
-    font-size: 1rem;
-    margin: 5px 0;
-  }
-
-  .course-manager .hole-details-grid input {
-    width: 90%;
     padding: 5px;
+    font-size: 0.9em;
+    word-break: break-word; /* Allow long words to break */
+    overflow-wrap: break-word; /* Ensure names wrap */
+  }
+
+  /* Adjusting for 5 columns */
+  .course-table th:nth-child(1),
+  .course-table td:nth-child(1) { width: 25%; } /* Name */
+  .course-table th:nth-child(2),
+  .course-table td:nth-child(2) { width: 15%; } /* Country */
+  .course-table th:nth-child(3),
+  .course-table td:nth-child(3) { width: 15%; } /* Slope */
+  .course-table th:nth-child(4),
+  .course-table td:nth-child(4) { width: 22.5%; } /* Edit Button */
+  .course-table th:nth-child(5),
+  .course-table td:nth-child(5) { width: 22.5%; } /* Delete Button */
+
+  .course-table button {
+    background-color: #6c757d; /* Darker Grey */
+    color: white;
+    padding: 1px;
+    font-size: 0.4em;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    white-space: nowrap;
   }
 }
-

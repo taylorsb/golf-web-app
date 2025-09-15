@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './TournamentManager.css';
-import './monochrome.css';
+
 import API_URL from './config';
 
 function TournamentManager() {
@@ -209,163 +209,179 @@ function TournamentManager() {
   };
 
   return (
-    <div className="tournament-manager monochrome-container">
-      <h1>Tournament Management</h1>
+    <>
+      <header className="page-header">
+        <h2 style={{ fontSize: '14pt', color: 'white', margin: 0 }}>Tournament Management</h2>
+      </header>
+      <div className="tournament-manager monochrome-container">
+        <div className="tournament-form">
+          <input
+            type="text"
+            placeholder="Tournament Name"
+            value={newTournamentName}
+            onChange={(e) => setNewTournamentName(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Date (e.g., YYYY-MM-DD)"
+            value={newTournamentDate}
+            onChange={(e) => setNewTournamentDate(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Location"
+            value={newTournamentLocation}
+            onChange={(e) => setNewTournamentLocation(e.target.value)}
+          />
+          {editingTournament ? (
+            <button onClick={handleUpdateTournament}>Update Tournament</button>
+          ) : (
+            <button onClick={handleAddTournament}>Add Tournament</button>
+          )}
+        </div>
 
-      <div className="tournament-form">
-        <input
-          type="text"
-          placeholder="Tournament Name"
-          value={newTournamentName}
-          onChange={(e) => setNewTournamentName(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Date (e.g., YYYY-MM-DD)"
-          value={newTournamentDate}
-          onChange={(e) => setNewTournamentDate(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Location"
-          value={newTournamentLocation}
-          onChange={(e) => setNewTournamentLocation(e.target.value)}
-        />
-        {editingTournament ? (
-          <button onClick={handleUpdateTournament}>Update Tournament</button>
-        ) : (
-          <button onClick={handleAddTournament}>Add Tournament</button>
-        )}
-      </div>
+        <h2>Tournaments List</h2>
+        <table className="tournament-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Date</th>
+              <th>Location</th>
+              <th>Edit</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tournaments.map((tournament) => (
+              <tr key={tournament.id}>
+                <td>{tournament.name}</td>
+                <td>{tournament.date}</td>
+                <td>{tournament.location}</td>
+                <td><button onClick={() => handleEditClick(tournament)}>Edit</button></td>
+                <td><button onClick={() => handleDeleteTournament(tournament.id)}>Delete</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-      <h2>Tournaments List</h2>
-      <ul className="tournament-list">
-        {tournaments.map((tournament) => (
-          <li key={tournament.id}>
-            {tournament.name} ({tournament.date}, {tournament.location})
-            <button onClick={() => handleEditClick(tournament)}>Edit</button>
-            <button onClick={() => handleDeleteTournament(tournament.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-
-      {editingTournament && (
-        <div className="assignment-section">
-          <div className="assignment-box">
-            <h2>Assign Players to {editingTournament.name}</h2>
-            <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
-              {players.map((player) => (
-                <div key={player.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-                  <span>{player.name}</span>
-                  <button
-                    onClick={() => handleAddPlayerToPending(player)}
-                    disabled={assignedPlayers.some(p => p.id === player.id) || playersToAdd.some(p => p.id === player.id)}
-                  >
-                    +
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="assignment-box">
-            <h2>Assign Courses to {editingTournament.name}</h2>
-            <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
-              {courses.map((course) => (
-                <div key={course.id} className="course-assignment-row">
-                  <span>{course.name}</span>
-                  <div>
-                    <input
-                      type="number"
-                      placeholder="Order"
-                      min="1"
-                      id={`course-seq-${course.id}`}
-                    />
+        {editingTournament && (
+          <div className="assignment-section">
+            <div className="assignment-box">
+              <h2>Assign Players to {editingTournament.name}</h2>
+              <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
+                {players.map((player) => (
+                  <div key={player.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                    <span>{player.name}</span>
                     <button
-                      onClick={() => handleAddCourseToPending(course, document.getElementById(`course-seq-${course.id}`).value)}
+                      onClick={() => handleAddPlayerToPending(player)}
+                      disabled={assignedPlayers.some(p => p.id === player.id) || playersToAdd.some(p => p.id === player.id)}
                     >
                       +
                     </button>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {editingTournament && (
-        <div className="current-assignments-section">
-          <h2>Current Assignments for {editingTournament.name}</h2>
-          <div className="current-assignments">
-            <div className="assignment-list">
-              <h3>Assigned Players:</h3>
-              <table border="1" style={{ width: '100%', margin: '0 auto' }}>
-                <thead>
-                  <tr>
-                    <th>Player Name</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {assignedPlayers.map(player => (
-                    <tr key={player.id}>
-                      <td>{player.name}</td>
-                      <td>
-                        <button onClick={() => handleRemovePlayerFromPending(player)}>🗑️</button>
-                      </td>
-                    </tr>
-                  ))}
-                  {playersToAdd.map(player => (
-                    <tr key={player.id} style={{ backgroundColor: '#e0ffe0' }}>
-                      <td>{player.name} (Pending Add)</td>
-                      <td>
-                        <button onClick={() => handleRemovePlayerFromPending(player)}>🗑️</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                ))}
+              </div>
             </div>
 
-            <div className="assignment-list">
-              <h3>Assigned Courses:</h3>
-              <table border="1" style={{ width: '100%', margin: '0 auto' }}>
-                <thead>
-                  <tr>
-                    <th>Course Name</th>
-                    <th>Order</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...assignedCourses].sort((a, b) => a.sequence_number - b.sequence_number).map(course => (
-                    <tr key={`${course.id}-${course.sequence_number}`}>
-                      <td>{course.name}</td>
-                      <td>{course.sequence_number}</td>
-                      <td>
-                        <button onClick={() => handleRemoveCourseFromPending(course)}>🗑️</button>
-                      </td>
-                    </tr>
-                  ))}
-                  {[...coursesToAdd].sort((a, b) => a.sequence_number - b.sequence_number).map(course => (
-                    <tr key={`${course.id}-${course.sequence_number}`} style={{ backgroundColor: '#e0ffe0' }}>
-                      <td>{course.name} (Pending Add)</td>
-                      <td>{course.sequence_number}</td>
-                      <td>
-                        <button onClick={() => handleRemoveCourseFromPending(course)}>🗑️</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="assignment-box">
+              <h2>Assign Courses to {editingTournament.name}</h2>
+              <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
+                {courses.map((course) => (
+                  <div key={course.id} className="course-assignment-row">
+                    <span>{course.name}</span>
+                    <div>
+                      <input
+                        type="number"
+                        placeholder="Order"
+                        min="1"
+                        id={`course-seq-${course.id}`}
+                      />
+                      <button
+                        onClick={() => handleAddCourseToPending(course, document.getElementById(`course-seq-${course.id}`).value)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          <button onClick={handleSubmitChanges} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '1.2em' }}>Update Assignments</button>
-          {successMessage && <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>}
-        </div>
-      )}
-    </div>
+        )}
+
+        {editingTournament && (
+          <div className="current-assignments-section">
+            <h2>Current Assignments for {editingTournament.name}</h2>
+            <div className="current-assignments">
+              <div className="assignment-list">
+                <h3>Assigned Players:</h3>
+                <table className="assignment-table" style={{ width: '100%', margin: '0 auto' }}>
+                  <thead>
+                    <tr>
+                      <th>Player Name</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assignedPlayers.map(player => (
+                      <tr key={player.id}>
+                        <td>{player.name}</td>
+                        <td>
+                          <button onClick={() => handleRemovePlayerFromPending(player)}>-</button>
+                        </td>
+                      </tr>
+                    ))}
+                    {playersToAdd.map(player => (
+                      <tr key={player.id} style={{ backgroundColor: '#e0ffe0' }}>
+                        <td>{player.name} (Pending Add)</td>
+                        <td>
+                          <button onClick={() => handleRemovePlayerFromPending(player)}>-</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="assignment-list">
+                <h3>Assigned Courses:</h3>
+                <table className="assignment-table" style={{ width: '100%', margin: '0 auto' }}>
+                  <thead>
+                    <tr>
+                      <th>Course Name</th>
+                      <th>Order</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...assignedCourses].sort((a, b) => a.sequence_number - b.sequence_number).map(course => (
+                      <tr key={`${course.id}-${course.sequence_number}`}>
+                        <td>{course.name}</td>
+                        <td>{course.sequence_number}</td>
+                        <td>
+                          <button onClick={() => handleRemoveCourseFromPending(course)}>-</button>
+                        </td>
+                      </tr>
+                    ))}
+                    {[...coursesToAdd].sort((a, b) => a.sequence_number - b.sequence_number).map(course => (
+                      <tr key={`${course.id}-${course.sequence_number}`} style={{ backgroundColor: '#e0ffe0' }}>
+                        <td>{course.name} (Pending Add)</td>
+                        <td>{course.sequence_number}</td>
+                        <td>
+                          <button onClick={() => handleRemoveCourseFromPending(course)}>-</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <button onClick={handleSubmitChanges} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '1.2em' }}>Update Assignments</button>
+            {successMessage && <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 

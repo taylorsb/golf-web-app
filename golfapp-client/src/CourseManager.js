@@ -101,80 +101,94 @@ function CourseManager() {
   };
 
   return (
-    <div className="course-manager monochrome-container">
-      <h2>Golf Courses</h2>
+    <>
+      <header className="page-header">
+        <h2 style={{ fontSize: '14pt', color: 'white', margin: 0 }}>Course Management</h2>
+      </header>
+      <div className="course-manager monochrome-container">
+        {!showCourseForm && !editingCourse && (
+          <button onClick={() => setShowCourseForm(true)}>Add New Course</button>
+        )}
 
-      {!showCourseForm && !editingCourse && (
-        <button onClick={() => setShowCourseForm(true)}>Add New Course</button>
-      )}
+        {(showCourseForm || editingCourse) && (
+          <div>
+            <div className="course-form-main-inputs">
+              <input
+                type="text"
+                placeholder="Course Name"
+                value={newCourseName}
+                onChange={(e) => setNewCourseName(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Country"
+                value={newCourseCountry}
+                onChange={(e) => setNewCourseCountry(e.target.value)}
+              />
+              <input
+                type="number"
+                step="0.1"
+                placeholder="Slope Rating"
+                value={newCourseSlopeRating}
+                onChange={(e) => setNewCourseSlopeRating(e.target.value)}
+              />
+            </div>
+            
+            <h3>Hole Details</h3>
+            <div className="hole-details-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '5px' }}>
+              {[...Array(18)].map((_, index) => (
+                <div key={index} style={{ border: '1px solid #ccc', padding: '5px' }}>
+                  <h4>Hole {index + 1}</h4>
+                  <input
+                    type="number"
+                    placeholder="Par"
+                    value={newCourseHolePars[index]}
+                    onChange={(e) => handleHoleParChange(index, e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Stroke Index"
+                    value={newCourseHoleStrokeIndices[index]}
+                    onChange={(e) => handleHoleStrokeIndexChange(index, e.target.value)}
+                  />
+                </div>
+              ))}
+            </div>
 
-      {(showCourseForm || editingCourse) && (
-        <div>
-          <div className="course-form-main-inputs">
-            <input
-              type="text"
-              placeholder="Course Name"
-              value={newCourseName}
-              onChange={(e) => setNewCourseName(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Country"
-              value={newCourseCountry}
-              onChange={(e) => setNewCourseCountry(e.target.value)}
-            />
-            <input
-              type="number"
-              step="0.1"
-              placeholder="Slope Rating"
-              value={newCourseSlopeRating}
-              onChange={(e) => setNewCourseSlopeRating(e.target.value)}
-            />
+            {editingCourse ? (
+              <button onClick={handleUpdateCourse}>Update Course</button>
+            ) : (
+              <button onClick={handleAddCourse}>Add Course</button>
+            )}
+            <button onClick={resetForm}>Cancel</button>
           </div>
-          
-          <h3>Hole Details</h3>
-          <div className="hole-details-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '5px' }}>
-            {[...Array(18)].map((_, index) => (
-              <div key={index} style={{ border: '1px solid #ccc', padding: '5px' }}>
-                <h4>Hole {index + 1}</h4>
-                <input
-                  type="number"
-                  placeholder="Par"
-                  value={newCourseHolePars[index]}
-                  onChange={(e) => handleHoleParChange(index, e.target.value)}
-                />
-                <input
-                  type="number"
-                  placeholder="Stroke Index"
-                  value={newCourseHoleStrokeIndices[index]}
-                  onChange={(e) => handleHoleStrokeIndexChange(index, e.target.value)}
-                />
-              </div>
-            ))}
-          </div>
+        )}
 
-          {editingCourse ? (
-            <button onClick={handleUpdateCourse}>Update Course</button>
-          ) : (
-            <button onClick={handleAddCourse}>Add Course</button>
-          )}
-          <button onClick={resetForm}>Cancel</button>
-        </div>
-      )}
-
-      <h3>Courses List</h3>
-      <table className="course-table">
-        <tbody>
-          {courses.sort((a, b) => a.name.localeCompare(b.name)).map((course) => (
-            <tr key={course.id}>
-              <td data-label="Course">{course.name} ({course.country}) - Slope: {course.slope_rating}</td>
-              <td data-label="Actions"><button onClick={() => handleEditClick(course)}>Edit</button></td>
-              <td data-label="Actions"><button onClick={() => handleDeleteCourse(course.id)}>Delete</button></td>
+        <h3>Courses List</h3>
+        <table className="course-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Country</th>
+              <th>Slope</th>
+              <th>Edit</th>
+              <th>Delete</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {courses.sort((a, b) => a.name.localeCompare(b.name)).map((course) => (
+              <tr key={course.id}>
+                <td>{course.name}</td>
+                <td>{course.country}</td>
+                <td>{course.slope_rating}</td>
+                <td><button onClick={() => handleEditClick(course)}>Edit</button></td>
+                <td><button onClick={() => handleDeleteCourse(course.id)}>Delete</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 

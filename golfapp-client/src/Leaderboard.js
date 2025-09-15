@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './leaderboard_bbc.css';
 import API_URL from './config';
-import backgroundImage from './theopenimage.jpg'; // Import the image
+import backgroundImage from './anfi.jpg'; // Import the image
 
 const Leaderboard = () => {
   const [tournaments, setTournaments] = useState([]);
@@ -128,68 +128,75 @@ const Leaderboard = () => {
   };
 
   return (
-    <div className="home-container" style={homeStyle}>
-      <header className="app-header">
-        <h1>
-          <span role="img" aria-label="golf-icon">⛳</span> Golf Tournament Manager
-        </h1>
-        <p>
-          <em>“Golf is the closest game to the game we call life. You get bad breaks from good shots;
-          <br />
-          you get good breaks from bad shots – but you have to play the ball where it lies.”</em>
-          <br />
-          <span style={{ textAlign: 'center', display: 'block' }}>by Bobby Jones</span>
-        </p>
-      </header>
-      <main className="leaderboard-container">
-        <div className="leaderboard-controls"> {/* New container for controls */}
-          <label htmlFor="tournament-select">Tournament:</label>
-          <select id="tournament-select" onChange={handleTournamentChange} value={selectedTournament}>
-            {tournaments.map((tournament) => (
-              <option key={tournament.id} value={tournament.id}>
-                {tournament.name}
-              </option>
-            ))}
-          </select>
-          
+    <div className="leaderboard-page-container">
+      <div className="top-blue-bar">
+        <h1>DGC Tour Golf</h1>
+      </div>
+      <div className="hero-section">
+        <div className="hero-image-container" style={homeStyle}>
+          <header className="app-header">
+            <h1>
+              <span role="img" aria-label="golf-icon">⛳</span> Golf Tournament Manager
+            </h1>
+            <p>
+              <em>“Golf is the closest game to the game we call life. You get bad breaks from good shots;
+              <br />
+              you get good breaks from bad shots – but you have to play the ball where it lies.”</em>
+              <br />
+              <span style={{ textAlign: 'center', display: 'block' }}>by Bobby Jones</span>
+            </p>
+          </header>
         </div>
-        <div className="leaderboard-widget">
-          <h2>Leaderboard</h2> {/* Renamed title */}
-          <div className="leaderboard-body">
-            <table className="leaderboard-table">
-            <thead>
-              <tr>
-                <th style={{color: '#333'}}>Pos {sortColumn === 'position' && (sortDirection === 'asc' ? '▲' : '▼')}</th>
-                <th style={{color: '#333'}}>Player {sortColumn === 'playerName' && (sortDirection === 'asc' ? '▲' : '▼')}</th>
-                <th className="narrow-column" onClick={() => handleSort('tournamentStablefordPoints')}>
-                  Tourn. Stableford {sortColumn === 'tournamentStablefordPoints' && (sortDirection === 'asc' ? '▲' : '▼')}
-                </th>
-                {leaderboardData.length > 0 && leaderboardData[0].rounds.map((_, index) => (
-                  <th key={index}>
-                    R{index + 1}
-                  </th>
-                ))}
-                <th className="narrow-column" onClick={() => handleSort('tournamentGross')}>
-                  Tourn. Gross {sortColumn === 'tournamentGross' && (sortDirection === 'asc' ? '▲' : '▼')}
-                </th>
-                
-              </tr>
-            </thead>
-            <tbody>
-              {leaderboardData.map((player) => (
-                <tr key={player.playerName}>
-                  <td>{player.position}</td>
-                  <td>{player.playerName}</td>
-                  <td><div className="score-square stableford-square">{player.tournamentStablefordPoints}</div></td>
-                  {player.rounds.map((round, index) => (
-                    <td key={index}><div className="score-square round-square">{round}</div></td>
-                  ))}
-                  <td><div className="score-square gross-square">{player.tournamentGross}</div></td>
-                </tr>
+      </div>
+      <main className="leaderboard-section">
+        <div className="leaderboard-container">
+          <div className="leaderboard-controls"> {/* New container for controls */}
+            <label htmlFor="tournament-select">Tournament:</label>
+            <select id="tournament-select" onChange={handleTournamentChange} value={selectedTournament}>
+              {tournaments.map((tournament) => (
+                <option key={tournament.id} value={tournament.id}>
+                  {tournament.name}
+                </option>
               ))}
-            </tbody>
-            <tfoot><tr><td colSpan={leaderboardData.length > 0 ? 5 + leaderboardData[0].rounds.length : 5}></td></tr></tfoot>
-          </table>
+            </select>
+          </div>
+          <div className="leaderboard-widget">
+            <h2>Leaderboard</h2> {/* Renamed title */}
+            <div className="leaderboard-body">
+              <table className="leaderboard-table">
+                <thead>
+                  <tr>
+                    <th style={{color: '#333'}}>Pos {sortColumn === 'position' && (sortDirection === 'asc' ? '▲' : '▼')}</th>
+                    <th style={{color: '#333'}}>Player {sortColumn === 'playerName' && (sortDirection === 'asc' ? '▲' : '▼')}</th>
+                    <th className="narrow-column" onClick={() => handleSort('tournamentStablefordPoints')}>
+                      Tourn. Stableford {sortColumn === 'tournamentStablefordPoints' && (sortDirection === 'asc' ? '▲' : '▼')}
+                    </th>
+                    {leaderboardData.length > 0 && leaderboardData[0].rounds.map((_, index) => (
+                      <th key={index}>
+                        R{index + 1}
+                      </th>
+                    ))}
+                    <th className="narrow-column" onClick={() => handleSort('tournamentGross')}>
+                      Tourn. Gross {sortColumn === 'tournamentGross' && (sortDirection === 'asc' ? '▲' : '▼')}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaderboardData.map((player) => (
+                    <tr key={player.playerName}>
+                      <td>{player.position}</td>
+                      <td>{player.playerName}</td>
+                      <td><div className="score-square stableford-square">{player.tournamentStablefordPoints}</div></td>
+                      {player.rounds.map((round, index) => (
+                        <td key={index}><div className="score-square round-square">{round}</div></td>
+                      ))}
+                      <td><div className="score-square gross-square">{player.tournamentGross}</div></td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot><tr><td colSpan={leaderboardData.length > 0 ? 5 + leaderboardData[0].rounds.length : 5}></td></tr></tfoot>
+              </table>
+            </div>
           </div>
         </div>
       </main>

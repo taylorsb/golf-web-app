@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './PlayerManager.css';
-import './monochrome.css';
+
 import API_URL from './config';
 
 const PlayerManager = () => {
@@ -61,51 +61,54 @@ const PlayerManager = () => {
   };
 
   return (
-    <div className="player-manager monochrome-container">
-      <h1>Golf Players</h1>
+    <>
+      <header className="page-header">
+        <h2 style={{ fontSize: '14pt', color: 'white', margin: 0 }}>Player Management</h2>
+      </header>
+      <div className="player-manager monochrome-container">
+        <div>
+          <input
+            type="text"
+            placeholder="Player Name"
+            value={newPlayerName}
+            onChange={(e) => setNewPlayerName(e.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="Handicap"
+            value={newPlayerHandicap}
+            onChange={(e) => setNewPlayerHandicap(e.target.value)}
+          />
+          {editingPlayer ? (
+            <button onClick={handleUpdatePlayer}>Update Player</button>
+          ) : (
+            <button onClick={handleAddPlayer}>Add Player</button>
+          )}
+        </div>
 
-      <div>
-        <input
-          type="text"
-          placeholder="Player Name"
-          value={newPlayerName}
-          onChange={(e) => setNewPlayerName(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Handicap"
-          value={newPlayerHandicap}
-          onChange={(e) => setNewPlayerHandicap(e.target.value)}
-        />
-        {editingPlayer ? (
-          <button onClick={handleUpdatePlayer}>Update Player</button>
-        ) : (
-          <button onClick={handleAddPlayer}>Add Player</button>
-        )}
-      </div>
-
-      <h2>Players List</h2>
-      <table className="player-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Handicap Index</th>
-            <th>Edit</th>
-            <th>Delete</th>
-          </tr>
-        </thead>
-        <tbody>
-          {players.sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
-            <tr key={player.id}>
-              <td>{player.name}</td>
-              <td>{player.handicap}</td>
-              <td><button onClick={() => handleEditClick(player)}>Edit</button></td>
-              <td><button onClick={() => handleDeletePlayer(player.id)}>Del</button></td>
+        <h2>Players List</h2>
+        <table className="player-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Handicap Index</th>
+              <th>Edit</th>
+              <th>Delete</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {players.sort((a, b) => a.name.localeCompare(b.name)).map((player) => (
+              <tr key={player.id}>
+                <td>{player.name}</td>
+                <td>{player.handicap}</td>
+                <td><button onClick={() => handleEditClick(player)}>Edit</button></td>
+                <td><button onClick={() => handleDeletePlayer(player.id)}>Del</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
