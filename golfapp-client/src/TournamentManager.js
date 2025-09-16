@@ -214,7 +214,7 @@ function TournamentManager() {
         <h2 style={{ fontSize: '14pt', color: 'white', margin: 0 }}>Tournament Management</h2>
       </header>
       <div className="tournament-manager monochrome-container">
-        <div className="tournament-form">
+        <div className="tournament-form tournament-form-inputs">
           <input
             type="text"
             placeholder="Tournament Name"
@@ -222,7 +222,7 @@ function TournamentManager() {
             onChange={(e) => setNewTournamentName(e.target.value)}
           />
           <input
-            type="text"
+            type="date"
             placeholder="Date (e.g., YYYY-MM-DD)"
             value={newTournamentDate}
             onChange={(e) => setNewTournamentDate(e.target.value)}
@@ -269,17 +269,19 @@ function TournamentManager() {
             <div className="assignment-box">
               <h2>Assign Players to {editingTournament.name}</h2>
               <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
-                {players.map((player) => (
-                  <div key={player.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-                    <span>{player.name}</span>
-                    <button
-                      onClick={() => handleAddPlayerToPending(player)}
-                      disabled={assignedPlayers.some(p => p.id === player.id) || playersToAdd.some(p => p.id === player.id)}
-                    >
-                      +
-                    </button>
-                  </div>
-                ))}
+                <div className="two-column-list">
+                  {players.map((player) => (
+                    <div key={player.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                      <span className="player-name-truncate">{player.name}</span>
+                      <button
+                        onClick={() => handleAddPlayerToPending(player)}
+                        disabled={assignedPlayers.some(p => p.id === player.id) || playersToAdd.some(p => p.id === player.id)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -287,12 +289,12 @@ function TournamentManager() {
               <h2>Assign Courses to {editingTournament.name}</h2>
               <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
                 {courses.map((course) => (
-                  <div key={course.id} className="course-assignment-row">
-                    <span>{course.name}</span>
-                    <div>
+                  <div key={course.id} className="course-assignment-item">
+                    <span className="course-name-truncate">{course.name}</span>
+                    <div className="course-assignment-controls">
                       <input
                         type="number"
-                        placeholder="Order"
+                        placeholder="Ord"
                         min="1"
                         id={`course-seq-${course.id}`}
                       />

@@ -11,6 +11,24 @@
   color: #333;
 }
 
+/* Tournament form inputs */
+.tournament-form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tournament-form input {
+  flex: 1 1 calc(33% - 20px); /* Approx 1/3 width minus gap */
+  max-width: 250px; /* Max width for larger screens */
+  box-sizing: border-box;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
 /* Main tournament list table */
 .tournament-table {
   width: 100%;
@@ -84,33 +102,61 @@
   text-align: left;
 }
 
-/* Smaller tables within the edit view */
-.assignment-table {
-  width: 100%;
-  font-size: 0.9em;
-}
-
-.assignment-table th,
-.assignment-table td {
-  padding: 4px;
-  text-align: left;
-}
-
 .assignment-table button {
   padding: 2px 5px;
   font-size: 0.8em;
 }
 
-.course-assignment-row {
+.course-assignment-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 5px;
+  width: 100%; /* Full width for single column */
+  padding: 2px 0; /* Adjust padding */
+  box-sizing: border-box;
 }
 
-.course-assignment-row input {
-  width: 40px; /* Narrow width for 2-digit number */
+.course-assignment-item .course-name-truncate {
+  flex-grow: 1; /* Allow name to take available space */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left; /* Align text to the left */
+}
+
+.course-assignment-controls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0; /* Prevent controls from shrinking */
+}
+
+.course-assignment-controls input {
+  width: 55px; /* Width for number and steppers */
+  font-size: 0.9em;
   text-align: center;
+}
+
+.course-name-truncate,
+.player-name-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.two-column-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.two-column-list > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: calc(50% - 5px); /* 50% width for two columns, minus half the gap */
+  padding: 2px;
+  box-sizing: border-box;
 }
 
 /* Mobile adjustments */
@@ -129,5 +175,10 @@
   .assignment-container,
   .current-assignments {
     flex-direction: column;
+  }
+
+  .tournament-form input {
+    flex: 1 1 90%; /* Full width on mobile */
+    max-width: none;
   }
 }
