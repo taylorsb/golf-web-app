@@ -138,28 +138,21 @@ const Leaderboard = () => {
             <h1>
               <span role="img" aria-label="golf-icon">⛳</span> Golf Tournament Manager
             </h1>
-            <p>
-              <em>“Golf is the closest game to the game we call life. You get bad breaks from good shots;
-              <br />
-              you get good breaks from bad shots – but you have to play the ball where it lies.”</em>
-              <br />
-              <span style={{ textAlign: 'center', display: 'block' }}>by Bobby Jones</span>
-            </p>
           </header>
         </div>
       </div>
       <main className="leaderboard-section">
+        <div className="leaderboard-controls"> {/* New container for controls */}
+          <label htmlFor="tournament-select">Tournament:</label>
+          <select id="tournament-select" onChange={handleTournamentChange} value={selectedTournament}>
+            {tournaments.map((tournament) => (
+              <option key={tournament.id} value={tournament.id}>
+                {tournament.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div className="leaderboard-container">
-          <div className="leaderboard-controls"> {/* New container for controls */}
-            <label htmlFor="tournament-select">Tournament:</label>
-            <select id="tournament-select" onChange={handleTournamentChange} value={selectedTournament}>
-              {tournaments.map((tournament) => (
-                <option key={tournament.id} value={tournament.id}>
-                  {tournament.name}
-                </option>
-              ))}
-            </select>
-          </div>
           <div className="leaderboard-widget">
             <h2>Leaderboard</h2> {/* Renamed title */}
             <div className="leaderboard-body">

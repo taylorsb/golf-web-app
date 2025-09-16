@@ -9,6 +9,7 @@
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
   overflow: hidden; /* Ensures content respects the curved corners */
+  margin: 0 auto; /* Center the widget */
 }
 
 .leaderboard-widget h2 {
@@ -75,4 +76,10 @@
 .leaderboard-controls label {
   color: #333;
   margin-right: 0.5rem;
+  font-size: 1.2em;
+}
+
+.leaderboard-controls select {
+  padding: 8px;
+  font-size: 1.1em;
 }

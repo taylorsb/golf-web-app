@@ -91,7 +91,7 @@ const PlayerManager = () => {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Handicap Index</th>
+              <th>Hcp Index</th>
               <th>Edit</th>
               <th>Delete</th>
             </tr>

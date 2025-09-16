@@ -27,7 +27,7 @@
 }
 
 .hero-section {
-  height: 75vh;
+  height: 85vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -43,7 +43,7 @@
   background-size: cover;
   background-position: center 80%; /* Shift focus down */
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* Align header to the top */
   justify-content: center;
   border-radius: 10px;
 }
@@ -63,6 +63,7 @@
 .app-header p {
   font-size: 1.2rem;
   max-width: 900px;
+  color: #000080; /* Navy Blue */
 }
 
 .page-header {
@@ -73,14 +74,14 @@
 }
 
 .leaderboard-section {
-  min-height: 25vh;
+  min-height: 15vh;
   background-color: #f2f2f2;
-  padding: 2rem;
+  padding: 2rem 0; /* Remove horizontal padding */
 }
 
 .leaderboard-container {
   width: 100%;
-  max-width: 900px;
+  padding: 0 20px; /* Add horizontal padding */
   margin: 0 auto;
   background-color: #f2f2f2;
   border-radius: 15px;
@@ -192,12 +193,27 @@ nav ul ul li a {
 }
 
 @media (max-width: 768px) {
+  .hero-section {
+    height: 50vh;
+  }
+
+  .leaderboard-section {
+    min-height: 50vh;
+  }
+
+  .app-header {
+    background-color: transparent;
+    padding: 0;
+  }
+
   .app-header h1 {
-    font-size: 2rem;
+    font-size: 1.8rem; /* Reduced font size */
+    max-width: 300px; /* Added max-width to encourage wrapping */
+    margin: 0 auto; /* Center the heading */
   }
 
   .app-header p {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .leaderboard-container {
