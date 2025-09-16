@@ -67,6 +67,8 @@ const Leaderboard = () => {
             playerName: round.player_name,
             tournamentStablefordPoints: 0,
             tournamentGross: 0,
+            tournamentStablefordBack9: 0, /* New field for countback */
+            tournamentStablefordFront9: 0, /* New field for countback */
             rounds: [],
           };
         }
@@ -74,6 +76,8 @@ const Leaderboard = () => {
         players[round.player_id].rounds[round.round_number - 1] = round.stableford_total || 0;
         players[round.player_id].tournamentStablefordPoints += round.stableford_total || 0;
         players[round.player_id].tournamentGross += round.gross_score_total || 0;
+        players[round.player_id].tournamentStablefordBack9 += round.stableford_back_9 || 0;
+        players[round.player_id].tournamentStablefordFront9 += round.stableford_front_9 || 0;
         
       });
 
@@ -82,23 +86,38 @@ const Leaderboard = () => {
       // Apply sorting
       processedData.sort((a, b) => {
         let comparison = 0;
-        if (sortColumn === 'tournamentStablefordPoints') {
-          comparison = b[sortColumn] - a[sortColumn]; // High to low
-        } else if (sortColumn === 'tournamentGross') {
-          comparison = a[sortColumn] - b[sortColumn]; // Low to high
-        }
 
-        if (sortDirection === 'asc') {
-          comparison *= -1; // Reverse for ascending
-        }
-        return comparison;
+        // Primary sort: Tournament Stableford Points (descending)
+        comparison = b.tournamentStablefordPoints - a.tournamentStablefordPoints;
+        if (comparison !== 0) return comparison;
+
+        // Secondary sort: Back 9 Stableford Points (descending)
+        comparison = b.tournamentStablefordBack9 - a.tournamentStablefordBack9;
+        if (comparison !== 0) return comparison;
+
+        // Tertiary sort: Front 9 Stableford Points (descending)
+        comparison = b.tournamentStablefordFront9 - a.tournamentStablefordFront9;
+        if (comparison !== 0) return comparison;
+
+        // If still tied, maintain original order (or sort by name, etc. if desired)
+        return 0;
       });
 
       // Add position after sorting
       processedData = processedData.map((item, index) => ({
         ...item,
         position: index + 1,
+        isCountbackApplied: false, // Default to false
       }));
+
+      // Identify players where countback was applied
+      for (let i = 1; i < processedData.length; i++) {
+        if (processedData[i].tournamentStablefordPoints === processedData[i-1].tournamentStablefordPoints) {
+          // If current player is tied with previous, mark both (and potentially others in the group)
+          processedData[i].isCountbackApplied = true;
+          processedData[i-1].isCountbackApplied = true;
+        }
+      }
 
       setLeaderboardData(processedData);
       console.log('Processed leaderboard data:', processedData);
@@ -178,7 +197,7 @@ const Leaderboard = () => {
                   {leaderboardData.map((player) => (
                     <tr key={player.playerName}>
                       <td>{player.position}</td>
-                      <td>{player.playerName}</td>
+                      <td>{player.playerName} {player.isCountbackApplied && <span className="countback-indicator">(CB)</span>}</td>
                       <td><div className="score-square stableford-square">{player.tournamentStablefordPoints}</div></td>
                       {player.rounds.map((round, index) => (
                         <td key={index}><div className="score-square round-square">{round}</div></td>

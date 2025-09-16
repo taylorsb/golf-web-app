@@ -29,7 +29,7 @@
   background-color: #e6e6e6;
   color: #333;
   padding: 0.5rem;
-  text-align: left;
+  text-align: center;
 }
 
 .leaderboard-table tr:nth-child(even) {
@@ -82,4 +82,19 @@
 .leaderboard-controls select {
   padding: 8px;
   font-size: 1.1em;
+}
+
+.countback-indicator {
+  display: inline-block;
+  background-color: #007bc0; /* Blue background */
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  font-size: 0.7em;
+  font-weight: bold;
+  margin-left: 5px;
+  vertical-align: middle;
 }
