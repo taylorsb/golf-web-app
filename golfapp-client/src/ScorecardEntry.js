@@ -537,139 +537,295 @@ const ScorecardEntry = () => {
   };
 
   return (
-    <div className="scorecard-container monochrome-container">
+    <>
+      <header className="page-header">
+        <h2 style={{ fontSize: '14pt', color: 'white', margin: 0 }}>Scorecard Entry</h2>
+      </header>
+      <div className="scorecard-container monochrome-container">
+        {notification.message && (
+            <div className={`notification ${notification.type}`}>
+                {notification.message}
+            </div>
+        )}
 
-      {notification.message && (
-          <div className={`notification ${notification.type}`}>
-              {notification.message}
+        <div className="dropdown-grid">
+          <div className="controls-container">
+            <label htmlFor="tournament-select">Select Tournament:</label>
+            <select id="tournament-select" value={selectedTournament} onChange={handleTournamentChange}>
+              <option value="">--Select a Tournament--</option>
+              {tournaments.map(tournament => (
+                <option key={tournament.id} value={tournament.id}>{tournament.name}</option>
+              ))}
+            </select>
           </div>
-      )}
 
-      <h2>Scorecard Entry</h2>
-
-      <div className="dropdown-grid">
-        <div className="controls-container">
-          <label htmlFor="tournament-select">Select Tournament:</label>
-          <select id="tournament-select" value={selectedTournament} onChange={handleTournamentChange}>
-            <option value="">--Select a Tournament--</option>
-            {tournaments.map(tournament => (
-              <option key={tournament.id} value={tournament.id}>{tournament.name}</option>
-            ))}
-          </select>
+          <div className="controls-container">
+            <label htmlFor="course-select">Select Course:</label>
+            <select id="course-select" value={`${selectedCourse}-${selectedCourseSequence}`} onChange={handleCourseChange}>
+              <option value="">--Select a Course--</option>
+              {courses.map(course => (
+                <option key={`${course.id}-${course.sequence_number}`} value={`${course.id}-${course.sequence_number}`}>{course.name} - {course.sequence_number}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="controls-container">
-          <label htmlFor="course-select">Select Course:</label>
-          <select id="course-select" value={`${selectedCourse}-${selectedCourseSequence}`} onChange={handleCourseChange}>
-            <option value="">--Select a Course--</option>
-            {courses.map(course => (
-              <option key={`${course.id}-${course.sequence_number}`} value={`${course.id}-${course.sequence_number}`}>{course.name} - {course.sequence_number}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="details-grid">
-        {selectedTournament && currentTournament && (
-          <div className="tournament-details">
-            <h3>Tournament Details</h3>
-            <p><strong>Tournament:</strong> {currentTournament.name} | Date: {currentTournament.date} | Location: {currentTournament.location}</p>
-          </div>
-        )}
-
-        {selectedCourse && currentCourse && (
-          <div className="course-details">
-            <h3>Course Details</h3>
-            <p><strong>Course:</strong> {currentCourse.name} | Slope Rating: {currentCourse.slope_rating}</p>
-          </div>
-        )}
-
-        {selectedTournament && selectedCourse && players.length > 0 && (
-          <div className="player-handicaps">
-            <h3>Player Course Handicaps</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Player Name</th>
-                  <th>Handicap Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                {players.map(player => (
-                  <tr key={player.id}>
-                    <td>{player.name}</td>
-                    <td>
-                      {roundInitiated || isCurrentRoundFinalized ? (
-                        `Hcp Index: ${roundPlayerHandicaps[player.id]?.handicap_index ?? 'N/A'} | Playing Hcp: ${roundPlayerHandicaps[player.id]?.playing_handicap ?? 'N/A'}`
-                      ) : (
-                        `Hcp Index: ${player.handicap} | Playing Hcp: ${calculatePlayingHandicap(player.handicap, currentCourse?.slope_rating)}`
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {selectedTournament && selectedCourse && players.length > 0 && (
-        <div className="scorecard-grid-container">
-          <div className="scorecard-color-key">
-            <h4>Scorecard Color Key:</h4>
-            <ul>
-              <li><span className="eagle-score-key"></span> Eagle or Better</li>
-              <li><span className="birdie-score-key"></span> Birdie</li>
-              <li><span className="bogey-score-key"></span> Bogey</li>
-              <li><span className="double-bogey-score-key"></span> Double Bogey</li>
-              <li><span className="worse-than-double-bogey-score-key"></span> Worse than Double Bogey</li>
-            </ul>
-          </div>
-          {!isLoadingRounds && !roundInitiated && !isCurrentRoundFinalized && (
-            <button onClick={handleInitiateScoring}>Initiate Scoring</button>
+        <div className="details-grid">
+          {selectedTournament && currentTournament && (
+            <div className="tournament-details">
+              <h3>Tournament Details</h3>
+              <p><strong>Tournament:</strong> {currentTournament.name} | Date: {currentTournament.date} | Location: {currentTournament.location}</p>
+            </div>
           )}
-          <h3>Input Scores for Round {selectedCourseSequence} - {currentCourse?.name}</h3>
 
-          {isMobileView ? (
-            <>
-              {/* Holes 1-6 Table */}
-              <table className="scorecard-table mobile-third">
+          {selectedCourse && currentCourse && (
+            <div className="course-details">
+              <h3>Course Details</h3>
+              <p><strong>Course:</strong> {currentCourse.name} | Slope Rating: {currentCourse.slope_rating}</p>
+            </div>
+          )}
+
+          {selectedTournament && selectedCourse && players.length > 0 && (
+            <div className="player-handicaps">
+              <h3>Player Course Handicaps</h3>
+              <table>
                 <thead>
                   <tr>
-                    <th>Player</th>
-                    <th>Hcp Index</th>
-                    <th>Playing Hcp</th>
-                    {Array.from({ length: 6 }, (_, i) => (
-                      <th key={`hole-header-${i + 1}`}>H{i + 1}</th>
+                    <th>Player Name</th>
+                    <th>Handicap Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {players.map(player => (
+                    <tr key={player.id}>
+                      <td>{player.name}</td>
+                      <td>
+                        {roundInitiated || isCurrentRoundFinalized ? (
+                          `Hcp Index: ${roundPlayerHandicaps[player.id]?.handicap_index ?? 'N/A'} | Playing Hcp: ${roundPlayerHandicaps[player.id]?.playing_handicap ?? 'N/A'}`
+                        ) : (
+                          `Hcp Index: ${player.handicap} | Playing Hcp: ${calculatePlayingHandicap(player.handicap, currentCourse?.slope_rating)}`
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {selectedTournament && selectedCourse && players.length > 0 && (
+          <div className="scorecard-grid-container">
+            <div className="scorecard-color-key">
+              <h4>Scorecard Color Key:</h4>
+              <ul>
+                <li><span className="eagle-score-key"></span> Eagle or Better</li>
+                <li><span className="birdie-score-key"></span> Birdie</li>
+                <li><span className="bogey-score-key"></span> Bogey</li>
+                <li><span className="double-bogey-score-key"></span> Double Bogey</li>
+                <li><span className="worse-than-double-bogey-score-key"></span> Worse than Double Bogey</li>
+              </ul>
+            </div>
+            {!isLoadingRounds && !roundInitiated && !isCurrentRoundFinalized && (
+              <button onClick={handleInitiateScoring}>Initiate Scoring</button>
+            )}
+            <h3>Input Scores for Round {selectedCourseSequence} - {currentCourse?.name}</h3>
+
+            {isMobileView ? (
+              <>
+                {/* Holes 1-6 Table */}
+                <table className="scorecard-table mobile-third">
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Hcp Index</th>
+                      <th>Playing Hcp</th>
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <th key={`hole-header-${i + 1}`}>H{i + 1}</th>
+                      ))}
+                    </tr>
+                    <tr>
+                      <th></th>
+                      <th></th>
+                      <th>Par</th>
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <th key={`par-header-${i + 1}`}>{holeData[i]?.par}</th>
+                      ))}
+                    </tr>
+                    <tr>
+                      <th></th>
+                      <th></th>
+                      <th>SI</th>
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <th key={`si-header-${i + 1}`}>{holeData[i]?.strokeIndex}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {players.map(player => (
+                      <tr key={`${player.id}-holes1-6`}>
+                        <td>{player.name}</td>
+                        <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
+                        <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
+                        {Array.from({ length: 6 }, (_, i) => (
+                          <td key={`${player.id}-hole-${i + 1}`}>
+                            <input
+                              type="number"
+                              value={scores[player.id]?.[i + 1] || ''}
+                              onChange={(e) => handleScoreChange(player.id, i + 1, e.target.value)}
+                              disabled={!roundInitiated}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* Holes 7-12 Table */}
+                <table className="scorecard-table mobile-third">
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Hcp Index</th>
+                      <th>Playing Hcp</th>
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <th key={`hole-header-${i + 7}`}>H{i + 7}</th>
+                      ))}
+                    </tr>
+                    <tr>
+                      <th></th>
+                      <th></th>
+                      <th>Par</th>
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <th key={`par-header-${i + 7}`}>{holeData[i + 6]?.par}</th>
+                      ))}
+                    </tr>
+                    <tr>
+                      <th></th>
+                      <th></th>
+                      <th>SI</th>
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <th key={`si-header-${i + 7}`}>{holeData[i + 6]?.strokeIndex}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {players.map(player => (
+                      <tr key={`${player.id}-holes7-12`}>
+                        <td>{player.name}</td>
+                        <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
+                        <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
+                        {Array.from({ length: 6 }, (_, i) => (
+                          <td key={`${player.id}-hole-${i + 7}`}>
+                            <input
+                              type="number"
+                              value={scores[player.id]?.[i + 7] || ''}
+                              onChange={(e) => handleScoreChange(player.id, i + 7, e.target.value)}
+                              disabled={!roundInitiated}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* Holes 13-18 Table */}
+                <table className="scorecard-table mobile-third">
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Hcp Index</th>
+                      <th>Playing Hcp</th>
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <th key={`hole-header-${i + 13}`}>H{i + 13}</th>
+                      ))}
+                    </tr>
+                    <tr>
+                      <th></th>
+                      <th></th>
+                      <th>Par</th>
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <th key={`par-header-${i + 13}`}>{holeData[i + 12]?.par}</th>
+                      ))}
+                    </tr>
+                    <tr>
+                      <th></th>
+                      <th></th>
+                      <th>SI</th>
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <th key={`si-header-${i + 13}`}>{holeData[i + 12]?.strokeIndex}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {players.map(player => (
+                      <tr key={`${player.id}-holes13-18`}>
+                        <td>{player.name}</td>
+                        <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
+                        <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
+                        {Array.from({ length: 6 }, (_, i) => (
+                          <td key={`${player.id}-hole-${i + 13}`}>
+                            <input
+                              type="number"
+                              value={scores[player.id]?.[i + 13] || ''}
+                              onChange={(e) => handleScoreChange(player.id, i + 13, e.target.value)}
+                              disabled={!roundInitiated}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            ) : (
+              <table className="scorecard-table">
+                <thead>
+                  <tr>
+                    <th>Player Name</th>
+                    <th>Player Handicap Index</th>
+                    <th>Playing Handicap</th>
+                    {Array.from({ length: 18 }, (_, i) => (
+                      <th key={`hole-header-${i + 1}`}>Hole {i + 1}</th>
                     ))}
                   </tr>
                   <tr>
                     <th></th>
                     <th></th>
                     <th>Par</th>
-                    {Array.from({ length: 6 }, (_, i) => (
-                      <th key={`par-header-${i + 1}`}>{holeData[i]?.par}</th>
+                    {Array.from({ length: 18 }, (_, i) => (
+                      <th key={`par-header-${i + 1}`}>
+                        {holeData[i]?.par}
+                      </th>
                     ))}
                   </tr>
                   <tr>
                     <th></th>
                     <th></th>
                     <th>SI</th>
-                    {Array.from({ length: 6 }, (_, i) => (
-                      <th key={`si-header-${i + 1}`}>{holeData[i]?.strokeIndex}</th>
+                    {Array.from({ length: 18 }, (_, i) => (
+                      <th key={`si-header-${i + 1}`}>
+                        {holeData[i]?.strokeIndex}
+                      </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {players.map(player => (
-                    <tr key={`${player.id}-holes1-6`}>
+                    <tr key={player.id}>
                       <td>{player.name}</td>
                       <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
                       <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
-                      {Array.from({ length: 6 }, (_, i) => (
+                      {Array.from({ length: 18 }, (_, i) => (
                         <td key={`${player.id}-hole-${i + 1}`}>
                           <input
                             type="number"
+                            className={getScoreClass(
+                              parseInt(scores[player.id]?.[i + 1]),
+                              holeData[i]?.par
+                            )}
                             value={scores[player.id]?.[i + 1] || ''}
                             onChange={(e) => handleScoreChange(player.id, i + 1, e.target.value)}
                             disabled={!roundInitiated}
@@ -680,218 +836,64 @@ const ScorecardEntry = () => {
                   ))}
                 </tbody>
               </table>
+            )}
+            {roundInitiated && !isCurrentRoundFinalized && (
+              <button onClick={handleSubmitFinalScores}>Submit Scores</button>
+            )}
+            {roundInitiated && !isCurrentRoundFinalized && (
+              <button onClick={handleEndRound}>End Round</button>
+            )}
+            {isCurrentRoundFinalized && (
+              <button onClick={handleReopenRound}>Re-open Round</button>
+            )}
 
-              {/* Holes 7-12 Table */}
-              <table className="scorecard-table mobile-third">
+            {/* New Summary Section */}
+            <div className="scorecard-summary-section">
+              <h3>Round Summary</h3>
+              <table className="summary-table">
                 <thead>
                   <tr>
-                    <th>Player</th>
-                    <th>Hcp Index</th>
-                    <th>Playing Hcp</th>
-                    {Array.from({ length: 6 }, (_, i) => (
-                      <th key={`hole-header-${i + 7}`}>H{i + 7}</th>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th></th>
-                    <th></th>
-                    <th>Par</th>
-                    {Array.from({ length: 6 }, (_, i) => (
-                      <th key={`par-header-${i + 7}`}>{holeData[i + 6]?.par}</th>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th></th>
-                    <th></th>
-                    <th>SI</th>
-                    {Array.from({ length: 6 }, (_, i) => (
-                      <th key={`si-header-${i + 7}`}>{holeData[i + 6]?.strokeIndex}</th>
-                    ))}
+                    <th>Player Name</th>
+                    <th>Gross Front 9</th>
+                    <th>Gross Back 9</th>
+                    <th>Net Front 9</th>
+                    <th>Net Back 9</th>
+                    <th>Gross Total</th>
+                    <th>Net Total</th>
+                    <th>Stableford Points</th>
                   </tr>
                 </thead>
                 <tbody>
                   {players.map(player => (
-                    <tr key={`${player.id}-holes7-12`}>
-                      <td>{player.name}</td>
-                      <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
-                      <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
-                      {Array.from({ length: 6 }, (_, i) => (
-                        <td key={`${player.id}-hole-${i + 7}`}>
-                          <input
-                            type="number"
-                            value={scores[player.id]?.[i + 7] || ''}
-                            onChange={(e) => handleScoreChange(player.id, i + 7, e.target.value)}
-                            disabled={!roundInitiated}
-                          />
-                        </td>
-                      ))}
+                    <tr key={player.id}>
+                      <td data-label="Player Name">{player.name}</td>
+                      <td data-label="Gross Front 9">{calculateFront9Gross(player.id)}</td>
+                      <td data-label="Gross Back 9">{calculateBack9Gross(player.id)}</td>
+                      <td data-label="Net Front 9">{calculateFront9Net(player.id)}</td>
+                      <td data-label="Net Back 9">{calculateBack9Net(player.id)}</td>
+                      <td data-label="Gross Total">{calculateGrossScore(player.id)}</td>
+                      <td data-label="Net Total">{calculateNetScore(player.id)}</td>
+                      <td data-label="Stableford Points">{calculateTotalStablefordPoints(player.id)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-
-              {/* Holes 13-18 Table */}
-              <table className="scorecard-table mobile-third">
-                <thead>
-                  <tr>
-                    <th>Player</th>
-                    <th>Hcp Index</th>
-                    <th>Playing Hcp</th>
-                    {Array.from({ length: 6 }, (_, i) => (
-                      <th key={`hole-header-${i + 13}`}>H{i + 13}</th>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th></th>
-                    <th></th>
-                    <th>Par</th>
-                    {Array.from({ length: 6 }, (_, i) => (
-                      <th key={`par-header-${i + 13}`}>{holeData[i + 12]?.par}</th>
-                    ))}
-                  </tr>
-                  <tr>
-                    <th></th>
-                    <th></th>
-                    <th>SI</th>
-                    {Array.from({ length: 6 }, (_, i) => (
-                      <th key={`si-header-${i + 13}`}>{holeData[i + 12]?.strokeIndex}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {players.map(player => (
-                    <tr key={`${player.id}-holes13-18`}>
-                      <td>{player.name}</td>
-                      <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
-                      <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
-                      {Array.from({ length: 6 }, (_, i) => (
-                        <td key={`${player.id}-hole-${i + 13}`}>
-                          <input
-                            type="number"
-                            value={scores[player.id]?.[i + 13] || ''}
-                            onChange={(e) => handleScoreChange(player.id, i + 13, e.target.value)}
-                            disabled={!roundInitiated}
-                          />
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </>
-          ) : (
-            <table className="scorecard-table">
-              <thead>
-                <tr>
-                  <th>Player Name</th>
-                  <th>Player Handicap Index</th>
-                  <th>Playing Handicap</th>
-                  {Array.from({ length: 18 }, (_, i) => (
-                    <th key={`hole-header-${i + 1}`}>Hole {i + 1}</th>
-                  ))}
-                </tr>
-                <tr>
-                  <th></th>
-                  <th></th>
-                  <th>Par</th>
-                  {Array.from({ length: 18 }, (_, i) => (
-                    <th key={`par-header-${i + 1}`}>
-                      {holeData[i]?.par}
-                    </th>
-                  ))}
-                </tr>
-                <tr>
-                  <th></th>
-                  <th></th>
-                  <th>SI</th>
-                  {Array.from({ length: 18 }, (_, i) => (
-                    <th key={`si-header-${i + 1}`}>
-                      {holeData[i]?.strokeIndex}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {players.map(player => (
-                  <tr key={player.id}>
-                    <td>{player.name}</td>
-                    <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
-                    <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
-                    {Array.from({ length: 18 }, (_, i) => (
-                      <td key={`${player.id}-hole-${i + 1}`}>
-                        <input
-                          type="number"
-                          className={getScoreClass(
-                            parseInt(scores[player.id]?.[i + 1]),
-                            holeData[i]?.par
-                          )}
-                          value={scores[player.id]?.[i + 1] || ''}
-                          onChange={(e) => handleScoreChange(player.id, i + 1, e.target.value)}
-                          disabled={!roundInitiated}
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-          {roundInitiated && !isCurrentRoundFinalized && (
-            <button onClick={handleSubmitFinalScores}>Submit Scores</button>
-          )}
-          {roundInitiated && !isCurrentRoundFinalized && (
-            <button onClick={handleEndRound}>End Round</button>
-          )}
-          {isCurrentRoundFinalized && (
-            <button onClick={handleReopenRound}>Re-open Round</button>
-          )}
-
-          {/* New Summary Section */}
-          <div className="scorecard-summary-section">
-            <h3>Round Summary</h3>
-            <table className="summary-table">
-              <thead>
-                <tr>
-                  <th>Player Name</th>
-                  <th>Gross Front 9</th>
-                  <th>Gross Back 9</th>
-                  <th>Net Front 9</th>
-                  <th>Net Back 9</th>
-                  <th>Gross Total</th>
-                  <th>Net Total</th>
-                  <th>Stableford Points</th>
-                </tr>
-              </thead>
-              <tbody>
-                {players.map(player => (
-                  <tr key={player.id}>
-                    <td data-label="Player Name">{player.name}</td>
-                    <td data-label="Gross Front 9">{calculateFront9Gross(player.id)}</td>
-                    <td data-label="Gross Back 9">{calculateBack9Gross(player.id)}</td>
-                    <td data-label="Net Front 9">{calculateFront9Net(player.id)}</td>
-                    <td data-label="Net Back 9">{calculateBack9Net(player.id)}</td>
-                    <td data-label="Gross Total">{calculateGrossScore(player.id)}</td>
-                    <td data-label="Net Total">{calculateNetScore(player.id)}</td>
-                    <td data-label="Stableford Points">{calculateTotalStablefordPoints(player.id)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {Object.keys(updatedPlayerHandicaps).length > 0 && (
-            <div className="updated-handicaps-section" style={{ marginTop: '20px', borderTop: '1px solid #ccc', paddingTop: '20px' }}>
-              <h3>Updated Player Handicaps for Next Round:</h3>
-              <p>
-                {players.filter(player => updatedPlayerHandicaps[player.id] !== undefined)
-                         .map(player => `${player.name}: ${updatedPlayerHandicaps[player.id].toFixed(1)}`)
-                         .join(' | ')}
-              </p>
             </div>
-          )}
+
+            {Object.keys(updatedPlayerHandicaps).length > 0 && (
+              <div className="updated-handicaps-section" style={{ marginTop: '20px', borderTop: '1px solid #ccc', paddingTop: '20px' }}>
+                <h3>Updated Player Handicaps for Next Round:</h3>
+                <p>
+                  {players.filter(player => updatedPlayerHandicaps[player.id] !== undefined)
+                           .map(player => `${player.name}: ${updatedPlayerHandicaps[player.id].toFixed(1)}`)
+                           .join(' | ')}
+                </p>
+              </div>
+            )}
           </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 };
 
