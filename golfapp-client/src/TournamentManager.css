@@ -108,6 +108,11 @@
   margin-bottom: 5px;
 }
 
+.course-assignment-row input {
+  width: 40px; /* Narrow width for 2-digit number */
+  text-align: center;
+}
+
 /* Mobile adjustments */
 @media (max-width: 768px) {
   .tournament-table th:nth-child(1),

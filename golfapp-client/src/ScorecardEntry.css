@@ -295,6 +295,19 @@
     width: 22px;
     font-size: 0.7em;
   }
+
+  .scorecard-color-key ul {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start; /* Align items to the start */
+    gap: 5px; /* Tighter gap */
+    padding-bottom: 5px; /* Add padding for scrollbar */
+  }
+
+  .scorecard-color-key li {
+    font-size: 0.9em; /* Smaller font for mobile */
+  }
 }
 
 /* New styles for tab buttons */

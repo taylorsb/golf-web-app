@@ -601,9 +601,9 @@ const ScorecardEntry = () => {
                     <td>{player.name}</td>
                     <td>
                       {roundInitiated || isCurrentRoundFinalized ? (
-                        `Handicap Index: ${roundPlayerHandicaps[player.id]?.handicap_index ?? 'N/A'} | Playing Handicap: ${roundPlayerHandicaps[player.id]?.playing_handicap ?? 'N/A'}`
+                        `Hcp Index: ${roundPlayerHandicaps[player.id]?.handicap_index ?? 'N/A'} | Playing Hcp: ${roundPlayerHandicaps[player.id]?.playing_handicap ?? 'N/A'}`
                       ) : (
-                        `Handicap Index: ${player.handicap} | Playing Handicap: ${calculatePlayingHandicap(player.handicap, currentCourse?.slope_rating)}`
+                        `Hcp Index: ${player.handicap} | Playing Hcp: ${calculatePlayingHandicap(player.handicap, currentCourse?.slope_rating)}`
                       )}
                     </td>
                   </tr>
