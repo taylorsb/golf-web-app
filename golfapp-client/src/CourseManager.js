@@ -182,7 +182,7 @@ function CourseManager() {
                 <td>{course.country}</td>
                 <td>{course.slope_rating}</td>
                 <td><button onClick={() => handleEditClick(course)}>Edit</button></td>
-                <td><button onClick={() => handleDeleteCourse(course.id)}>Delete</button></td>
+                <td><button onClick={() => handleDeleteCourse(course.id)}>Del</button></td>
               </tr>
             ))}
           </tbody>

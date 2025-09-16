@@ -105,8 +105,8 @@
   .course-table button {
     background-color: #6c757d; /* Darker Grey */
     color: white;
-    padding: 1px;
-    font-size: 0.4em;
+    padding: 5px 10px; /* Increased padding */
+    font-size: 0.8em; /* Increased font size */
     border: none;
     border-radius: 3px;
     cursor: pointer;
