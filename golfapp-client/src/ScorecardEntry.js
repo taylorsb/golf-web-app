@@ -18,7 +18,6 @@ const ScorecardEntry = () => {
   const [isCurrentRoundFinalized, setIsCurrentRoundFinalized] = useState(false);
   const [roundPlayerHandicaps, setRoundPlayerHandicaps] = useState({}); // New state to store handicaps specific to the round
   const [notification, setNotification] = useState({ message: '', type: '' });
-  const [activeTab, setActiveTab] = useState('front9');
   const [isMobileView, setIsMobileView] = useState(false);
 
   useEffect(() => {
@@ -631,79 +630,155 @@ const ScorecardEntry = () => {
           )}
           <h3>Input Scores for Round {selectedCourseSequence} - {currentCourse?.name}</h3>
 
-          {isMobileView && (
-            <div className="scorecard-tabs">
-              <button
-                className={`tab-button ${activeTab === 'front9' ? 'active' : ''}`}
-                onClick={() => setActiveTab('front9')}
-              >
-                Front 9
-              </button>
-              <button
-                className={`tab-button ${activeTab === 'back9' ? 'active' : ''}`}
-                onClick={() => setActiveTab('back9')}
-              >
-                Back 9
-              </button>
-            </div>
-          )}
-
           {isMobileView ? (
-            <table className="scorecard-table">
-              <thead>
-                <tr>
-                  <th>Player Name</th>
-                  <th>Player Handicap Index</th>
-                  <th>Playing Handicap</th>
-                  {Array.from({ length: 9 }, (_, i) => (
-                    <th key={`hole-header-${i + (activeTab === 'front9' ? 1 : 10)}`}>Hole {i + (activeTab === 'front9' ? 1 : 10)}</th>
-                  ))}
-                </tr>
-                <tr>
-                  <th></th>
-                  <th></th>
-                  <th>Par</th>
-                  {Array.from({ length: 9 }, (_, i) => (
-                    <th key={`par-header-${i + (activeTab === 'front9' ? 1 : 10)}`}>
-                      {holeData[i + (activeTab === 'front9' ? 0 : 9)]?.par}
-                    </th>
-                  ))}
-                </tr>
-                <tr>
-                  <th></th>
-                  <th></th>
-                  <th>SI</th>
-                  {Array.from({ length: 9 }, (_, i) => (
-                    <th key={`si-header-${i + (activeTab === 'front9' ? 1 : 10)}`}>
-                      {holeData[i + (activeTab === 'front9' ? 0 : 9)]?.strokeIndex}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {players.map(player => (
-                  <tr key={player.id}>
-                    <td>{player.name}</td>
-                    <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
-                    <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
-                    {Array.from({ length: 9 }, (_, i) => (
-                      <td key={`${player.id}-hole-${i + (activeTab === 'front9' ? 1 : 10)}`}>
-                        <input
-                          type="number"
-                          className={getScoreClass(
-                            parseInt(scores[player.id]?.[i + (activeTab === 'front9' ? 1 : 10)]),
-                            holeData[i + (activeTab === 'front9' ? 0 : 9)]?.par
-                          )}
-                          value={scores[player.id]?.[i + (activeTab === 'front9' ? 1 : 10)] || ''}
-                          onChange={(e) => handleScoreChange(player.id, i + (activeTab === 'front9' ? 1 : 10), e.target.value)}
-                          disabled={!roundInitiated}
-                        />
-                      </td>
+            <>
+              {/* Holes 1-6 Table */}
+              <table className="scorecard-table mobile-third">
+                <thead>
+                  <tr>
+                    <th>Player</th>
+                    <th>Hcp Index</th>
+                    <th>Playing Hcp</th>
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <th key={`hole-header-${i + 1}`}>H{i + 1}</th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Par</th>
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <th key={`par-header-${i + 1}`}>{holeData[i]?.par}</th>
+                    ))}
+                  </tr>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th>SI</th>
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <th key={`si-header-${i + 1}`}>{holeData[i]?.strokeIndex}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {players.map(player => (
+                    <tr key={`${player.id}-holes1-6`}>
+                      <td>{player.name}</td>
+                      <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
+                      <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <td key={`${player.id}-hole-${i + 1}`}>
+                          <input
+                            type="number"
+                            value={scores[player.id]?.[i + 1] || ''}
+                            onChange={(e) => handleScoreChange(player.id, i + 1, e.target.value)}
+                            disabled={!roundInitiated}
+                          />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* Holes 7-12 Table */}
+              <table className="scorecard-table mobile-third">
+                <thead>
+                  <tr>
+                    <th>Player</th>
+                    <th>Hcp Index</th>
+                    <th>Playing Hcp</th>
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <th key={`hole-header-${i + 7}`}>H{i + 7}</th>
+                    ))}
+                  </tr>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Par</th>
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <th key={`par-header-${i + 7}`}>{holeData[i + 6]?.par}</th>
+                    ))}
+                  </tr>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th>SI</th>
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <th key={`si-header-${i + 7}`}>{holeData[i + 6]?.strokeIndex}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {players.map(player => (
+                    <tr key={`${player.id}-holes7-12`}>
+                      <td>{player.name}</td>
+                      <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
+                      <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <td key={`${player.id}-hole-${i + 7}`}>
+                          <input
+                            type="number"
+                            value={scores[player.id]?.[i + 7] || ''}
+                            onChange={(e) => handleScoreChange(player.id, i + 7, e.target.value)}
+                            disabled={!roundInitiated}
+                          />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* Holes 13-18 Table */}
+              <table className="scorecard-table mobile-third">
+                <thead>
+                  <tr>
+                    <th>Player</th>
+                    <th>Hcp Index</th>
+                    <th>Playing Hcp</th>
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <th key={`hole-header-${i + 13}`}>H{i + 13}</th>
+                    ))}
+                  </tr>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Par</th>
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <th key={`par-header-${i + 13}`}>{holeData[i + 12]?.par}</th>
+                    ))}
+                  </tr>
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th>SI</th>
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <th key={`si-header-${i + 13}`}>{holeData[i + 12]?.strokeIndex}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {players.map(player => (
+                    <tr key={`${player.id}-holes13-18`}>
+                      <td>{player.name}</td>
+                      <td>{roundPlayerHandicaps[player.id]?.handicap_index}</td>
+                      <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
+                      {Array.from({ length: 6 }, (_, i) => (
+                        <td key={`${player.id}-hole-${i + 13}`}>
+                          <input
+                            type="number"
+                            value={scores[player.id]?.[i + 13] || ''}
+                            onChange={(e) => handleScoreChange(player.id, i + 13, e.target.value)}
+                            disabled={!roundInitiated}
+                          />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
           ) : (
             <table className="scorecard-table">
               <thead>
