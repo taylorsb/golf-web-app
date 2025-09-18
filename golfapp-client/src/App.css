@@ -1,3 +1,9 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 /* General App Styling */
 .App {
   text-align: center;
@@ -15,7 +21,7 @@
 }
 
 .top-blue-bar {
-  background-color: #1a2b4c; /* Dark Blue */
+  background-color: #333; /* Dark Grey */
   color: white;
   padding: 0.5rem;
   text-align: center;
@@ -23,7 +29,7 @@
 
 .top-blue-bar h1 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 
 .hero-section {
@@ -32,7 +38,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #1a2b4c; /* Dark Blue for border effect */
+  background-color: #333; /* Dark Grey for border effect */
   color: white;
 }
 
@@ -41,7 +47,7 @@
   height: 95%;
   background-image: url('./anfi.jpg');
   background-size: cover;
-  background-position: center 80%; /* Shift focus down */
+  background-position: center 90%; /* Shift focus down */
   display: flex;
   align-items: flex-start; /* Align header to the top */
   justify-content: center;
@@ -68,9 +74,16 @@
 
 .page-header {
   background-color: #808080; /* Mid Grey */
-  padding: 1rem;
+  padding: 0; /* Removed padding to make it flush */
   color: white;
-  /* Removed border-radius and margin-bottom */
+  width: 100%; /* Ensure it stretches the whole page */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.page-header h1 {
+  margin: 0; /* Remove default h1 margin */
+  padding: 0.5rem 1rem; /* Apply padding to the h1 inside */
+  font-size: 1.5em; /* Adjust font size as needed */
 }
 
 .leaderboard-section {

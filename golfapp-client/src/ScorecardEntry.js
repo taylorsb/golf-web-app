@@ -619,7 +619,7 @@ const ScorecardEntry = () => {
             <div className="scorecard-color-key">
               <h4>Scorecard Color Key:</h4>
               <ul>
-                <li><span className="eagle-score-key"></span> Eagle +</li>
+                <li><span className="eagle-score-key"></span> Eagle or Better</li>
                 <li><span className="birdie-score-key"></span> Birdie</li>
                 <li><span className="bogey-score-key"></span> Bogey</li>
                 <li><span className="double-bogey-score-key"></span> Double Bogey</li>
@@ -629,7 +629,7 @@ const ScorecardEntry = () => {
             {!isLoadingRounds && !roundInitiated && !isCurrentRoundFinalized && (
               <button onClick={handleInitiateScoring}>Initiate Scoring</button>
             )}
-            <h3>Input Scores for Round {selectedCourseSequence} - {currentCourse?.name}</h3>
+            <h3>Round {selectedCourseSequence} - {currentCourse?.name}</h3>
 
             {isMobileView ? (
               <>

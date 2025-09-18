@@ -128,7 +128,9 @@ const HandicapAdjustmentManager = () => {
 
   return (
     <div className="handicap-adjustment-manager monochrome-container">
-      <h1>Handicap Adjustment Reference</h1>
+      <header className="page-header">
+        <h1>Handicap Adjust</h1>
+      </header>
 
       <div className="adjustment-form"> {/* New div for the form */}
         <input
@@ -173,8 +175,8 @@ const HandicapAdjustmentManager = () => {
                   <td>{adj.stableford_score}</td>
                   <td>{adj.adjustment}</td>
                   <td>
-                    <button onClick={() => handleEditClick(adj)}>✏️</button>
-                    <button onClick={() => handleDeleteAdjustment(adj.stableford_score)}>🗑️</button>
+                    <button onClick={() => handleEditClick(adj)}>Edit</button>
+                    <button onClick={() => handleDeleteAdjustment(adj.stableford_score)}>Del</button>
                   </td>
                 </tr>
               ))}
@@ -198,8 +200,8 @@ const HandicapAdjustmentManager = () => {
                   <td>{adj.stableford_score}</td>
                   <td>{adj.adjustment}</td>
                   <td>
-                    <button onClick={() => handleEditClick(adj)}>✏️</button>
-                    <button onClick={() => handleDeleteAdjustment(adj.stableford_score)}>🗑️</button>
+                    <button onClick={() => handleEditClick(adj)}>Edit</button>
+                    <button onClick={() => handleDeleteAdjustment(adj.stableford_score)}>Del</button>
                   </td>
                 </tr>
               ))}
@@ -223,8 +225,8 @@ const HandicapAdjustmentManager = () => {
                   <td>{adj.stableford_score}</td>
                   <td>{adj.adjustment}</td>
                   <td>
-                    <button onClick={() => handleEditClick(adj)}>✏️</button>
-                    <button onClick={() => handleDeleteAdjustment(adj.stableford_score)}>🗑️</button>
+                    <button onClick={() => handleEditClick(adj)}>Edit</button>
+                    <button onClick={() => handleDeleteAdjustment(adj.stableford_score)}>Del</button>
                   </td>
                 </tr>
               ))}

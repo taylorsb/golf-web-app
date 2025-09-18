@@ -149,15 +149,13 @@ const Leaderboard = () => {
   return (
     <div className="leaderboard-page-container">
       <div className="top-blue-bar">
-        <h1>DGC Tour Golf</h1>
+        <h1>
+          <span role="img" aria-label="golf-icon">⛳</span> Golf Tournament Manager
+        </h1>
       </div>
       <div className="hero-section">
         <div className="hero-image-container" style={homeStyle}>
-          <header className="app-header">
-            <h1>
-              <span role="img" aria-label="golf-icon">⛳</span> Golf Tournament Manager
-            </h1>
-          </header>
+          
         </div>
       </div>
       <main className="leaderboard-section">
