@@ -207,11 +207,11 @@ nav ul ul li a {
 
 @media (max-width: 768px) {
   .hero-section {
-    height: 50vh;
+    height: 30vh;
   }
 
   .leaderboard-section {
-    min-height: 50vh;
+    min-height: 70vh; /* Adjust to fill remaining space */
   }
 
   .app-header {
@@ -231,5 +231,15 @@ nav ul ul li a {
 
   .leaderboard-container {
     width: 95%;
+  }
+}
+
+@media (orientation: landscape) and (max-width: 768px) {
+  .hero-section {
+    display: none;
+  }
+
+  .leaderboard-section {
+    min-height: 100vh; /* Take full height in landscape */
   }
 }
