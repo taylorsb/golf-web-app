@@ -82,7 +82,7 @@
 
 .page-header h1 {
   margin: 0; /* Remove default h1 margin */
-  padding: 0.5rem 1rem; /* Apply padding to the h1 inside */
+  padding: 2rem 1rem; /* Apply padding to the h1 inside */
   font-size: 1.5em; /* Adjust font size as needed */
 }
 

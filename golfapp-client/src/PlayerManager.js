@@ -63,7 +63,7 @@ const PlayerManager = () => {
   return (
     <>
       <header className="page-header">
-        <h2 style={{ fontSize: '14pt', color: 'white', margin: 0 }}>Player Management</h2>
+        <h1>Player Management</h1>
       </header>
       <div className="player-manager monochrome-container">
         <div>

@@ -211,7 +211,7 @@ function TournamentManager() {
   return (
     <>
       <header className="page-header">
-        <h2 style={{ fontSize: '14pt', color: 'white', margin: 0 }}>Tournament Management</h2>
+        <h1>Tournament Management</h1>
       </header>
       <div className="tournament-manager monochrome-container">
         <div className="tournament-form tournament-form-inputs">

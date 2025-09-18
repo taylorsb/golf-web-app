@@ -103,7 +103,7 @@ function CourseManager() {
   return (
     <>
       <header className="page-header">
-        <h2 style={{ fontSize: '14pt', color: 'white', margin: 0 }}>Course Management</h2>
+        <h1>Course Management</h1>
       </header>
       <div className="course-manager monochrome-container">
         {!showCourseForm && !editingCourse && (

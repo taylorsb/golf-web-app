@@ -539,7 +539,7 @@ const ScorecardEntry = () => {
   return (
     <>
       <header className="page-header">
-        <h2 style={{ fontSize: '14pt', color: 'white', margin: 0 }}>Scorecard Entry</h2>
+        <h1>Scorecard Entry</h1>
       </header>
       <div className="scorecard-container monochrome-container">
         {notification.message && (
