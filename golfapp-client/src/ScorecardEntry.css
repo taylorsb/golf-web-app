@@ -79,11 +79,11 @@
 .scorecard-table input[type="number"],
 .stableford-value,
 .summary-value {
-  width: 30px; /* Reduced width */
+  width: 24px; /* Reduced width to match height */
   padding: 2px; /* Reduced padding */
   font-size: 0.9em; /* Reduced font size */
-  border: 1px solid #ccc;
-  border-radius: 2px;
+  border: none;
+  background-color: transparent;
   text-align: center;
   display: inline-block;
   box-sizing: border-box;
@@ -161,24 +161,55 @@
   background-color: #45a049;
 }
 
-.eagle-score {
-  background-color: #FFFFCC;
+.score-input-wrapper {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.birdie-score {
-  background-color: #FFCCCC;
+.score-input-wrapper.eagle-score, .score-input-wrapper.birdie-score {
+  border-radius: 50%;
 }
 
-.bogey-score {
+.score-input-wrapper.bogey-score, .score-input-wrapper.double-bogey-score, .score-input-wrapper.worse-than-double-bogey-score {
+  border-radius: 0;
+}
+
+.score-input-wrapper.eagle-score {
+  background-color: yellow;
+}
+
+.score-input-wrapper.birdie-score {
+  background-color: red;
+}
+
+.score-input-wrapper.birdie-score input {
+  color: white;
+}
+
+.score-input-wrapper.bogey-score {
   background-color: #CCEEFF;
 }
 
-.double-bogey-score {
+.score-input-wrapper.double-bogey-score {
   background-color: #EEEEEE;
 }
 
-.worse-than-double-bogey-score {
+.score-input-wrapper.worse-than-double-bogey-score {
   background-color: #E0CCFF;
+}
+
+.scorecard-table input[type="number"] {
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+  text-align: center;
+  font-size: 0.9em;
+  padding: 0;
+  margin: 0;
 }
 
 .scorecard-color-key {

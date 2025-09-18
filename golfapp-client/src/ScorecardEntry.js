@@ -619,11 +619,11 @@ const ScorecardEntry = () => {
             <div className="scorecard-color-key">
               <h4>Scorecard Color Key:</h4>
               <ul>
-                <li><span className="eagle-score-key"></span> Eagle or Better</li>
+                <li><span className="eagle-score-key"></span> Eagle +</li>
                 <li><span className="birdie-score-key"></span> Birdie</li>
                 <li><span className="bogey-score-key"></span> Bogey</li>
                 <li><span className="double-bogey-score-key"></span> Double Bogey</li>
-                <li><span className="worse-than-double-bogey-score-key"></span> Worse than Double Bogey</li>
+                <li><span className="worse-than-double-bogey-score-key"></span> Double Bogey +</li>
               </ul>
             </div>
             {!isLoadingRounds && !roundInitiated && !isCurrentRoundFinalized && (
@@ -669,12 +669,17 @@ const ScorecardEntry = () => {
                         <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
                         {Array.from({ length: 6 }, (_, i) => (
                           <td key={`${player.id}-hole-${i + 1}`}>
-                            <input
-                              type="number"
-                              value={scores[player.id]?.[i + 1] || ''}
-                              onChange={(e) => handleScoreChange(player.id, i + 1, e.target.value)}
-                              disabled={!roundInitiated}
-                            />
+                            <div className={`score-input-wrapper ${getScoreClass(
+                              parseInt(scores[player.id]?.[i + 1]),
+                              holeData[i]?.par
+                            )}`}>
+                              <input
+                                type="number"
+                                value={scores[player.id]?.[i + 1] || ''}
+                                onChange={(e) => handleScoreChange(player.id, i + 1, e.target.value)}
+                                disabled={!roundInitiated}
+                              />
+                            </div>
                           </td>
                         ))}
                       </tr>
@@ -718,12 +723,17 @@ const ScorecardEntry = () => {
                         <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
                         {Array.from({ length: 6 }, (_, i) => (
                           <td key={`${player.id}-hole-${i + 7}`}>
-                            <input
-                              type="number"
-                              value={scores[player.id]?.[i + 7] || ''}
-                              onChange={(e) => handleScoreChange(player.id, i + 7, e.target.value)}
-                              disabled={!roundInitiated}
-                            />
+                            <div className={`score-input-wrapper ${getScoreClass(
+                              parseInt(scores[player.id]?.[i + 7]),
+                              holeData[i + 6]?.par
+                            )}`}>
+                              <input
+                                type="number"
+                                value={scores[player.id]?.[i + 7] || ''}
+                                onChange={(e) => handleScoreChange(player.id, i + 7, e.target.value)}
+                                disabled={!roundInitiated}
+                              />
+                            </div>
                           </td>
                         ))}
                       </tr>
@@ -767,12 +777,17 @@ const ScorecardEntry = () => {
                         <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
                         {Array.from({ length: 6 }, (_, i) => (
                           <td key={`${player.id}-hole-${i + 13}`}>
-                            <input
-                              type="number"
-                              value={scores[player.id]?.[i + 13] || ''}
-                              onChange={(e) => handleScoreChange(player.id, i + 13, e.target.value)}
-                              disabled={!roundInitiated}
-                            />
+                            <div className={`score-input-wrapper ${getScoreClass(
+                              parseInt(scores[player.id]?.[i + 13]),
+                              holeData[i + 12]?.par
+                            )}`}>
+                              <input
+                                type="number"
+                                value={scores[player.id]?.[i + 13] || ''}
+                                onChange={(e) => handleScoreChange(player.id, i + 13, e.target.value)}
+                                disabled={!roundInitiated}
+                              />
+                            </div>
                           </td>
                         ))}
                       </tr>
@@ -820,16 +835,17 @@ const ScorecardEntry = () => {
                       <td>{roundPlayerHandicaps[player.id]?.playing_handicap}</td>
                       {Array.from({ length: 18 }, (_, i) => (
                         <td key={`${player.id}-hole-${i + 1}`}>
-                          <input
-                            type="number"
-                            className={getScoreClass(
-                              parseInt(scores[player.id]?.[i + 1]),
-                              holeData[i]?.par
-                            )}
-                            value={scores[player.id]?.[i + 1] || ''}
-                            onChange={(e) => handleScoreChange(player.id, i + 1, e.target.value)}
-                            disabled={!roundInitiated}
-                          />
+                          <div className={`score-input-wrapper ${getScoreClass(
+                            parseInt(scores[player.id]?.[i + 1]),
+                            holeData[i]?.par
+                          )}`}>
+                            <input
+                              type="number"
+                              value={scores[player.id]?.[i + 1] || ''}
+                              onChange={(e) => handleScoreChange(player.id, i + 1, e.target.value)}
+                              disabled={!roundInitiated}
+                            />
+                          </div>
                         </td>
                       ))}
                     </tr>
