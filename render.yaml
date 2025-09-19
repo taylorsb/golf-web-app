@@ -13,7 +13,7 @@ services:
           property: connectionString
       - key: PYTHON_VERSION
         value: "3.11.0"
-    buildCommand: "pip install -r golfapp-server/requirements.txt && cd golfapp-server && flask db upgrade"
+    buildCommand: "pip install -r golfapp-server/requirements.txt && cd golfapp-server && flask db stamp head"
     startCommand: "cd golfapp-server && gunicorn app:app"
     autoDeploy: true
 
