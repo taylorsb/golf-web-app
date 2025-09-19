@@ -375,8 +375,8 @@ const ScorecardEntry = () => {
   };
 
   const getScoreClass = (grossScore, par) => {
-    if (grossScore === '' || isNaN(grossScore) || par === '' || isNaN(par)) {
-      return ''; // No class if score or par is not a valid number
+    if (grossScore === '' || isNaN(grossScore) || par === '' || isNaN(par) || grossScore === 0) {
+      return ''; // No class if score or par is not a valid number, or if score is 0
     }
 
     const scoreDiff = grossScore - par;
