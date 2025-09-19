@@ -32,9 +32,10 @@
 .player-table th,
 .player-table td {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 2px;
   text-align: center;
   vertical-align: middle;
+  font-size: 0.9em;
 }
 
 .player-table th {

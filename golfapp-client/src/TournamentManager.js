@@ -268,10 +268,10 @@ function TournamentManager() {
           <div className="assignment-section">
             <div className="assignment-box">
               <h2>Assign Players to {editingTournament.name}</h2>
-              <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
-                <div className="two-column-list">
+              <div style={{ maxHeight: '240px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
+                <div className="four-column-list">
                   {players.map((player) => (
-                    <div key={player.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                    <div key={player.id}>
                       <span className="player-name-truncate">{player.name}</span>
                       <button
                         onClick={() => handleAddPlayerToPending(player)}
@@ -288,24 +288,26 @@ function TournamentManager() {
             <div className="assignment-box">
               <h2>Assign Courses to {editingTournament.name}</h2>
               <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
-                {courses.map((course) => (
-                  <div key={course.id} className="course-assignment-item">
-                    <span className="course-name-truncate">{course.name}</span>
-                    <div className="course-assignment-controls">
-                      <input
-                        type="number"
-                        placeholder="Ord"
-                        min="1"
-                        id={`course-seq-${course.id}`}
-                      />
-                      <button
-                        onClick={() => handleAddCourseToPending(course, document.getElementById(`course-seq-${course.id}`).value)}
-                      >
-                        +
-                      </button>
+                <div className="course-grid">
+                  {courses.map((course) => (
+                    <div key={course.id} className="course-item">
+                      <span className="course-name-truncate">{course.name}</span>
+                      <div className="course-assignment-controls">
+                        <input
+                          type="number"
+                          placeholder="Ord"
+                          min="1"
+                          id={`course-seq-${course.id}`}
+                        />
+                        <button
+                          onClick={() => handleAddCourseToPending(course, document.getElementById(`course-seq-${course.id}`).value)}
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>

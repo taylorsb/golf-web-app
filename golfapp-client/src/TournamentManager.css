@@ -107,6 +107,37 @@
   font-size: 0.8em;
 }
 
+.course-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+}
+
+.course-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8em;
+  padding: 0;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.course-item input {
+  width: 40px;
+}
+
+.two-column-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 5px;
+  font-size: 0.8em;
+}
+
+.two-column-grid > div {
+  display: contents;
+}
+
 .course-assignment-item {
   display: flex;
   justify-content: space-between;
@@ -144,23 +175,31 @@
   text-overflow: ellipsis;
 }
 
-.two-column-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.four-column-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  font-size: 0.9em;
 }
 
-.two-column-list > div {
+.four-column-list > div {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: calc(50% - 5px); /* 50% width for two columns, minus half the gap */
-  padding: 2px;
+  padding: 1px;
   box-sizing: border-box;
 }
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
+  .four-column-list {
+    grid-template-columns: 1fr;
+  }
+
+  .course-grid {
+    grid-template-columns: 1fr;
+  }
+
   .tournament-table th:nth-child(1),
   .tournament-table td:nth-child(1) { width: 30%; } /* Name */
   .tournament-table th:nth-child(2),

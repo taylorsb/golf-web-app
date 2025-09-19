@@ -162,6 +162,7 @@ const ScorecardEntry = () => {
     });
     
     setSubmittedSummaryScores(newSubmittedSummaryScores);
+    displayNotification('Scores submitted successfully!', 'success');
   };
 
   // Remove redundant client-side calculations
