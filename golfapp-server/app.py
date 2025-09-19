@@ -195,6 +195,28 @@ def create_app():
                     'adjustment': self.adjustment
                 }
 
+        class TournamentRoundGroup(db.Model):
+            id = db.Column(db.Integer, primary_key=True)
+            tournament_id = db.Column(db.Integer, db.ForeignKey('tournament.id'), nullable=False)
+            course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+            round_number = db.Column(db.Integer, nullable=False)
+            group_number = db.Column(db.Integer, nullable=False)
+            player_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
+
+            tournament = db.relationship('Tournament', backref=db.backref('round_groups', lazy=True))
+            course = db.relationship('Course', backref=db.backref('round_groups', lazy=True))
+            player = db.relationship('Player', backref=db.backref('round_groups', lazy=True))
+
+            def to_dict(self):
+                return {
+                    'id': self.id,
+                    'tournament_id': self.tournament_id,
+                    'course_id': self.course_id,
+                    'round_number': self.round_number,
+                    'group_number': self.group_number,
+                    'player_id': self.player_id
+                }
+
         @app.route('/players', methods=['GET'])
         def get_players():
             players = Player.query.all()
@@ -877,6 +899,59 @@ def create_app():
             db.session.delete(adjustment)
             db.session.commit()
             return '', 204
+
+        @app.route('/tournaments/<int:tournament_id>/groups', methods=['GET'])
+        def get_tournament_groups(tournament_id):
+            groups = TournamentRoundGroup.query.filter_by(tournament_id=tournament_id).all()
+            # Organize groups by course and round number
+            organized_groups = {}
+            for group_entry in groups:
+                course_id = group_entry.course_id
+                round_number = group_entry.round_number
+                group_number = group_entry.group_number
+                player_id = group_entry.player_id
+
+                if course_id not in organized_groups:
+                    organized_groups[course_id] = {}
+                if round_number not in organized_groups[course_id]:
+                    organized_groups[course_id][round_number] = {}
+                if group_number not in organized_groups[course_id][round_number]:
+                    organized_groups[course_id][round_number][group_number] = []
+                
+                player = Player.query.get(player_id)
+                if player:
+                    organized_groups[course_id][round_number][group_number].append(player.to_dict())
+            
+            return jsonify(organized_groups)
+
+        @app.route('/tournaments/<int:tournament_id>/groups', methods=['POST'])
+        def save_tournament_groups(tournament_id):
+            data = request.get_json()
+            # data is expected to be a dictionary where keys are course_id, then round_number, then group_number
+            # Example: { "course_id": { "round_number": { "group_number": [player_id, player_id] } } }
+
+            # First, delete all existing groups for this tournament
+            TournamentRoundGroup.query.filter_by(tournament_id=tournament_id).delete()
+            db.session.commit()
+
+            for course_id_str, rounds_data in data.items():
+                course_id = int(course_id_str)
+                for round_number_str, groups_data in rounds_data.items():
+                    round_number = int(round_number_str)
+                    for group_number_str, player_ids in groups_data.items():
+                        group_number = int(group_number_str)
+                        for player_id in player_ids:
+                            new_group_entry = TournamentRoundGroup(
+                                tournament_id=tournament_id,
+                                course_id=course_id,
+                                round_number=round_number,
+                                group_number=group_number,
+                                player_id=player_id
+                            )
+                            db.session.add(new_group_entry)
+            
+            db.session.commit()
+            return jsonify({"message": "Groups saved successfully!"}), 200
 
     return app
 

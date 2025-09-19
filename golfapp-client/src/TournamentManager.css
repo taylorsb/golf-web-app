@@ -1,3 +1,112 @@
+/* Group Management Styles */
+.group-management-container {
+  display: flex;
+  gap: 20px;
+}
+
+.player-pool {
+  width: 200px;
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.player-card {
+  display: flex; /* Ensure flexbox for alignment */
+  justify-content: space-between; /* Space out name and button */
+  align-items: center; /* Vertically center content */
+  padding: 2px 5px; /* Reduced padding */
+  margin-bottom: 2px; /* Reduced margin */
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+  font-size: 0.9em; /* Slightly larger font size */
+}
+
+.player-card button {
+  padding: 2px 6px; /* Slightly larger button padding */
+  font-size: 0.8em; /* Slightly larger button font size */
+  line-height: 1; /* Ensure consistent line height */
+}
+
+.course-groups {
+  flex: 1;
+}
+
+.course-round-section {
+  margin-bottom: 20px;
+  border: 1px solid #eee;
+  padding: 10px;
+}
+
+.group-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.group-table th,
+.group-table td {
+  border: 1px solid #ddd;
+  padding: 5px;
+  text-align: center;
+  font-size: 0.85em;
+}
+
+.group-table th {
+  background-color: #f9f9f9;
+}
+
+.player-in-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.player-in-group span {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.player-in-group button {
+  padding: 1px 5px;
+  font-size: 0.7em;
+  line-height: 1;
+}
+
+.course-groups-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.course-groups-table th,
+.course-groups-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.course-groups-table th {
+  background-color: #f2f2f2;
+}
+
+/* Tab Styles */
+.tab-buttons {
+  margin-bottom: 20px;
+}
+
+.tab-buttons button {
+  padding: 10px 20px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  background-color: #f2f2f2;
+  cursor: pointer;
+}
+
+.tab-buttons button.active {
+  background-color: #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
 /* Main tournament manager layout */
 .tournament-manager {
   padding: 0 20px 20px 20px;

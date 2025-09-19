@@ -18,12 +18,192 @@ function TournamentManager() {
   const [coursesToAdd, setCoursesToAdd] = useState([]); // Courses to be added on submit
   const [coursesToRemove, setCoursesToRemove] = useState([]); // Courses to be removed on submit
   const [successMessage, setSuccessMessage] = useState('');
+  const [activeTab, setActiveTab] = useState('assignments');
+  const [groups, setGroups] = useState({});
+
+  const handleRemovePlayerFromGroup = (player, courseId, roundNumber, group) => { // Changed groupIndex to group
+    setGroups(prevGroups => {
+      const newGroups = { ...prevGroups };
+      // Ensure the round array exists before trying to find the group
+      if (!newGroups[courseId] || !newGroups[courseId][roundNumber]) {
+        return newGroups; // Nothing to remove if the round doesn't exist
+      }
+
+      const groupIndex = newGroups[courseId][roundNumber].indexOf(group);
+      if (groupIndex > -1) { // Ensure the group exists
+        newGroups[courseId][roundNumber][groupIndex] = newGroups[courseId][roundNumber][groupIndex].filter(p => p.id !== player.id);
+
+        // If the group becomes empty, remove it
+        if (newGroups[courseId][roundNumber][groupIndex].length === 0) {
+          newGroups[courseId][roundNumber].splice(groupIndex, 1);
+          // If all groups for a round become empty, remove the round
+          if (newGroups[courseId][roundNumber].length === 0) {
+            delete newGroups[courseId][roundNumber];
+            // If all rounds for a course become empty, remove the course
+            if (Object.keys(newGroups[courseId]).length === 0) {
+              delete newGroups[courseId];
+            }
+          }
+        }
+      }
+      return newGroups;
+    });
+  };
+
+  const handleAddEmptyGroup = (courseId, roundNumber) => {
+    setGroups(prevGroups => {
+      const newGroups = { ...prevGroups };
+      if (!newGroups[courseId]) {
+        newGroups[courseId] = {};
+      }
+      if (!newGroups[courseId][roundNumber]) {
+        newGroups[courseId][roundNumber] = [];
+      }
+      newGroups[courseId][roundNumber].push([]); // Add an empty group
+      return newGroups;
+    });
+  };
+
+  const handleRemoveLastGroup = (courseId, roundNumber) => {
+    setGroups(prevGroups => {
+      const newGroups = { ...prevGroups };
+      if (newGroups[courseId] && newGroups[courseId][roundNumber] && newGroups[courseId][roundNumber].length > 0) {
+        newGroups[courseId][roundNumber].pop(); // Remove the last group
+        if (newGroups[courseId][roundNumber].length === 0) {
+          delete newGroups[courseId][roundNumber];
+          if (Object.keys(newGroups[courseId]).length === 0) {
+            delete newGroups[courseId];
+          }
+        }
+      }
+      return newGroups;
+    });
+  };
+
+  const handleAddPlayerToGroup = (player) => {
+    setGroups(prevGroups => {
+      const newGroups = { ...prevGroups };
+      const sortedCourses = assignedCourses.sort((a, b) => a.sequence_number - b.sequence_number);
+
+      // Helper function to encapsulate the logic and allow early exit
+      const tryAddPlayer = () => {
+        for (const course of sortedCourses) {
+          const courseId = course.id;
+          const roundNumber = course.sequence_number;
+
+          if (!newGroups[courseId]) {
+            newGroups[courseId] = {};
+          }
+          if (!newGroups[courseId][roundNumber]) {
+            newGroups[courseId][roundNumber] = [[]];
+          }
+
+          const playerInThisRound = newGroups[courseId][roundNumber].flat().find(p => p.id === player.id);
+          if (playerInThisRound) {
+            continue; // Skip to the next round if player is already in this round
+          }
+
+          // Try to add to an existing group
+          for (let i = 0; i < newGroups[courseId][roundNumber].length; i++) {
+            if (newGroups[courseId][roundNumber][i].length < 4) {
+              newGroups[courseId][roundNumber][i].push(player);
+              return true; // Player added, exit helper function
+            }
+          }
+
+          // If not added to an existing group, create a new one
+          newGroups[courseId][roundNumber].push([player]);
+          return true; // Player added, exit helper function
+        }
+        return false; // Player not added to any group
+      };
+
+      const playerWasAdded = tryAddPlayer(); // Call the helper function
+
+      if (!playerWasAdded) {
+        alert("No available slots in any group for any round. Please add more groups or rounds.");
+      }
+
+      return newGroups;
+    });
+  };
 
   useEffect(() => {
     fetchTournaments();
     fetchPlayers();
     fetchCourses();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'groups' && editingTournament) {
+      const fetchGroups = async () => {
+        try {
+          const response = await fetch(`${API_URL}/tournaments/${editingTournament.id}/groups`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const data = await response.json();
+          // Transform the fetched data into the frontend's expected format
+          const transformedGroups = {};
+          for (const courseId in data) {
+            transformedGroups[courseId] = {};
+            for (const roundNumber in data[courseId]) {
+              transformedGroups[courseId][roundNumber] = [];
+              for (const groupNumber in data[courseId][roundNumber]) {
+                transformedGroups[courseId][roundNumber].push(data[courseId][roundNumber][groupNumber]);
+              }
+            }
+          }
+          setGroups(transformedGroups);
+        } catch (error) {
+          console.error("Error fetching groups:", error);
+        }
+      };
+      fetchGroups();
+    }
+  }, [activeTab, editingTournament]);
+
+  const handleSaveGroups = async () => {
+    if (!editingTournament) return;
+
+    // Transform frontend groups state to backend expected format
+    const groupsToSave = {};
+    for (const courseId in groups) {
+      groupsToSave[courseId] = {};
+      for (const roundNumber in groups[courseId]) {
+        groupsToSave[courseId][roundNumber] = {};
+        groups[courseId][roundNumber].forEach((group, index) => {
+          groupsToSave[courseId][roundNumber][index] = group.map(player => player.id);
+        });
+      }
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/tournaments/${editingTournament.id}/groups`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(groupsToSave),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      setSuccessMessage('Groups saved successfully!');
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 3000);
+    } catch (error) {
+      console.error("Error saving groups:", error);
+      setSuccessMessage(`Failed to save groups: ${error.message}`);
+      setTimeout(() => {
+        setSuccessMessage('');
+      }, 3000);
+    }
+  };
 
   const fetchPlayers = async () => {
     const response = await fetch(`${API_URL}/players`);
@@ -265,123 +445,196 @@ function TournamentManager() {
         </table>
 
         {editingTournament && (
-          <div className="assignment-section">
-            <div className="assignment-box">
-              <h2>Assign Players to {editingTournament.name}</h2>
-              <div style={{ maxHeight: '240px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
-                <div className="four-column-list">
-                  {players.map((player) => (
-                    <div key={player.id}>
-                      <span className="player-name-truncate">{player.name}</span>
-                      <button
-                        onClick={() => handleAddPlayerToPending(player)}
-                        disabled={assignedPlayers.some(p => p.id === player.id) || playersToAdd.some(p => p.id === player.id)}
-                      >
-                        +
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          <div>
+            <div className="tab-buttons">
+              <button 
+                onClick={() => setActiveTab('assignments')}
+                className={activeTab === 'assignments' ? 'active' : ''}
+              >
+                Assignments
+              </button>
+              <button 
+                onClick={() => setActiveTab('groups')}
+                className={activeTab === 'groups' ? 'active' : ''}
+              >
+                Group Management
+              </button>
             </div>
 
-            <div className="assignment-box">
-              <h2>Assign Courses to {editingTournament.name}</h2>
-              <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
-                <div className="course-grid">
-                  {courses.map((course) => (
-                    <div key={course.id} className="course-item">
-                      <span className="course-name-truncate">{course.name}</span>
-                      <div className="course-assignment-controls">
-                        <input
-                          type="number"
-                          placeholder="Ord"
-                          min="1"
-                          id={`course-seq-${course.id}`}
-                        />
-                        <button
-                          onClick={() => handleAddCourseToPending(course, document.getElementById(`course-seq-${course.id}`).value)}
-                        >
-                          +
-                        </button>
+            {activeTab === 'assignments' && (
+              <div>
+                <div className="assignment-section">
+                  <div className="assignment-box">
+                    <h2>Assign Players to {editingTournament.name}</h2>
+                    <div style={{ maxHeight: '240px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
+                      <div className="four-column-list">
+                        {players.map((player) => (
+                          <div key={player.id}>
+                            <span className="player-name-truncate">{player.name}</span>
+                            <button
+                              onClick={() => handleAddPlayerToPending(player)}
+                              disabled={assignedPlayers.some(p => p.id === player.id) || playersToAdd.some(p => p.id === player.id)}
+                            >
+                              +
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="assignment-box">
+                    <h2>Assign Courses to {editingTournament.name}</h2>
+                    <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #ccc', padding: '10px' }}>
+                      <div className="course-grid">
+                        {courses.map((course) => (
+                          <div key={course.id} className="course-item">
+                            <span className="course-name-truncate">{course.name}</span>
+                            <div className="course-assignment-controls">
+                              <input
+                                type="number"
+                                placeholder="Ord"
+                                min="1"
+                                id={`course-seq-${course.id}`}
+                              />
+                              <button
+                                onClick={() => handleAddCourseToPending(course, document.getElementById(`course-seq-${course.id}`).value)}
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="current-assignments-section">
+                  <h2>Current Assignments for {editingTournament.name}</h2>
+                  <div className="current-assignments">
+                    <div className="assignment-list">
+                      <h3>Assigned Players:</h3>
+                      <table className="assignment-table" style={{ width: '100%', margin: '0 auto' }}>
+                        <thead>
+                          <tr>
+                            <th>Player Name</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {assignedPlayers.map(player => (
+                            <tr key={player.id}>
+                              <td>{player.name}</td>
+                              <td>
+                                <button onClick={() => handleRemovePlayerFromPending(player)}>-</button>
+                              </td>
+                            </tr>
+                          ))}
+                          {playersToAdd.map(player => (
+                            <tr key={player.id} style={{ backgroundColor: '#e0ffe0' }}>
+                              <td>{player.name} (Pending Add)</td>
+                              <td>
+                                <button onClick={() => handleRemovePlayerFromPending(player)}>-</button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="assignment-list">
+                      <h3>Assigned Courses:</h3>
+                      <table className="assignment-table" style={{ width: '100%', margin: '0 auto' }}>
+                        <thead>
+                          <tr>
+                            <th>Course Name</th>
+                            <th>Order</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[...assignedCourses].sort((a, b) => a.sequence_number - b.sequence_number).map(course => (
+                            <tr key={`${course.id}-${course.sequence_number}`}>
+                              <td>{course.name}</td>
+                              <td>{course.sequence_number}</td>
+                              <td>
+                                <button onClick={() => handleRemoveCourseFromPending(course)}>-</button>
+                              </td>
+                            </tr>
+                          ))}
+                          {[...coursesToAdd].sort((a, b) => a.sequence_number - b.sequence_number).map(course => (
+                            <tr key={`${course.id}-${course.sequence_number}`} style={{ backgroundColor: '#e0ffe0' }}>
+                              <td>{course.name} (Pending Add)</td>
+                              <td>{course.sequence_number}</td>
+                              <td>
+                                <button onClick={() => handleRemoveCourseFromPending(course)}>-</button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <button onClick={handleSubmitChanges} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '1.2em' }}>Update Assignments</button>
+                  {successMessage && <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>}
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
-        {editingTournament && (
-          <div className="current-assignments-section">
-            <h2>Current Assignments for {editingTournament.name}</h2>
-            <div className="current-assignments">
-              <div className="assignment-list">
-                <h3>Assigned Players:</h3>
-                <table className="assignment-table" style={{ width: '100%', margin: '0 auto' }}>
-                  <thead>
-                    <tr>
-                      <th>Player Name</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+            {activeTab === 'groups' && (
+              <div>
+                <h2>Group Management for {editingTournament.name}</h2>
+                <div className="group-management-container">
+                  <div className="player-pool">
+                    <h3>Available Players</h3>
                     {assignedPlayers.map(player => (
-                      <tr key={player.id}>
-                        <td>{player.name}</td>
-                        <td>
-                          <button onClick={() => handleRemovePlayerFromPending(player)}>-</button>
-                        </td>
-                      </tr>
+                      <div key={player.id} className="player-card">
+                        <span>{player.name}</span>
+                        <button onClick={() => handleAddPlayerToGroup(player)}>+</button>
+                      </div>
                     ))}
-                    {playersToAdd.map(player => (
-                      <tr key={player.id} style={{ backgroundColor: '#e0ffe0' }}>
-                        <td>{player.name} (Pending Add)</td>
-                        <td>
-                          <button onClick={() => handleRemovePlayerFromPending(player)}>-</button>
-                        </td>
-                      </tr>
+                  </div>
+                  <div className="course-groups">
+                    <h3>Course Groups</h3>
+                    {assignedCourses.sort((a, b) => a.sequence_number - b.sequence_number).map(course => (
+                      <div key={course.id} className="course-round-section">
+                        <h4>Round {course.sequence_number} - {course.name}</h4>
+                        <table className="group-table">
+                          <thead>
+                            <tr>
+                              <th>Player 1</th>
+                              <th>Player 2</th>
+                              <th>Player 3</th>
+                              <th>Player 4</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {groups[course.id] && groups[course.id][course.sequence_number] && Array.isArray(groups[course.id][course.sequence_number]) && groups[course.id][course.sequence_number].map((group, i) => (
+                              <tr key={i}>
+                                {Array.from({ length: 4 }).map((_, playerColIndex) => (
+                                  <td key={playerColIndex}>
+                                    {group[playerColIndex] ? (
+                                      <div className="player-in-group">
+                                        <span>{group[playerColIndex].name}</span>
+                                        <button onClick={() => handleRemovePlayerFromGroup(group[playerColIndex], course.id, course.sequence_number, group)}>-</button>
+                                      </div>
+                                    ) : (
+                                      ''
+                                    )}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                </div>
+                <button onClick={handleSaveGroups} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '1.2em' }}>Save Groups</button>
+                {successMessage && <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>}
               </div>
-
-              <div className="assignment-list">
-                <h3>Assigned Courses:</h3>
-                <table className="assignment-table" style={{ width: '100%', margin: '0 auto' }}>
-                  <thead>
-                    <tr>
-                      <th>Course Name</th>
-                      <th>Order</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[...assignedCourses].sort((a, b) => a.sequence_number - b.sequence_number).map(course => (
-                      <tr key={`${course.id}-${course.sequence_number}`}>
-                        <td>{course.name}</td>
-                        <td>{course.sequence_number}</td>
-                        <td>
-                          <button onClick={() => handleRemoveCourseFromPending(course)}>-</button>
-                        </td>
-                      </tr>
-                    ))}
-                    {[...coursesToAdd].sort((a, b) => a.sequence_number - b.sequence_number).map(course => (
-                      <tr key={`${course.id}-${course.sequence_number}`} style={{ backgroundColor: '#e0ffe0' }}>
-                        <td>{course.name} (Pending Add)</td>
-                        <td>{course.sequence_number}</td>
-                        <td>
-                          <button onClick={() => handleRemoveCourseFromPending(course)}>-</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <button onClick={handleSubmitChanges} style={{ marginTop: '20px', padding: '10px 20px', fontSize: '1.2em' }}>Update Assignments</button>
-            {successMessage && <p style={{ color: 'green', marginTop: '10px' }}>{successMessage}</p>}
+            )}
           </div>
         )}
       </div>
