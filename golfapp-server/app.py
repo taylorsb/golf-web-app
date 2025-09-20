@@ -957,6 +957,7 @@ def create_app():
     # Another non-functional change to trigger Render deployment after render.yaml fix
     # Non-functional change to trigger Render deployment
     # Added comment to trigger deploy after releaseCommand fix
+    # Added comment to trigger deploy after startCommand fix
     return app
 
 app = create_app()
