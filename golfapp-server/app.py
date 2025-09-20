@@ -953,6 +953,7 @@ def create_app():
             db.session.commit()
             return jsonify({"message": "Groups saved successfully!"}), 200
 
+    # Non-functional change to trigger Render deployment
     return app
 
 app = create_app()

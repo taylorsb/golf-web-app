@@ -1,7 +1,20 @@
-fix: Resolve scorecard display and submission issues
+feat: Refine player grouping and fix frontend errors
 
-Addresses several bugs related to scorecard display and score submission:
-- Corrected frontend logic to properly load and display existing hole scores when switching courses.
-- Optimized frontend data fetching for existing rounds by making a single API call.
-- Fixed backend `record_hole_scores` function to correctly initialize and accumulate summary scores, resolving `UnboundLocalError` and `NameError`.
-- Ensured `HoleScore` entries are updated (upserted) rather than always inserted.
+This commit addresses several issues related to player grouping and frontend stability:
+
+- **Player Grouping Logic:**
+  - Refined the `handleAddPlayerToGroup` function in `TournamentManager.js` to correctly add players to the next available slot across rounds.
+  - Re-introduced per-round checks to prevent players from being added to multiple groups within the same round.
+  - Ensured proper breaking from loops to prevent incorrect state updates.
+
+- **Frontend Error Resolution:**
+  - Fixed the "No available slots in any group for any round" spurious alert by correctly managing the `playerWasAdded` flag.
+  - Resolved ESLint "not defined" errors for `playerWasAdded` and `sortedCourses` by re-adding their declarations.
+  - Corrected `SyntaxError: Unsyntactic break` by refactoring the player adding logic into a helper function, replacing labeled `break` statements with early `return`s.
+
+- **New Group Management Components:**
+  - Added `GroupModal.js` and `GroupModal.css` for enhanced group management functionality.
+
+- **Backend and Database Updates:**
+  - Updated `golfapp-server/app.py` with model definitions and potentially other backend logic (related to previous SQLAlchemy/SSL fixes).
+  - Reorganized Alembic migrations, including the deletion of old migration files and the addition of new ones, along with modifications to `alembic.ini`. These database changes will require an upgrade on the Render PostgreSQL database.
