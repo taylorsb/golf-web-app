@@ -15,7 +15,7 @@ services:
         value: "3.11.0"
     buildCommand: "pip install -r golfapp-server/requirements.txt"
     startCommand: "cd golfapp-server && gunicorn app:app"
-    releaseCommand: flask db upgrade head
+    releaseCommand: FLASK_APP=golfapp-server/app.py flask db upgrade head
     autoDeploy: true
 
 
